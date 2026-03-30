@@ -1,0 +1,97 @@
+<div class="login-page">
+  <!-- 🍃 Hojas animadas flotando en el fondo -->
+  <div class="leaf"></div>
+  <div class="leaf"></div>
+  <div class="leaf"></div>
+  <div class="leaf"></div>
+  <div class="leaf"></div>
+
+  <!-- 💧 Fondo con efecto de agua -->
+  <div class="water-effect"></div>
+  
+  <!-- Contenedor principal centrado (como estaba antes) -->
+  <div class="container">
+    <!-- Tarjeta de login -->
+    <div class="login-box">
+      <!-- Logo y título - CORREGIDO: usar el componente -->
+      <div class="login-header">
+        <app-logo tipo="login" [clickable]="false"></app-logo>
+        <h1></h1>
+      </div>
+      <!-- Formulario de login -->
+      <form (ngSubmit)="onSubmit()" *ngIf="!loading" class="login-form">
+        <div class="form-group">
+          <div class="input-floating">
+            <input
+              type="text"
+              id="username"
+              [(ngModel)]="credentials.nombre_usuario"
+              name="username"
+              required
+              [disabled]="loading"
+              autocomplete="username"
+              placeholder=" "
+            />
+            <label for="username">USUARIO</label>
+            <i class="fas fa-user"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-floating">
+            <input
+              type="password"
+              id="password"
+              [(ngModel)]="credentials.password"
+              name="password"
+              required
+              [disabled]="loading"
+              autocomplete="current-password"
+              placeholder=" "
+            />
+            <label for="password">CONTRASEÑA</label>
+            <i class="fas fa-lock"></i>
+          </div>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div *ngIf="error" class="error-message">
+          <i class="fas fa-exclamation-circle"></i>
+          {{ error }}
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          <span class="button-content">
+            <i class="fas fa-sign-in-alt"></i>
+            {{ loading ? 'INICIANDO SESIÓN...' : 'INICIAR SESIÓN' }}
+          </span>
+        </button>
+      </form>
+
+      <!-- Loader -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="loading-spinner">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <p>Verificando credenciales...</p>
+      </div>
+
+      <!-- Enlaces y soporte -->
+      <div class="footer-links">
+        <div class="register-link"></div>
+        
+        <div class="support-section">
+          <div class="support-icon">
+            <i class="fas fa-headset"></i>
+          </div>
+          <div class="support-info">
+            <span class="support-label">Soporte Técnico</span>
+            <a href="tel:950879855" class="support-phone">
+              <i class="fas fa-phone"></i> 950 879 855
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

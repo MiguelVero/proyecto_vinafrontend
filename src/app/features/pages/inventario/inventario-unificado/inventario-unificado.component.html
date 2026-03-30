@@ -1,0 +1,35 @@
+<!-- inventario-unificado.component.html -->
+<div class="inventario-container">
+  <div class="header">
+    <h1>🧮 Gestión de Inventario</h1>
+    <div class="header-buttons">
+      <button mat-raised-button color="primary" (click)="crearMovimientoUnificado()" class="btn-nuevo">
+        <mat-icon>add</mat-icon> Nuevo Movimiento
+      </button>
+      <!-- ✅ BOTÓN DE PRODUCCIÓN -->
+      <button mat-raised-button color="accent" (click)="abrirProduccion()" class="btn-produccion">
+        <mat-icon>factory</mat-icon> Producción
+      </button>
+    </div>
+  </div>
+
+  <mat-tab-group animationDuration="0ms" class="inventario-tabs">
+    <mat-tab label="📊 Dashboard">
+      <div class="tab-content">
+        <app-inventario-dashboard></app-inventario-dashboard>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="📦 Movimientos">
+      <div class="tab-content">
+        <app-movimiento-stock-list></app-movimiento-stock-list>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="🏷️ Lotes">
+      <div class="tab-content">
+        <app-lote-list></app-lote-list>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

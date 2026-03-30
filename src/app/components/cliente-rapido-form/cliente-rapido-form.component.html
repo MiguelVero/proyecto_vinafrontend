@@ -1,0 +1,112 @@
+<!-- src/app/features/components/cliente-rapido-form/cliente-rapido-form.component.html -->
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon class="title-icon">person_add</mat-icon>
+  Agregar Cliente Rápido
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="clienteForm" class="cliente-form-rapido">
+    
+    <!-- Fila 1: Documento y Nombre -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Tipo de Documento</mat-label>
+        <mat-select formControlName="tipo_documento" (selectionChange)="onTipoDocumentoChange()">
+          <mat-option *ngFor="let tipo of tiposDocumento" [value]="tipo.value">
+            {{ tipo.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>N° Documento (Opcional)</mat-label>
+        <input matInput 
+               formControlName="dni" 
+               (input)="formatearDocumento($event)"
+               (keypress)="prevenirCaracteresNoPermitidos($event, 'numero')"
+               [placeholder]="clienteForm.get('tipo_documento')?.value === 'DNI' ? '12345678' : 
+                            clienteForm.get('tipo_documento')?.value === 'RUC' ? '12345678901' : 
+                            clienteForm.get('tipo_documento')?.value === 'CE' ? 'ABC123456789' : 'Opcional'"/>
+        <mat-hint class="document-hint">
+          <span *ngIf="clienteForm.get('tipo_documento')?.value === 'DNI'">8 dígitos (opcional)</span>
+          <span *ngIf="clienteForm.get('tipo_documento')?.value === 'RUC'">11 dígitos (opcional)</span>
+          <span *ngIf="clienteForm.get('tipo_documento')?.value === 'CE'">9-12 caracteres (opcional)</span>
+          <span *ngIf="clienteForm.get('tipo_documento')?.value === 'NO_ESPECIFICADO'"></span>
+        </mat-hint>
+        <mat-error>{{ getDocumentoError() }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field-large">
+        <mat-label>Nombre Completo *</mat-label>
+        <input matInput 
+               formControlName="nombre" 
+               required 
+               (keypress)="prevenirCaracteresNoPermitidos($event, 'letra')"
+               placeholder="Ej: Juan Pérez García"/>
+        <mat-error>{{ getNombreError() }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 2: Teléfono y Tipo de Cliente -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Teléfono *</mat-label>
+        <input matInput 
+               formControlName="telefono" 
+               required 
+               (input)="formatearTelefono($event)"
+               (keypress)="prevenirCaracteresNoPermitidos($event, 'numero')"
+               placeholder="912345678"
+               maxlength="9"/>
+        <mat-hint>9 dígitos</mat-hint>
+        <mat-error>{{ getTelefonoError() }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Tipo de Cliente *</mat-label>
+        <mat-select formControlName="tipo_cliente">
+          <mat-option *ngFor="let tipo of tiposCliente" [value]="tipo.value">
+            {{ tipo.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="clienteForm.get('tipo_cliente')?.hasError('required')">
+          Tipo de cliente requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field-large">
+        <mat-label>Razón Social</mat-label>
+        <input matInput 
+               formControlName="razon_social" 
+               placeholder="Para facturación (opcional)"/>
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 3: Dirección -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field-full">
+        <mat-label>Dirección</mat-label>
+        <textarea matInput 
+                  formControlName="direccion" 
+                  rows="2" 
+                  placeholder="Dirección del cliente (opcional)"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="onCancel()" class="cancel-button">Cancelar</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="clienteForm.invalid || isLoading"
+    class="submit-button"
+  >
+    <mat-icon *ngIf="isLoading" class="spinner-icon">
+      <mat-spinner diameter="16"></mat-spinner>
+    </mat-icon>
+    <span>{{ isLoading ? 'Guardando...' : 'Guardar' }}</span>
+  </button>
+</mat-dialog-actions>

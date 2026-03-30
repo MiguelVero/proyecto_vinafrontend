@@ -1,0 +1,38 @@
+<div class="map-modal">
+  <h2 mat-dialog-title class="dialog-title">
+    <mat-icon class="title-icon">location_on</mat-icon>
+    Ubicación de {{ data.nombre }}
+    <span *ngIf="data.razon_social"> - {{ data.razon_social }}</span>
+  </h2>
+
+  <mat-dialog-content class="dialog-content">
+    <div class="address-info">
+      <p><strong>Cliente:</strong> {{ data.nombre }}</p>
+      <p *ngIf="data.razon_social"><strong>Razón Social:</strong> {{ data.razon_social }}</p>
+      <p><strong>Tipo:</strong> {{ data.tipo_cliente }}</p>
+      <p><strong>Dirección:</strong> {{ data.direccion }}</p>
+      <p><strong>Teléfono:</strong> {{ data.telefono }}</p>
+      <p *ngIf="data.coordenadas"><strong>Coordenadas:</strong> {{ data.coordenadas }}</p>
+    </div>
+
+    <div class="map-loading" *ngIf="isLoading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Buscando ubicación...</p>
+    </div>
+
+    <div class="map-error" *ngIf="errorMessage && !isLoading">
+      <mat-icon color="warn">warning</mat-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <div id="map-{{ uniqueId }}" class="map-container" 
+         [class.hidden]="isLoading || errorMessage"></div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button (click)="onClose()" class="close-btn">
+      <mat-icon>close</mat-icon>
+      Cerrar
+    </button>
+  </mat-dialog-actions>
+</div>

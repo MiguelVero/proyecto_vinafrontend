@@ -1,0 +1,64 @@
+<div class="form-container" [class.loading]="isLoading">
+  <h2 class="dialog-title">{{ titulo }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    
+    <div class="form-grid">
+      <!-- Fila 1 -->
+      <mat-form-field appearance="outline" class="field-small">
+        <mat-label>Tipo Doc.</mat-label>
+        <mat-select formControlName="tipo_documento">
+          <mat-option value="RUC">RUC</mat-option>
+          <mat-option value="DNI">DNI</mat-option>
+          <mat-option value="CE">CE</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="field-medium">
+        <mat-label>N° Documento</mat-label>
+        <input matInput formControlName="numero_documento">
+      </mat-form-field>
+
+      <!-- Fila 2 -->
+      <mat-form-field appearance="outline" class="field-large" style="grid-column: span 2;">
+        <mat-label>Nombre Completo</mat-label>
+        <input matInput formControlName="nombre_completo">
+      </mat-form-field>
+
+      <!-- Fila 3 -->
+      <mat-form-field appearance="outline" class="field-large" style="grid-column: span 2;">
+        <mat-label>Razón Social</mat-label>
+        <input matInput formControlName="razon_social">
+      </mat-form-field>
+
+      <!-- Fila 4 -->
+      <mat-form-field appearance="outline" class="field-small">
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="telefono">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="field-small">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="direccion">
+      </mat-form-field>
+
+      <!-- Fila 5 -->
+      <div class="checkbox-container" style="grid-column: span 2;">
+        <mat-checkbox formControlName="activo" color="primary">
+          Proveedor activo
+        </mat-checkbox>
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="isLoading || form.invalid">
+        {{ data && data.id_proveedor ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+
+  <div class="overlay" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+</div>

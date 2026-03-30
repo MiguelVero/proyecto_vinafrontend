@@ -1,0 +1,145 @@
+{
+  "personas": [
+    {
+      "nombre": "Juan",
+      "apellidos": "Perez",
+      "dni": "71390300",
+      "correo": "juan.perez@example.com",
+      "telefono": "987654321",
+      "direccion": "AV CENTENARIO 1211",
+      "paisId": "1",
+      "departamentoId": "1",
+      "provinciaId": "1",
+      "distritoId": "1",
+      "coordenadas": "-8.4055238,-74.6335033",
+      "id": "1"
+    }
+  ],
+  "paises": [   
+    {
+      "id": 1,
+      "nombre": "Perú"
+    },
+    {
+      "id": 2,
+      "nombre": "Chile"
+    },
+    {
+      "id": 3,
+      "nombre": "Brasil"
+    }
+  ],
+  "departamentos": [
+    {
+      "id": 1,
+      "nombre": "Ucayali",
+      "paisId": 1
+    },
+    {
+      "id": 2,
+      "nombre": "Lima",
+      "paisId": 1
+    }
+  ],
+  "provincias": [
+    {
+      "id": 1,
+      "nombre": "Coronel Portillo",
+      "departamentoId": 1
+    },
+    {
+      "id": 2,
+      "nombre": "Lima",
+      "departamentoId": 2
+    }
+  ],
+  "distritos": [
+    {
+      "id": 1,
+      "nombre": "Calleria",
+      "provinciaId": 1
+    },
+    {
+      "id": 2,
+      "nombre": "Miraflores",
+      "provinciaId": 2
+    }
+  ],
+  "productos": [
+    {
+      "id": 1,
+      "nombre": "Laptop HP",
+      "descripcion": "Laptop HP Pavilion 15 con procesador i5",
+      "precio": 2500,
+      "stock": 10,
+      "categoriaId": 1,
+      "marcaId": 1,
+      "proveedorId": 1,
+      "paisOrigenId": 1
+    },
+    {
+      "id": 2,
+      "nombre": "Smartphone Samsung",
+      "descripcion": "Galaxy S22 Ultra 256GB",
+      "precio": 4500,
+      "stock": 5,
+      "categoriaId": 1,
+      "marcaId": 2,
+      "proveedorId": 2,
+      "paisOrigenId": 2
+    },
+    {
+      "id": "2214",
+      "nombre": "Smartphone Samsumg",
+      "descripcion": "Galaxy A16 5G 256GB",
+      "precio": 1800,
+      "stock": 50,
+      "categoriaId": 1,
+      "marcaId": 2,
+      "proveedorId": 2,
+      "paisOrigenId": 1
+    }
+  ],
+  "categorias": [
+    {
+      "id": 1,
+      "nombre": "Electrónica"
+    },
+    {
+      "id": 2,
+      "nombre": "Hogar"
+    },
+    {
+      "id": 3,
+      "nombre": "Ropa"
+    }
+  ],
+  "marcas": [
+    {
+      "id": 1,
+      "nombre": "HP"
+    },
+    {
+      "id": 2,
+      "nombre": "Samsung"
+    },
+    {
+      "id": 3,
+      "nombre": "Nike"
+    }
+  ],
+  "proveedores": [
+    {
+      "id": 1,
+      "nombre": "Tech Solutions SAC"
+    },
+    {
+      "id": 2,
+      "nombre": "Electro Importaciones SRL"
+    },
+    {
+      "id": 3,
+      "nombre": "Distribuidora Global SA"
+    }
+  ]
+}

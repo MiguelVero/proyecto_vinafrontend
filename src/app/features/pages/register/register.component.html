@@ -1,0 +1,79 @@
+<div class="register-container">
+  <video autoplay muted loop playsinline class="background-video">
+    <source src="../../../../assets/fondo-agua.mp4" type="video/mp4" />
+  </video>
+
+  <div class="card">
+    <div class="card-header">
+      <img src="../../../../assets/company-logo.png" class="logo" />
+    </div>
+
+    <form (ngSubmit)="onSubmit()" *ngIf="!loading" class="login-form">
+      <div class="form-group">
+        <label for="username">USUARIO</label>
+        <input
+          type="text"
+          id="username"
+          [(ngModel)]="usuario.nombre_usuario"
+          name="nombre_usuario"
+          required
+          placeholder="Ingresa tu usuario"
+          [disabled]="loading"
+          autocomplete="username"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">EMAIL</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="usuario.email"
+          name="email"
+          required
+          placeholder="Ingresa correo"
+          [disabled]="loading"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">CONTRASEÑA</label>
+        <input
+          type="password"
+          id="password"
+          [(ngModel)]="usuario.password"
+          name="password"
+          required
+          placeholder="Ingresa tu contraseña"
+          [disabled]="loading"
+          autocomplete="new-password"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="role">ROL</label>
+        <select [(ngModel)]="usuario.id_rol" name="id_rol" id="role">
+          <option [value]="1">Administrador</option>
+          <option [value]="2">Vendedor</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        {{ loading ? 'REGISTRANDO...' : 'REGISTRAR' }}
+      </button>
+    </form>
+
+    <div *ngIf="loading" class="loading">
+      <p>Creando usuario...</p>
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+
+    <div style="margin-top:12px;">
+      <p style="color:#d9f9ff;">¿Ya tienes cuenta? <a routerLink="/login" class="link-register">Iniciar sesión</a></p>
+    </div>
+  </div>
+</div>

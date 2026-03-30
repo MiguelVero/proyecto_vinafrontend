@@ -1,0 +1,27 @@
+<div class="form-container" [class.loading]="isLoading">
+  <h2>{{ titulo }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre de la categoría</mat-label>
+      <input matInput formControlName="nombre" placeholder="Ejemplo: Bidón" />
+      <mat-error *ngIf="form.get('nombre')?.hasError('required')">
+        El nombre es obligatorio
+      </mat-error>
+      <mat-error *ngIf="form.get('nombre')?.hasError('minlength')">
+        Mínimo 3 caracteres
+      </mat-error>
+    </mat-form-field>
+
+    <div class="buttons">
+      <button mat-raised-button color="primary" type="submit" [disabled]="isLoading || form.invalid">
+        {{ data && data.id_categoria ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+  </form>
+
+  <div class="overlay" *ngIf="isLoading">
+    <mat-progress-spinner mode="indeterminate" diameter="60"></mat-progress-spinner>
+  </div>
+</div>

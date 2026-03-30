@@ -1,0 +1,631 @@
+/* persona-list.component.css - DISEÑO MEJORADO */
+
+/* === 🎨 VARIABLES Y ESTILOS BASE === */
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.persona-list-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* === 🏷️ HEADER MEJORADO === */
+.header-container {
+  margin-bottom: 24px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.title-section {
+  flex: 1;
+  min-width: 300px;
+}
+
+.page-title {
+  margin: 0 0 8px 0;
+  color: #8e24aa;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+.header-actions {
+  flex-shrink: 0;
+}
+
+.add-button {
+  background: linear-gradient(135deg, #8e24aa, #ab47bc) !important;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 20px;
+  box-shadow: 0 2px 8px rgba(142, 36, 170, 0.3);
+  transition: all 0.3s ease;
+}
+
+.add-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(142, 36, 170, 0.4);
+}
+
+/* === 🔍 BÚSQUEDA Y FILTROS === */
+.search-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-field .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+.filter-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.page-size-field {
+  width: 120px;
+}
+
+.total-count {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* === 📋 TABLA RESPONSIVE === */
+.table-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.table-container {
+  position: relative;
+  min-height: 400px;
+}
+
+.table-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  flex: 1;
+}
+
+.personas-table {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+}
+
+/* === 🎯 ENCABEZADOS DE COLUMNA === */
+.header-row {
+  background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+}
+
+.column-header {
+  padding: 12px 8px;
+  font-weight: 600;
+  color: #8e24aa;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* === 📊 CELDAS DE DATOS === */
+.data-row td {
+  padding: 16px 8px;
+  border-bottom: 1px solid #f3e5f5;
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+
+.data-row:hover td {
+  background-color: #faf5ff;
+}
+
+/* === 📐 ANCHOS DE COLUMNA OPTIMIZADOS === */
+.column-id {
+  min-width: 70px;
+  max-width: 90px;
+}
+
+.column-documento {
+  min-width: 150px;
+  max-width: 180px;
+}
+
+.column-informacion {
+  min-width: 200px;
+  max-width: 250px;
+}
+
+.column-direccion {
+  min-width: 180px;
+  max-width: 220px;
+}
+
+.column-contacto {
+  min-width: 150px;
+  max-width: 180px;
+}
+
+.column-acciones {
+  min-width: 100px;
+  max-width: 120px;
+}
+
+/* === 🎨 ESTILOS DE CONTENIDO === */
+.persona-id {
+  font-weight: 600;
+  color: #8e24aa;
+  text-align: center;
+  font-size: 0.9rem;
+  background: #f3e5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.documento-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.numero-documento {
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+  font-size: 0.95rem;
+}
+
+.tipo-documento {
+  font-size: 0.75rem;
+  color: #666;
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.persona-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nombre-completo {
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+  font-size: 0.95rem;
+}
+
+.contacto {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.contacto mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #ab47bc;
+}
+
+.direccion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.direccion-texto {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: #555;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.direccion-texto mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #8e24aa;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.contacto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contacto-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+  font-size: 0.85rem;
+}
+
+.contacto-item mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #8e24aa;
+  flex-shrink: 0;
+}
+
+.empty-badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  background: #ffebee;
+  color: #d32f2f;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+/* === ⚙️ BOTONES DE ACCIÓN === */
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+}
+
+.edit-btn {
+  background: #e3f2fd !important;
+}
+
+.delete-btn {
+  background: #ffebee !important;
+}
+
+/* === 🔄 LOADING === */
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.loading-spinner p {
+  margin-top: 16px;
+  font-size: 0.95rem;
+}
+
+/* === 📭 SIN DATOS === */
+.no-data {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+}
+
+.no-data-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  color: #e1bee7;
+}
+
+.no-data h3 {
+  margin: 0 0 8px 0;
+  color: #666;
+  font-weight: 500;
+}
+
+.no-data p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* === 🧭 NAVEGACIÓN PERSONALIZADA === */
+.custom-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: #f5f5f5;
+  border-top: 1px solid #e0e0e0;
+  border-radius: 0 0 12px 12px;
+}
+
+.nav-info {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover:not([disabled]) {
+  background: #f0f0f0;
+  border-color: #ccc;
+  transform: translateY(-1px);
+}
+
+.nav-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav-btn mat-icon {
+  color: #8e24aa;
+  font-size: 20px;
+}
+
+/* === 📱 RESPONSIVE DESIGN === */
+
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) {
+  .persona-list-container {
+    padding: 16px;
+  }
+  
+  .page-title {
+    font-size: 1.6rem;
+  }
+  
+  .personas-table {
+    min-width: 900px;
+  }
+  
+  .column-contacto {
+    display: none;
+  }
+  
+  .search-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-field {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .filter-right {
+    align-self: flex-end;
+  }
+  
+  .custom-navigation {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .nav-buttons {
+    justify-content: center;
+  }
+}
+
+/* Tablets pequeñas (600px - 768px) */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .title-section {
+    min-width: auto;
+  }
+  
+  .header-actions {
+    align-self: flex-start;
+  }
+  
+  .column-contacto,
+  .column-direccion {
+    display: none;
+  }
+  
+  .personas-table {
+    min-width: 800px;
+  }
+  
+  .data-row td {
+    padding: 12px 6px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Móviles (hasta 600px) */
+@media (max-width: 600px) {
+  .persona-list-container {
+    padding: 12px;
+  }
+  
+  .page-title {
+    font-size: 1.4rem;
+    text-align: center;
+  }
+  
+  .page-subtitle {
+    text-align: center;
+  }
+  
+  .header-actions {
+    align-self: center;
+  }
+  
+  .add-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .filter-right {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .page-size-field {
+    width: 100%;
+  }
+  
+  .total-count {
+    text-align: center;
+  }
+  
+  .column-contacto,
+  .column-direccion,
+  .column-id {
+    display: none;
+  }
+  
+  .personas-table {
+    min-width: 700px;
+  }
+  
+  .column-informacion {
+    min-width: 180px;
+    max-width: 220px;
+  }
+  
+  .data-row td {
+    padding: 10px 4px;
+    font-size: 0.8rem;
+  }
+  
+  .nombre-completo {
+    font-size: 0.85rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+/* Pantallas muy pequeñas (hasta 400px) */
+@media (max-width: 400px) {
+  .persona-list-container {
+    padding: 8px;
+  }
+  
+  .page-title {
+    font-size: 1.2rem;
+  }
+  
+  .page-subtitle {
+    font-size: 0.85rem;
+  }
+  
+  .personas-table {
+    min-width: 600px;
+  }
+}
+
+/* Scrollbar personalizado para la tabla */
+.table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #e1bee7;
+  border-radius: 3px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #ce93d8;
+}
+
+/* Estilos adicionales para el diálogo confirm */
+::ng-deep .confirm-dialog .mat-dialog-container {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+::ng-deep .confirm-dialog .mat-dialog-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-height: 65vh !important;
+}
+
+::ng-deep .confirm-dialog .mat-dialog-actions {
+  margin: 0 !important;
+  padding: 0 !important;
+}

@@ -1,0 +1,180 @@
+<!-- usuario-list.component.html - DISEÑO MEJORADO -->
+<div class="usuario-list-container">
+  <!-- Header mejorado -->
+  <div class="header-container">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">Gestión de Usuarios</h1>
+        <p class="page-subtitle">Administra los usuarios y sus permisos en el sistema</p>
+      </div>
+
+      <!-- Botón de crear usuario (solo admin) -->
+      <div class="header-actions" *ngIf="authService.isAdmin()">
+        <button mat-raised-button color="primary" (click)="openAddDialog()" class="add-button">
+          <mat-icon>add</mat-icon>
+          Crear Usuario
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda compacta -->
+  <div class="search-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar usuarios</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Usuario, nombre, email...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="filter-right">
+      <mat-form-field appearance="outline" class="page-size-field">
+        <mat-label>Mostrar</mat-label>
+        <mat-select [(value)]="pageSize" (selectionChange)="changePageSize($event.value)">
+          <mat-option [value]="5">5</mat-option>
+          <mat-option [value]="10">10</mat-option>
+          <mat-option [value]="20">20</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <span class="total-count">de {{ dataSource.data.length }} usuarios</span>
+    </div>
+  </div>
+
+  <!-- Contenedor de tabla responsive -->
+  <div class="table-section">
+    <div class="table-container">
+      
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="loading-spinner">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando usuarios...</p>
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!isLoading" class="table-content">
+        <div class="table-wrapper" #tableWrapper>
+          <table mat-table [dataSource]="dataSource" matSort class="usuarios-table">
+            
+            <!-- Columna Número -->
+            <ng-container matColumnDef="numero">
+              <th mat-header-cell *matHeaderCellDef class="column-numero"> 
+                <div class="column-header">#</div>
+              </th>
+              <td mat-cell *matCellDef="let usuario; let i = index" class="column-numero"> 
+                <div class="numero">{{ getRowNumber(i) }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Información del Usuario -->
+            <ng-container matColumnDef="usuario_info">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-usuario"> 
+                <div class="column-header">Usuario</div>
+              </th>
+              <td mat-cell *matCellDef="let usuario" class="column-usuario"> 
+                <div class="usuario-info">
+                  <div class="username">{{usuario.nombre_usuario || usuario.username}}</div>
+                  <div class="user-id">ID: {{usuario.id_usuario}}</div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Persona -->
+            <ng-container matColumnDef="persona">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-persona"> 
+                <div class="column-header">Persona</div>
+              </th>
+              <td mat-cell *matCellDef="let usuario" class="column-persona"> 
+                <div class="persona-info">
+                  <div class="nombre">{{usuario.nombre_completo || usuario.nombre || '-'}}</div>
+                  <div class="email" *ngIf="usuario.email">
+                    <mat-icon>email</mat-icon> {{usuario.email}}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Rol -->
+            <ng-container matColumnDef="rol">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-rol"> 
+                <div class="column-header">Rol</div>
+              </th>
+              <td mat-cell *matCellDef="let usuario" class="column-rol"> 
+                <div class="rol-info">
+                  <div class="rol-badge" [class]="getRoleClass(usuario.id_rol || usuario.role)">
+                    {{usuario.roleName || usuario.rol || getRoleName(usuario.id_rol || usuario.role)}}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-estado"> 
+                <div class="column-header">Estado</div>
+              </th>
+              <td mat-cell *matCellDef="let usuario" class="column-estado"> 
+                <div class="status-info">
+                  <div class="status-badge" [class.active]="usuario.activo" [class.inactive]="!usuario.activo">
+                    {{usuario.activo ? 'Activo' : 'Inactivo'}}
+                  </div>
+                  <div class="ultimo-acceso" *ngIf="usuario.ultimo_acceso">
+                    Último acceso: {{formatDate(usuario.ultimo_acceso)}}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Acciones (solo admin) -->
+            <ng-container matColumnDef="acciones" *ngIf="authService.isAdmin()">
+              <th mat-header-cell *matHeaderCellDef class="column-acciones"> 
+                <div class="column-header">Acciones</div>
+              </th>
+              <td mat-cell *matCellDef="let usuario" class="column-acciones">
+                <div class="action-buttons">
+                  <button mat-icon-button color="primary" 
+                          (click)="openEditDialog(usuario)" 
+                          matTooltip="Editar usuario"
+                          class="action-btn edit-btn">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button 
+                          [color]="usuario.activo ? 'warn' : 'primary'"
+                          (click)="toggleActive(usuario)" 
+                          [matTooltip]="usuario.activo ? 'Desactivar' : 'Activar'"
+                          class="action-btn toggle-btn">
+                    <mat-icon>{{ usuario.activo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns" class="data-row"></tr>
+          </table>
+        </div>
+
+        <!-- Navegación personalizada (solo botones adelante/atrás) -->
+        <div class="custom-navigation" *ngIf="!isLoading && dataSource.data.length > 0">
+          <div class="nav-info">
+            <span>Mostrando {{getStartIndex() + 1}} - {{getEndIndex()}} de {{dataSource.data.length}} usuarios</span>
+          </div>
+          <div class="nav-buttons">
+            <button mat-icon-button (click)="previousPage()" [disabled]="!hasPreviousPage()" class="nav-btn">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button mat-icon-button (click)="nextPage()" [disabled]="!hasNextPage()" class="nav-btn">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mensaje cuando no hay datos -->
+        <div *ngIf="dataSource.data.length === 0 && !isLoading" class="no-data">
+          <mat-icon class="no-data-icon">people</mat-icon>
+          <h3>No se encontraron usuarios</h3>
+          <p *ngIf="authService.isAdmin()">Comienza creando un nuevo usuario</p>
+          <p *ngIf="!authService.isAdmin()">No hay usuarios disponibles para mostrar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

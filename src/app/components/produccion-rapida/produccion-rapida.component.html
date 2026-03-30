@@ -1,0 +1,146 @@
+<!-- produccion-rapida.component.html -->
+<div class="produccion-container">
+  <div class="produccion-header">
+    <mat-icon class="header-icon">factory</mat-icon>
+    <h2>🏭 Producción Rápida</h2>
+    <button mat-icon-button class="close-btn" (click)="cancelar()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
+  <div class="produccion-content">
+    <!-- Selección de Producto -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>📦 Producto a producir</mat-label>
+      <mat-select [(ngModel)]="productoSeleccionado" (selectionChange)="onProductoChange()">
+        <mat-option *ngFor="let p of productos" [value]="p">
+          <div class="producto-option">
+            <span class="producto-nombre">{{ p.nombre }}</span>
+            <span class="producto-stock">Stock actual: {{ p.stock }} unidades</span>
+          </div>
+        </mat-option>
+      </mat-select>
+      <mat-hint *ngIf="productoSeleccionado">
+        Stock actual: {{ productoSeleccionado.stock }} unidades
+      </mat-hint>
+    </mat-form-field>
+    
+    <!-- Cantidad a producir -->
+    <div class="cantidad-section">
+      <mat-form-field appearance="outline" class="cantidad-field">
+        <mat-label>{{ esProductoPaquete ? '📦 Cantidad de paquetes' : '📊 Cantidad a producir' }}</mat-label>
+        <input matInput type="number" [(ngModel)]="cantidadPaquetes" 
+               (change)="onCantidadChange()" min="1" step="1">
+        <mat-hint *ngIf="esProductoPaquete">1 paquete = 15 botellas</mat-hint>
+      </mat-form-field>
+      
+      <div class="resumen-cantidad" *ngIf="esProductoPaquete">
+        <div class="total-botellas">
+          <mat-icon>local_drink</mat-icon>
+          <span><strong>{{ cantidadPaquetes * 15 }}</strong> botellas</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Descripción opcional -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>📝 Descripción (opcional)</mat-label>
+      <textarea matInput [(ngModel)]="descripcion" rows="2" 
+                placeholder="Ej: Producción especial para pedido mayorista..."></textarea>
+    </mat-form-field>
+    
+    <!-- Verificación de disponibilidad -->
+    <div class="verificacion-section" *ngIf="verificando">
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      <p class="verificando-text">Verificando disponibilidad de insumos...</p>
+    </div>
+    
+    <div class="insumos-section" *ngIf="verificacion && !verificando">
+      <h3>📋 Insumos necesarios</h3>
+      
+      <div class="insumos-list">
+        <div *ngFor="let insumo of verificacion.receta" 
+             class="insumo-item" 
+             [class.insuficiente]="insumo.stock_actual < insumo.cantidad_total">
+          <div class="insumo-info">
+            <span class="insumo-nombre">{{ insumo.nombre }}</span>
+            <span class="insumo-cantidad">
+              {{ insumo.cantidad_total }} {{ insumo.unidad }}
+            </span>
+          </div>
+          <div class="insumo-stock">
+            <div class="stock-bar">
+              <div class="stock-fill" 
+                   [style.width.%]="getPorcentajeStock(insumo.stock_actual, insumo.cantidad_total)">
+              </div>
+            </div>
+            <span class="stock-text" [class]="getStockClass(insumo.stock_actual, insumo.cantidad_total)">
+              Stock: {{ insumo.stock_actual }} / {{ insumo.cantidad_total }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="alerta-insuficiente" *ngIf="!verificacion.disponible">
+        <mat-icon color="warn">warning</mat-icon>
+        <div class="alerta-content">
+          <strong>⚠️ Stock insuficiente</strong>
+          <p>Faltan los siguientes insumos:</p>
+          <ul>
+            <li *ngFor="let falta of verificacion.insumosFaltantes">
+              {{ falta.nombre }}: falta {{ falta.faltante }} {{ falta.unidad }}
+            </li>
+          </ul>
+          <p class="sugerencia">💡 Sugerencia: Crea un pedido a proveedor para estos insumos.</p>
+        </div>
+      </div>
+      
+      <div class="alerta-suficiente" *ngIf="verificacion.disponible">
+        <mat-icon color="success">check_circle</mat-icon>
+        <div class="alerta-content">
+          <strong>✅ Stock suficiente</strong>
+          <p>Todos los insumos están disponibles para la producción.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Resumen final -->
+    <div class="resumen-final" *ngIf="productoSeleccionado && verificacion?.disponible">
+      <h3>📊 Resumen de producción</h3>
+      <div class="resumen-grid">
+        <div class="resumen-item">
+          <span class="label">Producto:</span>
+          <span class="value">{{ productoSeleccionado.nombre }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Cantidad:</span>
+          <span class="value">{{ esProductoPaquete ? cantidadPaquetes + ' paquetes' : cantidadPaquetes + ' unidades' }}</span>
+        </div>
+        <div class="resumen-item" *ngIf="esProductoPaquete">
+          <span class="label">Botellas:</span>
+          <span class="value">{{ cantidadPaquetes * 15 }} unidades</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Stock final estimado:</span>
+          <span class="value">{{ (productoSeleccionado.stock || 0) + (esProductoPaquete ? cantidadPaquetes : cantidadPaquetes) }} unidades</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Botones de acción -->
+  <div class="produccion-actions">
+    <button mat-button (click)="cancelar()" [disabled]="produciendo">
+      Cancelar
+    </button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="producir()" 
+            [disabled]="!puedeProducir() || produciendo"
+            class="btn-producir">
+      <mat-icon *ngIf="!produciendo">play_arrow</mat-icon>
+      <mat-spinner *ngIf="produciendo" diameter="20"></mat-spinner>
+      {{ produciendo ? 'Produciendo...' : '🚀 Producir' }}
+    </button>
+  </div>
+</div>

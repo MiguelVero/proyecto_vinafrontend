@@ -1,0 +1,208 @@
+<!-- header.component.html - VERSIÓN CON USER-ACTIONS EN EL MENÚ -->
+<header class="header">
+  <!-- Logo clickeable -->
+  <app-logo tipo="navbar" (click)="irAlInicio()"></app-logo>
+
+  <!-- Botón menú hamburguesa (solo móvil) -->
+  <button mat-icon-button class="menu-toggle" *ngIf="isLoggedIn" (click)="toggleMenu()" aria-label="Menú principal">
+    <mat-icon>{{ isMenuOpen ? 'close' : 'menu' }}</mat-icon>
+  </button>
+
+  <!-- Navegación principal -->
+  <nav class="nav-links" *ngIf="isLoggedIn" [class.mobile-open]="isMenuOpen" aria-label="Navegación principal">
+    
+    <!-- USER INFO EN MÓVIL (dentro del menú) -->
+    <div class="mobile-user-info" *ngIf="isMobile">
+      <div class="user-avatar">
+        <mat-icon>account_circle</mat-icon>
+      </div>
+      <div class="user-details">
+        <span class="user-name-mobile">{{ nombreUsuario }}</span>
+        <span class="user-role-mobile" *ngIf="userRole === 1">Administrador</span>
+        <span class="user-role-mobile" *ngIf="userRole === 2">Vendedor</span>
+        <span class="user-role-mobile" *ngIf="userRole === 3">Repartidor</span>
+        <span class="user-role-mobile" *ngIf="userRole === 4">Almacenero</span>
+      </div>
+    </div>
+
+    <!-- Menú principal de navegación -->
+    <div class="nav-menu-items">
+      <!-- Ventas -->
+      <button mat-button [matMenuTriggerFor]="ventasMenu" *ngIf="tieneAccesoAVentas()">
+        <mat-icon>point_of_sale</mat-icon>
+        <span class="nav-text">Ventas</span>
+      </button>
+      <mat-menu #ventasMenu="matMenu" class="responsive-menu">
+        <button mat-menu-item *ngIf="tieneAcceso('ventas_nueva')" (click)="nuevaVenta(); closeMenu()">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Nueva Venta
+        </button>
+        <!-- Dentro del menú de Ventas -->
+        <button mat-menu-item *ngIf="tieneAcceso('ventas_nueva')" (click)="goToRecargas(); closeMenu()">
+          <mat-icon>local_drink</mat-icon>
+          Recarga de Bidones
+        </button>
+        <button mat-menu-item *ngIf="tieneAcceso('ventas')" (click)="goToVentas(); closeMenu()">
+          <mat-icon>receipt_long</mat-icon>
+          Panel de Ventas
+        </button>
+         <!-- En el menú de usuario o en un lugar visible para admin  <button mat-menu-item *ngIf="isAdmin()" (click)="goToConfiguracionEmpresa()">
+            <mat-icon>settings</mat-icon>
+            Configurar Empresa
+          </button>-->
+         
+          <!-- Dentro del menú de usuario o como opción independiente -->
+          <button mat-menu-item *ngIf="isAdmin()" (click)="goToPersonalizacion()">
+            <mat-icon>palette</mat-icon>
+            Personalizar Sistema
+          </button>
+      </mat-menu>
+
+      <!-- Productos -->
+      <button mat-button *ngIf="tieneAcceso('productos')" (click)="goToProductos(); closeMenu()">
+        <mat-icon>inventory_2</mat-icon>
+        <span class="nav-text">Productos</span>
+      </button>
+
+      <!-- SUNAT -->
+      <button mat-button *ngIf="tieneAcceso('sunat')" (click)="goToSunat(); closeMenu()">
+        <mat-icon>receipt_long</mat-icon>
+        <span class="nav-text">SUNAT</span>
+      </button>
+
+      <!-- Gestión -->
+      <button mat-button [matMenuTriggerFor]="gestionMenu" *ngIf="tieneAccesoAGestion()">
+        <mat-icon>manage_accounts</mat-icon>
+        <span class="nav-text">Gestión</span>
+      </button>
+      <mat-menu #gestionMenu="matMenu" class="responsive-menu">
+        <button mat-menu-item *ngIf="tieneAcceso('usuarios')" (click)="goToUsuarios(); closeMenu()">
+          <mat-icon>people</mat-icon>
+          Gestión de Usuarios
+        </button>
+        <button mat-menu-item *ngIf="tieneAcceso('personas')" (click)="goToPersonas(); closeMenu()">
+          <mat-icon>person</mat-icon>
+          Gestión de Personas
+        </button>
+        <button mat-menu-item *ngIf="tieneAcceso('clientes')" (click)="goToClientes(); closeMenu()">
+          <mat-icon>groups</mat-icon>
+          Gestión de Clientes
+        </button>
+        <button mat-menu-item *ngIf="tieneAcceso('repartidores')" (click)="goToRepartidores(); closeMenu()">
+          <mat-icon>local_shipping</mat-icon>
+          Gestión de Repartidores
+        </button>
+      </mat-menu>
+
+      <!-- Rutas -->
+      <button mat-button [matMenuTriggerFor]="rutasMenu" *ngIf="tieneAccesoARutas()">
+        <mat-icon>route</mat-icon>
+        <span class="nav-text">Rutas</span>
+      </button>
+      <mat-menu #rutasMenu="matMenu" class="responsive-menu">
+        <button mat-menu-item *ngIf="tieneAcceso('ventas_asignacion_rutas')" (click)="goToRutas(); closeMenu()">
+          <mat-icon>add_road</mat-icon>
+          Asignación de Rutas
+        </button>
+        <button mat-menu-item *ngIf="tieneAcceso('rutas_asignadas')" (click)="goToRutasAsignadas(); closeMenu()">
+          <mat-icon>map</mat-icon>
+          Mis Rutas
+        </button>
+      </mat-menu>
+
+      <!-- Entregas (Repartidor) -->
+      <button mat-button [matMenuTriggerFor]="entregasMenu" *ngIf="tieneAccesoAEntregas()">
+        <mat-icon>local_shipping</mat-icon>
+        <span class="nav-text">Entregas</span>
+      </button>
+      <mat-menu #entregasMenu="matMenu" class="responsive-menu">
+        <button mat-menu-item *ngIf="tieneAcceso('entregas_pendientes')" (click)="goToEntregas(); closeMenu()">
+          <mat-icon>pending_actions</mat-icon>
+          Entregas Pendientes
+        </button>
+        <button mat-menu-item *ngIf="tieneAcceso('historial_entregas')" (click)="verHistorialEntregas(); closeMenu()">
+          <mat-icon>history</mat-icon>
+          Historial de Entregas
+        </button>
+      </mat-menu>
+
+      <!-- Inventario Unificado (Almacenero) -->
+      <button mat-button [matMenuTriggerFor]="inventarioMenu" *ngIf="tieneAccesoAInventario()">
+        <mat-icon>warehouse</mat-icon>
+        <span class="nav-text">Inventario</span>
+      </button>
+      <mat-menu #inventarioMenu="matMenu" class="responsive-menu">
+        <!-- Dashboard Unificado -->
+        <button mat-menu-item *ngIf="tieneAcceso('inventario')" (click)="goToInventarioUnificado(); closeMenu()">
+          <mat-icon>dashboard</mat-icon>
+          Dashboard de Inventario
+        </button>
+
+        <mat-divider></mat-divider>
+
+        <!-- Reportes -->
+        <button mat-menu-item *ngIf="tieneAcceso('inventario_reportes')" (click)="verReportes(); closeMenu()">
+          <mat-icon>assessment</mat-icon>
+          Reportes de Stock
+        </button>
+
+        <!-- Proveedores y Categorías -->
+        <button mat-menu-item *ngIf="tieneAcceso('proveedores')" (click)="goToProveedores(); closeMenu()">
+          <mat-icon>local_shipping</mat-icon>
+          Proveedores
+        </button>
+        <button mat-menu-item *ngIf="tieneAcceso('pedido_proveedor')" (click)="goPedidosProveedor(); closeMenu()">
+          <mat-icon>list_alt</mat-icon>
+          Pedidos a Proveedor
+        </button>
+        <button mat-menu-item *ngIf="tieneAcceso('pedido_proveedor')" (click)="goInsumos(); closeMenu()">
+        <mat-icon>category</mat-icon>
+        Insumos
+      </button>
+        <button mat-menu-item *ngIf="tieneAcceso('categorias')" (click)="goCategorias(); closeMenu()">
+          <mat-icon>category</mat-icon>
+          Categorías
+        </button>
+        <button mat-menu-item *ngIf="tieneAcceso('marcas')" (click)="goMarcas(); closeMenu()">
+          <mat-icon>branding_watermark</mat-icon>
+          Marcas
+        </button>
+      </mat-menu>
+    </div>
+
+    <!-- ACCIONES DE USUARIO EN MÓVIL (dentro del menú) -->
+    <div class="mobile-user-actions" *ngIf="isMobile">
+      <button mat-button class="mobile-user-action-btn" (click)="irAlInicio(); closeMenu()">
+        <mat-icon>home</mat-icon>
+        <span>Inicio</span>
+      </button>
+      <button mat-button class="mobile-user-action-btn" (click)="logout(); closeMenu()">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Lado derecho - Acciones de usuario SOLO en DESKTOP -->
+  <div class="user-actions desktop-only" *ngIf="isLoggedIn">
+    <button mat-button class="user-btn" [matMenuTriggerFor]="userMenu">
+      <mat-icon>account_circle</mat-icon>
+      <span class="user-name">{{ nombreUsuario }}</span>
+    </button>
+
+    <mat-menu #userMenu="matMenu" class="responsive-menu">
+      <button mat-menu-item (click)="irAlInicio()">
+        <mat-icon>home</mat-icon>
+        Inicio
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Cerrar sesión
+      </button>
+    </mat-menu>
+  </div>
+
+  <!-- Overlay para móvil (solo cuando el menú está abierto) -->
+  <div class="mobile-overlay" *ngIf="isMenuOpen && isMobile" (click)="toggleMenu()" aria-hidden="true"></div>
+</header>

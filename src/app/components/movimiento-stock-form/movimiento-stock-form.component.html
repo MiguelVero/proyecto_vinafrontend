@@ -1,0 +1,83 @@
+<div class="form-container" [class.loading]="isLoading">
+  <h2>{{ titulo }}</h2>
+
+  <!-- ✅ CONTENEDOR CON SCROLL INTERNO -->
+  <div class="form-content">
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Producto</mat-label>
+        <mat-select formControlName="id_producto">
+          <mat-option *ngFor="let p of productos" [value]="p.id_producto">
+            {{ p.nombre }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('id_producto')?.hasError('required')">
+          El producto es obligatorio
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Tipo de movimiento</mat-label>
+        <mat-select formControlName="tipo_movimiento">
+          <mat-option *ngFor="let tipo of tiposMovimiento" [value]="tipo.value">
+            {{ tipo.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('tipo_movimiento')?.hasError('required')">
+          El tipo de movimiento es obligatorio
+        </mat-error>
+      </mat-form-field>
+
+      <!-- ✅ Selector de lote con mejor diseño -->
+      <mat-form-field appearance="fill" class="full-width" *ngIf="lotes.length > 0">
+        <mat-label>Lote</mat-label>
+        <mat-select formControlName="id_lote">
+          <mat-option value="">-- Sin lote específico --</mat-option>
+          <mat-option *ngFor="let lote of lotes" [value]="lote.id_lote">
+            <div class="lote-option">
+              <span class="lote-numero">{{ lote.numero_lote }}</span>
+              <span class="lote-info">
+                Caduca: {{ lote.fecha_caducidad | date:'dd/MM/yyyy' }} | 
+                Stock: {{ lote.cantidad_actual }}
+              </span>
+            </div>
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="form.get('tipo_movimiento')?.value !== 'ingreso'">
+          Seleccione el lote específico para este movimiento
+        </mat-hint>
+        <mat-error *ngIf="form.get('id_lote')?.hasError('required')">
+          El lote es obligatorio para este tipo de movimiento
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Cantidad</mat-label>
+        <input matInput type="number" formControlName="cantidad" placeholder="Ingrese cantidad" />
+        <mat-error *ngIf="form.get('cantidad')?.hasError('required')">
+          La cantidad es obligatoria
+        </mat-error>
+        <mat-error *ngIf="form.get('cantidad')?.hasError('min')">
+          Debe ser mayor que 0
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="descripcion" rows="2" placeholder="Descripción opcional del movimiento"></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- ✅ BOTONES SIEMPRE VISIBLES -->
+  <div class="buttons">
+    <button mat-raised-button color="primary" type="submit" [disabled]="isLoading" (click)="guardar()">
+      {{ data && data.id_movimiento ? 'Actualizar' : 'Guardar' }}
+    </button>
+    <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+  </div>
+
+  <div class="overlay" *ngIf="isLoading">
+    <mat-spinner diameter="60"></mat-spinner>
+  </div>
+</div>

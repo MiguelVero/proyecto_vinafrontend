@@ -1,0 +1,158 @@
+<!-- recarga-rapida.component.html -->
+<div class="recarga-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="btn-back" (click)="volver()">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+    <h1>
+      <i class="fas fa-tint"></i>
+      Recarga de Bidones
+    </h1>
+  </div>
+
+  <div class="recarga-content">
+    <!-- Sección Cliente -->
+    <div class="section cliente-section">
+      <h2>
+        <i class="fas fa-user"></i>
+        Cliente
+      </h2>
+      
+      <div class="search-container">
+        <div class="search-box">
+          <input 
+            type="text" 
+            [(ngModel)]="searchCliente" 
+            (input)="filtrarClientes()"
+            (focus)="mostrarListaClientes = true"
+            [placeholder]="clienteSeleccionado ? clienteSeleccionado.nombre_completo : 'Buscar cliente por nombre o teléfono...'"
+            class="search-input">
+          <button *ngIf="clienteSeleccionado" (click)="limpiarBusquedaCliente()" class="btn-clear">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <button (click)="abrirNuevoCliente()" class="btn-nuevo-cliente">
+          <i class="fas fa-user-plus"></i> Nuevo Cliente
+        </button>
+      </div>
+
+      <!-- Lista de resultados -->
+      <div class="results-list" *ngIf="mostrarListaClientes && filteredClientes.length > 0">
+        <div *ngFor="let cliente of filteredClientes" 
+             class="result-item"
+             (click)="seleccionarCliente(cliente)">
+          <div class="result-info">
+            <strong>{{ cliente.nombre_completo || cliente.persona?.nombre_completo }}</strong>
+            <small>{{ cliente.persona?.telefono }}</small>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+
+      <!-- Cliente seleccionado -->
+      <div *ngIf="clienteSeleccionado" class="cliente-seleccionado">
+        <div class="cliente-info">
+          <i class="fas fa-check-circle"></i>
+          <span>{{ clienteSeleccionado.nombre_completo || clienteSeleccionado.persona?.nombre_completo }}</span>
+          <small>{{ clienteSeleccionado.persona?.telefono }}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección Producto -->
+    <div class="section producto-section">
+      <h2>
+        <i class="fas fa-tint"></i>
+        Producto
+      </h2>
+      
+      <div class="productos-grid">
+        <div *ngFor="let producto of productos" 
+             class="producto-card"
+             [class.selected]="productoSeleccionado?.id_producto === producto.id_producto"
+             (click)="productoSeleccionado = producto">
+          <div class="producto-icon">
+            <i class="fas fa-water"></i>
+          </div>
+          <div class="producto-info">
+            <h3>{{ producto.nombre }}</h3>
+            <p class="precio">S/ {{ producto.precio }} por unidad</p>
+            <p class="stock">Stock: {{ producto.stock }} unidades</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cantidad-control" *ngIf="productoSeleccionado">
+        <label>Cantidad de bidones:</label>
+        <div class="quantity-selector">
+          <button (click)="decrementarCantidad()" class="qty-btn">-</button>
+          <input 
+            type="number" 
+            [(ngModel)]="cantidad" 
+            (change)="onCantidadChange()"
+            min="1" 
+            class="quantity-input">
+          <button (click)="incrementarCantidad()" class="qty-btn">+</button>
+        </div>
+        <p class="total-recarga">
+          Total a pagar: <strong>S/ {{ getTotal() | number:'1.2-2' }}</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- Sección Método de Pago -->
+    <div class="section pago-section">
+      <h2>
+        <i class="fas fa-credit-card"></i>
+        Método de Pago
+      </h2>
+      
+      <div class="metodos-grid">
+        <div *ngFor="let metodo of metodosPago" 
+             class="metodo-card"
+             [class.selected]="metodoPago === metodo.id"
+             (click)="metodoPago = metodo.id">
+          <div class="metodo-icon" [ngClass]="metodo.nombre.toLowerCase()">
+            <i class="fas fa-{{ metodo.icono }}"></i>
+          </div>
+          <div class="metodo-info">
+            <h3>{{ metodo.nombre }}</h3>
+            <p *ngIf="metodo.nombre === 'Yape'" class="metodo-desc">
+              El cliente paga con Yape y confirmas
+            </p>
+            <p *ngIf="metodo.nombre === 'Efectivo'" class="metodo-desc">
+              Pago inmediato en caja
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección Notas -->
+    <div class="section notas-section">
+      <h2>
+        <i class="fas fa-sticky-note"></i>
+        Notas (opcional)
+      </h2>
+      <textarea [(ngModel)]="notas" 
+                rows="2" 
+                placeholder="Ej: Cliente frecuente, descuento especial..."></textarea>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="acciones">
+      <button class="btn-cancelar" (click)="volver()">
+        Cancelar
+      </button>
+      <button class="btn-registrar" 
+              (click)="registrarRecarga()" 
+              [disabled]="!puedeRegistrar() || loading">
+        <i *ngIf="!loading" class="fas fa-check-circle"></i>
+        <div *ngIf="loading" class="spinner"></div>
+        {{ loading ? 'Procesando...' : 'Registrar Recarga' }}
+      </button>
+    </div>
+  </div>
+</div>

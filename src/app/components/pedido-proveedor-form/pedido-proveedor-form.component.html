@@ -1,0 +1,240 @@
+<!-- pedido-proveedor-form.component.html - VERSIÓN FINAL MEJORADA -->
+<div class="dialog-container">
+  <!-- Header fijo -->
+  <div class="dialog-header">
+    <h2 mat-dialog-title class="dialog-title">
+      <mat-icon class="title-icon">inventory_2</mat-icon>
+      {{ isEditMode ? 'Editar Pedido' : 'Nuevo Pedido a Proveedor' }}
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-btn" matTooltip="Cerrar" aria-label="Cerrar diálogo">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Contenido con scroll -->
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-container">
+      
+      <!-- Información Básica -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <mat-icon>info</mat-icon>
+            Información del Pedido
+          </h3>
+        </div>
+        
+        <div class="form-grid">
+          <!-- Proveedor -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Proveedor *</mat-label>
+            <mat-select formControlName="id_proveedor">
+              <mat-option *ngFor="let prov of proveedores" [value]="prov.id_proveedor">
+                {{ prov.razon_social }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matSuffix>business</mat-icon>
+            <mat-error *ngIf="form.get('id_proveedor')?.hasError('required')">
+              Proveedor requerido
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Fecha -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Fecha del Pedido *</mat-label>
+            <input matInput 
+                  [matDatepicker]="picker" 
+                  formControlName="fecha"
+                  [min]="minDate"
+                  [max]="maxDate"
+                  placeholder="DD/MM/AAAA">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="form.get('fecha')?.hasError('required')">
+              Fecha requerida
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Estado: SOLO información visual MEJORADA -->
+          <div class="estado-display" [class.estado-creacion]="!isEditMode" [class.estado-info]="isEditMode">
+            <mat-icon>{{ isEditMode ? 'info' : 'pending_actions' }}</mat-icon>
+            <div class="estado-info-content">
+              <span class="estado-label">{{ isEditMode ? 'Estado actual' : 'Estado del Pedido' }}</span>
+              <span class="estado-value">{{ isEditMode ? getEstadoActual() : 'Solicitado' }}</span>
+              <small>
+                {{ isEditMode 
+                  ? 'Use el menú de acciones en la lista para cambiar el estado' 
+                  : 'Los pedidos nuevos se crean en estado "Solicitado" por defecto' 
+                }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje de advertencia para pedidos no editables -->
+      <div *ngIf="isEditMode && !puedeEditarPedido()" class="edit-warning">
+        <mat-icon color="warn">warning</mat-icon>
+        <span>Este pedido no se puede editar porque está en estado "{{ getEstadoActual() }}"</span>
+      </div>
+
+      <!-- Detalles del Pedido CON SCROLL PROPIO -->
+      <div class="form-section detalles-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <mat-icon>list_alt</mat-icon>
+            Insumos del Pedido
+          </h3>
+          <button mat-raised-button color="primary" type="button" (click)="agregarDetalle()" class="add-btn">
+            <mat-icon>add_circle</mat-icon>
+            Agregar Insumo
+          </button>
+        </div>
+
+        <div formArrayName="detalles" class="detalles-container">
+          <div *ngFor="let detalle of detalles.controls; let i = index; let last = last" 
+              [formGroupName]="i" class="detalle-item">
+            
+            <div class="detalle-header">
+              <div class="detalle-info">
+                <span class="detalle-number">Item {{ i + 1 }}</span>
+                <span class="detalle-product" *ngIf="getDetalleControl(i, 'id_insumo')?.value">
+                  {{ getNombreInsumo(i) }}
+                </span>
+                <span class="detalle-product" *ngIf="!getDetalleControl(i, 'id_insumo')?.value">
+                  Seleccione un insumo
+                </span>
+              </div>
+              <button mat-icon-button color="warn" type="button" 
+                      (click)="eliminarDetalle(i)" 
+                      [disabled]="detalles.length === 1"
+                      class="delete-btn" 
+                      matTooltip="Eliminar item"
+                      aria-label="Eliminar item">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+
+            <!-- Grid de campos responsive -->
+            <div class="detalle-grid">
+              <!-- Insumo -->
+              <mat-form-field appearance="outline" class="detalle-field">
+                <mat-label>Insumo *</mat-label>
+                <mat-select formControlName="id_insumo" (selectionChange)="actualizarSubtotal(i)">
+                  <mat-option *ngFor="let insumo of insumos" [value]="insumo.id_insumo">
+                    {{ insumo.nombre }} ({{ insumo.unidad_medida }})
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="getDetalleControl(i, 'id_insumo')?.hasError('required')">
+                  Insumo requerido
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Cantidad -->
+              <mat-form-field appearance="outline" class="detalle-field">
+                <mat-label>Cantidad *</mat-label>
+                <input matInput type="number" formControlName="cantidad" min="1" 
+                      (blur)="actualizarSubtotal(i)" 
+                      (input)="actualizarSubtotal(i)"
+                      placeholder="0"
+                      aria-describedby="cantidad-help-{{i}}">
+                <span matSuffix class="unit-suffix">{{ getUnidadMedida(i) }}</span>
+                <mat-hint id="cantidad-help-{{i}}">Mínimo: 1</mat-hint>
+                <mat-error *ngIf="getDetalleControl(i, 'cantidad')?.hasError('required')">
+                  Cantidad requerida
+                </mat-error>
+                <mat-error *ngIf="getDetalleControl(i, 'cantidad')?.hasError('min')">
+                  Mínimo 1 unidad
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Costo Unitario -->
+              <mat-form-field appearance="outline" class="detalle-field">
+                <mat-label>Costo *</mat-label>
+                <input matInput type="number" formControlName="costo_unitario" min="0" step="0.01" 
+                      (blur)="actualizarSubtotal(i)" 
+                      (input)="actualizarSubtotal(i)"
+                      placeholder="0.00">
+                <span matPrefix class="currency-prefix">S/</span>
+                <mat-error *ngIf="getDetalleControl(i, 'costo_unitario')?.hasError('required')">
+                  Costo requerido
+                </mat-error>
+                <mat-error *ngIf="getDetalleControl(i, 'costo_unitario')?.hasError('min')">
+                  El costo no puede ser negativo
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Subtotal -->
+              <mat-form-field appearance="outline" class="detalle-field subtotal-field">
+                <mat-label>Subtotal</mat-label>
+                <input matInput type="number" formControlName="subtotal" readonly aria-label="Subtotal calculado">
+                <span matPrefix class="currency-prefix">S/</span>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensaje cuando no hay items -->
+        <div class="no-items-message" *ngIf="detalles.length === 0">
+          <mat-icon>inventory</mat-icon>
+          <span>No hay insumos agregados al pedido. Haga clic en "Agregar Insumo" para comenzar.</span>
+        </div>
+      </div>
+
+      <!-- Resumen del Pedido -->
+      <div class="form-section summary-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <mat-icon>summarize</mat-icon>
+            Resumen del Pedido
+          </h3>
+        </div>
+        
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-label">
+              <mat-icon>format_list_numbered</mat-icon>
+              Total de Items
+            </div>
+            <div class="summary-value">{{ detalles.length }}</div>
+          </div>
+          
+          <div class="summary-item total-item">
+            <div class="summary-label">
+              <mat-icon>payments</mat-icon>
+              Total del Pedido
+            </div>
+            <div class="summary-value total-value">
+              {{ getTotalFormateado() }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <!-- Acciones fijas en la parte inferior -->
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button (click)="onCancel()" [disabled]="isLoading" class="cancel-btn">
+      <mat-icon>cancel</mat-icon>
+      Cancelar
+    </button>
+    
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="submit()" 
+      [disabled]="form.invalid || isLoading || detalles.length === 0 || !puedeEditarPedido()"
+      class="submit-btn"
+      aria-describedby="submit-help">
+      <mat-icon *ngIf="!isLoading">{{ isEditMode ? 'update' : 'add_task' }}</mat-icon>
+      <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+      <span>{{ isEditMode ? 'Actualizar' : 'Crear' }} Pedido</span>
+    </button>
+    
+    <div id="submit-help" class="visually-hidden">
+      {{ form.invalid ? 'Formulario incompleto' : detalles.length === 0 ? 'Agregue al menos un insumo' : 'Listo para enviar' }}
+    </div>
+  </mat-dialog-actions>
+</div>

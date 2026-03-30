@@ -1,0 +1,26 @@
+<div class="form-container" [class.loading]="isLoading">
+  <h2>{{ titulo }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Nombre de la marca</mat-label>
+      <input matInput formControlName="nombre" placeholder="Ejemplo: Coca-Cola" />
+      <mat-error *ngIf="form.get('nombre')?.hasError('required')">
+        El nombre es obligatorio
+      </mat-error>
+      <mat-error *ngIf="form.get('nombre')?.hasError('minlength')">
+        Mínimo 2 caracteres
+      </mat-error>
+    </mat-form-field>
+    <div class="buttons">
+      <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">
+        {{ data && data.id_marca? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+  </form>
+
+  <div class="overlay" *ngIf="isLoading">
+    <mat-spinner diameter="60"></mat-spinner>
+  </div>
+</div>

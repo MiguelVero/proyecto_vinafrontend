@@ -1,0 +1,103 @@
+<!-- VIDEO DE FONDO -->
+<div class="video-background">
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="home-container">
+  <div class="welcome-card">
+    <h1>¡Bienvenido al Sistema de Agua Viña!</h1>
+
+    <!-- Información del usuario -->
+    <div class="user-info" *ngIf="authService.currentUser$ | async as user">
+      <p><strong>Usuario:</strong> {{ user.nombre }}</p>
+      <p><strong>Rol:</strong> {{ user.roleName }}</p>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="quick-actions">
+      <div class="action-buttons">
+        <!-- Botones mostrados según acceso a módulo (backend o frontend) -->
+        <button *ngIf="tieneAcceso('usuarios')" (click)="goToUsuarios()" class="btn-primary">
+          <i class="fas fa-users-cog"></i> Gestión de Usuarios
+        </button>
+
+        <button *ngIf="tieneAcceso('personas')" (click)="goToPersonas()" class="btn-primary">
+          <i class="fas fa-address-card"></i> Gestión de Personas
+        </button>
+
+        <button *ngIf="tieneAcceso('clientes')" (click)="goToClientes()" class="btn-primary">
+          <i class="fas fa-users"></i> Gestión de Clientes
+        </button>
+
+        <button *ngIf="tieneAcceso('productos')" (click)="goToProductos()" class="btn-secondary">
+          <i class="fas fa-box-open"></i> Gestión / Ver Productos
+        </button>
+
+        <button *ngIf="tieneAcceso('ventas_nueva') || tieneAcceso('ventas')" (click)="nuevaVenta()" class="btn-success">
+          <i class="fas fa-shopping-cart"></i> Nueva Venta
+        </button>
+
+        <button *ngIf="tieneAcceso('ventas')" (click)="goToVentas()" class="btn-info">
+          <i class="fas fa-clipboard-list"></i> Panel de Ventas
+        </button>
+
+        <button *ngIf="tieneAcceso('ventas_asignacion_rutas') || tieneAcceso('rutas')" (click)="goToRutas()" class="btn-warning">
+          <i class="fas fa-route"></i> Asignación de Rutas
+        </button>
+
+        <!-- Botón para módulo Repartidores -->
+        <button *ngIf="tieneAcceso('repartidores')" (click)="goToRepartidores()" class="btn-primary">
+          <i class="fas fa-truck"></i> Gestión de Repartidores
+        </button>
+
+        <button *ngIf="tieneAcceso('rutas_asignadas')" (click)="goToRutasAsignadas()" class="btn-primary">
+          <i class="fas fa-route"></i> Mis Rutas
+        </button>
+
+        <button *ngIf="tieneAcceso('entregas_pendientes')" (click)="goToEntregas()" class="btn-success">
+          <i class="fas fa-truck"></i> Entregas Pendientes
+        </button>
+
+        <button *ngIf="tieneAcceso('historial_entregas')" (click)="verHistorialEntregas()" class="btn-info">
+          <i class="fas fa-history"></i> Historial de Entregas
+        </button>
+ <!-- Botones para módulos de almacenero -->
+          <button *ngIf="tieneAcceso('inventario')" (click)="goToInventario()" class="btn-primary">
+            <i class="fas fa-warehouse"></i> Gestión de Inventario
+          </button>
+
+          <button *ngIf="tieneAcceso('inventario_movimiento')" (click)="registrarMovimiento()" class="btn-success">
+            <i class="fas fa-dolly"></i> Registrar Movimiento
+          </button>
+
+          <button *ngIf="tieneAcceso('inventario_reportes')" (click)="verReportes()" class="btn-info">
+            <i class="fas fa-chart-bar"></i> Reportes de Stock
+          </button>
+
+          <button *ngIf="tieneAcceso('lotes')" (click)="goToLotes()" class="btn-warning">
+            <i class="fas fa-barcode"></i> Gestión de Lotes
+          </button>
+
+          <button *ngIf="tieneAcceso('proveedores')" (click)="goToProveedores()" class="btn-info">
+            <i class="fas fa-truck-loading"></i> Proveedores
+          </button>
+
+          <button *ngIf="tieneAcceso('pedido_proveedor')" (click)="goPedidosProveedor()" class="btn-success">
+            <i class="fas fa-clipboard-list"></i> Pedidos a Proveedor
+          </button>
+
+          <button *ngIf="tieneAcceso('categorias')" (click)="goCategorias()" class="btn-primary">
+            <i class="fas fa-tags"></i> Categorías
+          </button>
+
+          <button *ngIf="tieneAcceso('marcas')" (click)="goMarcas()" class="btn-primary">
+            <i class="fas fa-copyright"></i> Marcas
+          </button>
+        
+ 
+      </div>
+    </div>
+
+
+  </div>
+</div>

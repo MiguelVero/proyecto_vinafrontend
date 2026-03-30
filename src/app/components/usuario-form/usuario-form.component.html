@@ -1,0 +1,49 @@
+<h3>{{ isEdit ? 'Editar usuario' : 'Crear usuario' }}</h3>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Usuario</mat-label>
+    <input matInput formControlName="nombre_usuario" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Email</mat-label>
+    <input matInput formControlName="email" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Contraseña</mat-label>
+    <input matInput type="password" formControlName="password" placeholder="Dejar vacío si no cambia" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Rol</mat-label>
+    <mat-select formControlName="id_rol">
+      <mat-option *ngFor="let r of roles" [value]="r.id">{{ r.nombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:calc(100% - 120px); margin-right:8px; display:inline-block">
+    <mat-label>Persona</mat-label>
+    <mat-select formControlName="id_persona">
+      <mat-option [value]="null">-- Ninguna --</mat-option>
+      <mat-option *ngFor="let p of personas" [value]="p.id_persona">{{ p.nombre_completo }}{{ p.numero_documento ? ' - ' + p.numero_documento : '' }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <div style="display:inline-block; vertical-align:top">
+    <button mat-stroked-button type="button" (click)="openCreatePersona()"><mat-icon>person_add</mat-icon> Nueva</button>
+  </div>
+
+  <div class="form-actions">
+    <button 
+      mat-raised-button 
+      class="limpiar-button" 
+      type="button" 
+      (click)="clearForm()">
+      <mat-icon>refresh</mat-icon>
+      Limpiar
+    </button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isLoading">{{ isEdit ? 'Actualizar' : 'Crear' }}</button>
+    <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+  </div>
+</form>

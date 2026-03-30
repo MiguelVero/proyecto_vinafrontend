@@ -1,0 +1,65 @@
+<h3>{{ isEditMode ? 'Editar Persona' : 'Crear Persona' }}</h3>
+
+<div class="loading-overlay" *ngIf="isLoading" style="display:flex; justify-content:center; margin:12px 0;">
+  <mat-spinner diameter="36"></mat-spinner>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Tipo documento *</mat-label>
+    <mat-select formControlName="tipo_documento" (selectionChange)="onTipoDocumentoChange()">
+      <mat-option *ngFor="let t of tipos" [value]="t">{{ t }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Número documento *</mat-label>
+    <input matInput 
+           formControlName="numero_documento" 
+           (input)="formatearDocumento($event)"
+           (keypress)="prevenirCaracteresNoPermitidos($event, 'numero')"
+           [placeholder]="form.get('tipo_documento')?.value === 'DNI' ? '12345678' : 
+                        form.get('tipo_documento')?.value === 'RUC' ? '12345678901' : 
+                        'ABC123456789'"/>
+    <mat-error>{{ getDocumentoError() }}</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Nombre completo *</mat-label>
+    <input matInput 
+           formControlName="nombre_completo" 
+           (keypress)="prevenirCaracteresNoPermitidos($event, 'letra')"
+           placeholder="Ej: Juan Pérez García"/>
+    <mat-error>{{ getNombreError() }}</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Teléfono</mat-label>
+    <input matInput 
+           formControlName="telefono" 
+           (input)="formatearTelefono($event)"
+           (keypress)="prevenirCaracteresNoPermitidos($event, 'numero')"
+           placeholder="912345678"
+           maxlength="9"/>
+    <mat-error>{{ getTelefonoError() }}</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Dirección</mat-label>
+    <input matInput formControlName="direccion" />
+  </mat-form-field>
+
+  <div class="form-actions" style="display:flex; gap:8px; margin-top:12px;">
+    <button 
+      mat-raised-button 
+      class="limpiar-button" 
+      type="button" 
+      (click)="clearForm()">
+      <mat-icon>refresh</mat-icon>
+      Limpiar
+    </button>
+
+    <button mat-flat-button color="primary" type="submit" [disabled]="isLoading">{{ isEditMode ? 'Actualizar' : 'Crear' }}</button>
+    <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+  </div>
+</form>

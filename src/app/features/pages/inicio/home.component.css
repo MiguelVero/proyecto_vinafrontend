@@ -1,0 +1,206 @@
+/* src/app/features/pages/inicio/home.component.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+/* === VIDEO DE FONDO === */
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.video-background video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.55); /* oscurece ligeramente para contraste */
+}
+
+/* === CONTENEDOR PRINCIPAL === */
+.home-container {
+  position: relative;
+  z-index: 1;
+  padding: 25px;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: calc(100vh - 120px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Mostserrat", sans-serif;
+  margin-top: -10px;
+  background-color: #3c7a8f;
+}
+
+/* === TARJETA DE BIENVENIDA (efecto vidrio) === */
+.welcome-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 35px 25px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  transition: transform 0.3s ease;
+  width: 900px;
+}
+
+.welcome-card:hover {
+  transform: translateY(-4px);
+}
+
+.welcome-card h1 {
+  color: #0288d1;
+  margin-bottom: 15px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  font-family: "Mostserrat", sans-serif;
+}
+
+/* === INFORMACIÓN DEL USUARIO === */
+.user-info {
+  background: #f1fbff;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 25px 300px;
+  border-left: 6px solid #00aaff;
+  box-shadow: 0 2px 6px rgba(0, 150, 200, 0.1); 
+  width: 250px;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+
+}
+
+.user-info p {
+  margin: 8px 0;
+  font-size: 1.05rem;
+  color: #333;
+}
+
+/* === ACCIONES RÁPIDAS === */
+.quick-actions {
+  margin-top: 35px;
+  text-align: center;
+}
+
+.quick-actions h3 {
+  color: #0277bd;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* === BOTONES === */
+button {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
+  transition: all 0.25s ease;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* === COLORES DE BOTONES === */
+.btn-primary {
+  background: #00bcd4;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0097a7;
+}
+
+.btn-secondary {
+  background: #0288d1;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #0277bd;
+}
+
+.btn-success {
+  background: #06c540;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #03ad36;
+}
+
+.btn-info {
+  background: #01dd93;
+  color: white;
+}
+
+.btn-info:hover {
+  background: #03c886;
+}
+
+.btn-logout {
+  background: #ef5350;
+  color: white;
+}
+
+.btn-logout:hover {
+  background: #d32f2f;
+}
+
+/* === ANIMACIÓN SUAVE DE APARICIÓN === */
+.welcome-card,
+.user-info,
+.quick-actions {
+  animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 15px;
+  }
+
+  .welcome-card {
+    padding: 25px;
+  }
+
+  .welcome-card h1 {
+    font-size: 1.7rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  button {
+    width: 100%;
+    max-width: 300px;
+  }
+}

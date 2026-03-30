@@ -1,0 +1,309 @@
+/* produccion-rapida.component.css */
+.produccion-container {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.produccion-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  position: relative;
+}
+
+.header-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.produccion-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  flex: 1;
+}
+
+.close-btn {
+  color: white;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
+
+.produccion-content {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.cantidad-section {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.cantidad-field {
+  flex: 1;
+}
+
+.resumen-cantidad {
+  background: #f0f7ff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.total-botellas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1e3c72;
+  font-size: 1.1rem;
+}
+
+.total-botellas mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.verificacion-section {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.verificando-text {
+  margin-top: 12px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.insumos-section {
+  margin: 20px 0;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.insumos-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  color: #2c3e50;
+}
+
+.insumos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.insumo-item {
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+  transition: all 0.2s;
+}
+
+.insumo-item.insuficiente {
+  border-left-color: #f44336;
+  background: #fff5f5;
+}
+
+.insumo-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.insumo-nombre {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.insumo-cantidad {
+  font-weight: 600;
+  color: #1e3c72;
+}
+
+.insumo-stock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stock-bar {
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stock-fill {
+  height: 100%;
+  background: #4caf50;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.insumo-item.insuficiente .stock-fill {
+  background: #f44336;
+}
+
+.stock-text {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.stock-text.sin-stock {
+  color: #f44336;
+}
+
+.stock-text.stock-insuficiente {
+  color: #ff9800;
+}
+
+.stock-text.stock-suficiente {
+  color: #4caf50;
+}
+
+.alerta-insuficiente,
+.alerta-suficiente {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.alerta-insuficiente {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+}
+
+.alerta-suficiente {
+  background: #e8f5e9;
+  border-left: 4px solid #4caf50;
+}
+
+.alerta-content {
+  flex: 1;
+}
+
+.alerta-content strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.alerta-content p {
+  margin: 4px 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.alerta-content ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.sugerencia {
+  margin-top: 8px;
+  font-style: italic;
+  color: #f57c00;
+}
+
+.resumen-final {
+  margin-top: 20px;
+  padding: 16px;
+  background: #e8f0fe;
+  border-radius: 12px;
+}
+
+.resumen-final h3 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #1e3c72;
+}
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.resumen-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  background: white;
+  border-radius: 8px;
+}
+
+.resumen-item .label {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.resumen-item .value {
+  font-weight: 600;
+  color: #1e3c72;
+}
+
+.produccion-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+}
+
+.btn-producir {
+  min-width: 120px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+}
+
+.btn-producir mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.btn-producir:disabled {
+  background: #ccc;
+}
+
+/* Scrollbar personalizado */
+.produccion-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.produccion-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.produccion-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.produccion-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

@@ -1,0 +1,175 @@
+<!-- repartidor-list.component.html - DISEÑO MEJORADO -->
+<div class="repartidor-list-container">
+  <!-- Header mejorado -->
+  <div class="header-container">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">Gestión de Repartidores</h1>
+        <p class="page-subtitle">Administra la información de los repartidores y sus vehículos</p>
+      </div>
+
+      <!-- Botón de agregar -->
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="openAddDialog()" class="add-button">
+          <mat-icon>add</mat-icon>
+          Nuevo Repartidor
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda compacta -->
+  <div class="search-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar repartidores</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Nombre, DNI, teléfono, placa...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Contenedor de tabla responsive -->
+  <div class="table-section">
+    <div class="table-container">
+      
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="loading-spinner">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando repartidores...</p>
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!isLoading" class="table-content">
+        <div class="table-wrapper" #tableWrapper>
+          <table mat-table [dataSource]="dataSource" matSort class="repartidores-table">
+            
+            <!-- Columna Nombre -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-nombre"> 
+                <div class="column-header">Repartidor</div>
+              </th>
+              <td mat-cell *matCellDef="let repartidor" class="column-nombre"> 
+                <div class="repartidor-info">
+                  <div class="repartidor-name">{{repartidor.persona?.nombre_completo || 'Sin nombre'}}</div>
+                  <div class="repartidor-id">ID: {{repartidor.id_repartidor}}</div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Contacto -->
+            <ng-container matColumnDef="contacto">
+              <th mat-header-cell *matHeaderCellDef class="column-contacto"> 
+                <div class="column-header">Contacto</div>
+              </th>
+              <td mat-cell *matCellDef="let repartidor" class="column-contacto"> 
+                <div class="contact-info">
+                  <div class="telefono" *ngIf="repartidor.persona?.telefono">
+                    <mat-icon>phone</mat-icon> {{repartidor.persona.telefono}}
+                  </div>
+                  <div class="documento" *ngIf="repartidor.persona?.numero_documento">
+                    <mat-icon>badge</mat-icon> {{repartidor.persona.numero_documento}}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Vehículo -->
+            <ng-container matColumnDef="vehiculo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-vehiculo"> 
+                <div class="column-header">Vehículo</div>
+              </th>
+              <td mat-cell *matCellDef="let repartidor" class="column-vehiculo"> 
+                <div class="vehicle-info">
+                  <div class="placa" *ngIf="repartidor.placa_furgon">
+                    <mat-icon>directions_car</mat-icon> {{repartidor.placa_furgon}}
+                  </div>
+                  <div class="no-placa" *ngIf="!repartidor.placa_furgon">
+                    <span class="empty-badge">Sin placa</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-estado"> 
+                <div class="column-header">Estado</div>
+              </th>
+              <td mat-cell *matCellDef="let repartidor" class="column-estado"> 
+                <div class="status-info">
+                  <div class="status-badge" [class.active]="repartidor.activo" [class.inactive]="!repartidor.activo">
+                    {{repartidor.activo ? 'Activo' : 'Inactivo'}}
+                  </div>
+                  <div class="contratacion" *ngIf="repartidor.fecha_contratacion">
+                    Contratado: {{formatDate(repartidor.fecha_contratacion)}}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Fecha Registro -->
+            <ng-container matColumnDef="fecha_registro">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-registro"> 
+                <div class="column-header">Registro</div>
+              </th>
+              <td mat-cell *matCellDef="let repartidor" class="column-registro"> 
+                <div class="date-info">
+                  <div class="fecha">{{formatDate(repartidor.fecha_creacion)}}</div>
+                  <div class="antiguedad" *ngIf="calcularAntiguedad(repartidor.fecha_creacion)">
+                    {{calcularAntiguedad(repartidor.fecha_creacion)}}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef class="column-acciones"> 
+                <div class="column-header">Acciones</div>
+              </th>
+              <td mat-cell *matCellDef="let repartidor" class="column-acciones">
+                <div class="action-buttons">
+                  <button mat-icon-button color="primary" 
+                          (click)="openEditDialog(repartidor)" 
+                          matTooltip="Editar repartidor"
+                          class="action-btn edit-btn">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" 
+                          (click)="deleteRepartidor(repartidor)" 
+                          matTooltip="Eliminar repartidor"
+                          class="action-btn delete-btn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                  <button mat-icon-button 
+                          [color]="repartidor.activo ? 'warn' : 'primary'"
+                          (click)="toggleActivo(repartidor)" 
+                          [matTooltip]="repartidor.activo ? 'Desactivar' : 'Activar'"
+                          class="action-btn toggle-btn">
+                    <mat-icon>{{ repartidor.activo ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns" class="data-row"></tr>
+          </table>
+        </div>
+
+        <!-- Paginador -->
+        <mat-paginator [pageSizeOptions]="[5, 10, 20, 50]" 
+                       showFirstLastButtons
+                       aria-label="Seleccionar página de repartidores"
+                       class="custom-paginator">
+        </mat-paginator>
+
+        <!-- Mensaje cuando no hay datos -->
+        <div *ngIf="dataSource.data.length === 0 && !isLoading" class="no-data">
+          <mat-icon class="no-data-icon">local_shipping</mat-icon>
+          <h3>No se encontraron repartidores</h3>
+          <p>Comienza agregando un nuevo repartidor</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,112 @@
+.form-container {
+  position: relative;
+  width: 520px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.dialog-title {
+  margin: 0;
+  padding: 16px 20px 12px;
+  text-align: center;
+  color: #3f51b5;
+  font-size: 1.3em;
+  font-weight: 500;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
+
+.field-small {
+  grid-column: span 1;
+}
+
+.field-medium {
+  grid-column: span 1;
+}
+
+.field-large {
+  grid-column: span 2;
+}
+
+/* Campos ultra compactos */
+.mat-form-field {
+  margin-bottom: 0;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-wrapper {
+  margin-bottom: -1.25em;
+  padding-bottom: 0;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-infix {
+  padding: 0.3em 0;
+  min-height: auto;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-label {
+  top: 1.1em;
+}
+
+.mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label {
+  transform: translateY(-1em) scale(0.75);
+}
+
+.mat-input-element {
+  font-size: 0.85em;
+  padding: 4px 0;
+}
+
+/* Checkbox compacto */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-top: 8px;
+}
+
+.mat-checkbox {
+  font-size: 0.85em;
+}
+
+/* Botones de acción */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+}
+
+.dialog-actions button {
+  min-width: 80px;
+  font-size: 0.9em;
+}
+
+/* Overlay de carga */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Mensajes de error ultra compactos */
+mat-error {
+  font-size: 0.65em;
+  line-height: 1.1;
+  margin-top: 2px;
+}

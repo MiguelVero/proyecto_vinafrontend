@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.register-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Fondo en video */
+.background-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  filter: brightness(0.6);
+}
+
+/* Tarjeta del login */
+.card {
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 45px 35px;
+  width: 100%;
+  max-width: 420px;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeIn 1s ease;
+}
+
+.card-header {
+  margin-bottom: 25px;
+}
+
+.logo {
+  width: 120px;
+  height: auto;
+  margin-top: -3rem;
+  margin-bottom: -2rem;
+  animation: floatLogo 3s ease-in-out infinite;
+}
+
+.card-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: #ffffff;
+}
+
+.subtitle {
+  color: #d9f9ff;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Campos del formulario */
+.form-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: #e3f2fd;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+input {
+  width: 93%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.3);
+}
+
+select {
+  width: 93%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+}
+select:focus {
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.3);
+}
+
+/* Botón principal */
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00aaff, #009688);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0099cc, #00796b);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 150, 200, 0.4);
+}
+
+/* Mensajes */
+.error-message {
+  background: rgba(255, 60, 60, 0.8);
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-weight: 500;
+  color: white;
+}
+
+.loading {
+  margin-top: 20px;
+  color: #aeeaff;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatLogo {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .card {
+    padding: 35px 25px;
+  }
+
+  .card-header h2 {
+    font-size: 1.6rem;
+  }
+}

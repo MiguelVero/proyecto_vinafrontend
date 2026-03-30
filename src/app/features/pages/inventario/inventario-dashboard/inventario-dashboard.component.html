@@ -1,0 +1,217 @@
+<div class="inventario-dashboard-container">
+  <!-- Header compacto -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="header-info">
+        <h1 class="page-title">
+          <mat-icon>dashboard</mat-icon>
+          Dashboard de Inventario
+        </h1>
+        <p class="page-subtitle">Métricas y análisis en tiempo real del almacén</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Métricas Principales Mejoradas -->
+  <div class="main-content-compact">
+    <!-- Estadísticas compactas -->
+    <div class="stats-grid-compact">
+      <div class="stat-card-compact">
+        <div class="stat-icon-compact primary">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="stat-content-compact">
+          <h3 class="stat-number-compact">{{ totalStock }}</h3>
+          <p class="stat-label-compact">UNIDADES TOTALES</p>
+        </div>
+      </div>
+      
+      <div class="stat-card-compact warning" *ngIf="productosStockBajo > 0">
+        <div class="stat-icon-compact warning">
+          <mat-icon>warning</mat-icon>
+        </div>
+        <div class="stat-content-compact">
+          <h3 class="stat-number-compact">{{ productosStockBajo }}</h3>
+          <p class="stat-label-compact">PRODUCTOS BAJO MÍNIMO</p>
+          <small class="stat-trend">Requieren atención</small>
+        </div>
+      </div>
+
+      <div class="stat-card-compact" *ngIf="productosStockBajo === 0">
+        <div class="stat-icon-compact success">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="stat-content-compact">
+          <h3 class="stat-number-compact">0</h3>
+          <p class="stat-label-compact">STOCK OPTIMO</p>
+          <small class="stat-trend">Todos los productos en nivel seguro</small>
+        </div>
+      </div>
+      
+      <div class="stat-card-compact">
+        <div class="stat-icon-compact accent">
+          <mat-icon>local_offer</mat-icon>
+        </div>
+        <div class="stat-content-compact">
+          <h3 class="stat-number-compact">{{ lotesActivos }}</h3>
+          <p class="stat-label-compact">LOTES ACTIVOS</p>
+          <small class="stat-trend">{{ lotesPorCaducar }} por caducar</small>
+        </div>
+      </div>
+
+      <div class="stat-card-compact info">
+        <div class="stat-icon-compact info">
+          <mat-icon>attach_money</mat-icon>
+        </div>
+        <div class="stat-content-compact">
+          <h3 class="stat-number-compact">{{ valorTotalInventario | currency:'PEN':'S/ ' }}</h3>
+          <p class="stat-label-compact">VALOR INVENTARIO</p>
+          <small class="stat-trend">Valor comercial estimado</small>
+        </div>
+      </div>
+
+      <div class="stat-card-compact">
+        <div class="stat-icon-compact secondary">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <div class="stat-content-compact">
+          <h3 class="stat-number-compact">{{ movimientosMes }}</h3>
+          <p class="stat-label-compact">MOVIMIENTOS ESTE MES</p>
+          <small class="stat-trend">Actividad del almacén</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos y Análisis -->
+    <div class="analytics-section">
+      <div class="section-card-compact">
+        <div class="section-header-compact">
+          <div class="section-title-compact">
+            <mat-icon>analytics</mat-icon>
+            <h2>Análisis de Stock</h2>
+          </div>
+        </div>
+        
+        <div class="analytics-grid">
+                <!-- Por esto: -->
+      <div class="analytics-card">
+        <h4>📊 Distribución por Categorías</h4>
+        <div class="chart-container">
+          <canvas baseChart
+                  [data]="pieChartData"
+                  [options]="pieChartOptions"
+                  [type]="pieChartType">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="analytics-card">
+        <h4>📈 Tendencia de Movimientos</h4>
+        <div class="chart-container">
+          <canvas baseChart
+                  [data]="lineChartData"
+                  [options]="lineChartOptions"
+                  [type]="lineChartType">
+          </canvas>
+        </div>
+      </div>
+          
+          <div class="analytics-card">
+            <h4>⏰ Próximas Caducidades</h4>
+            <div class="caducidad-list">
+              <div *ngFor="let lote of lotesProximosCaducar" class="caducidad-item">
+                <span class="lote-numero">{{ lote.numero_lote }}</span>
+                <span class="producto-nombre">{{ lote.producto?.nombre }}</span>
+                <span class="dias-restantes" [class]="getDiasClass(lote.fecha_caducidad)">
+                  {{ calcularDiasParaCaducar(lote.fecha_caducidad) }} días
+                </span>
+              </div>
+              <div *ngIf="lotesProximosCaducar.length === 0" class="sin-caducidades">
+                ✅ No hay lotes próximos a caducar
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones rápidas compactas (MANTENER) -->
+    <div class="section-card-compact">
+      <div class="section-header-compact">
+        <div class="section-title-compact">
+          <mat-icon>flash_on</mat-icon>
+          <h2>Acciones Rápidas</h2>
+        </div>
+      </div>
+
+      <div class="actions-grid-compact">
+        <button (click)="crearMovimientoUnificado()" class="action-btn-compact primary">
+          <div class="action-icon-compact">
+            <mat-icon>add_circle</mat-icon>
+          </div>
+          <div class="action-text-compact">
+            <span class="action-title-compact">Nuevo Movimiento</span>
+            <span class="action-desc-compact">Ingreso/egreso de stock</span>
+          </div>
+        </button>
+
+        <button (click)="goToReportes()" class="action-btn-compact accent">
+          <div class="action-icon-compact">
+            <mat-icon>assessment</mat-icon>
+          </div>
+          <div class="action-text-compact">
+            <span class="action-title-compact">Ver Reportes</span>
+            <span class="action-desc-compact">Análisis detallados</span>
+          </div>
+        </button>
+
+        <button (click)="goToProductos()" class="action-btn-compact primary">
+          <div class="action-icon-compact">
+            <mat-icon>shopping_cart</mat-icon>
+          </div>
+          <div class="action-text-compact">
+            <span class="action-title-compact">Catálogo Productos</span>
+            <span class="action-desc-compact">Gestionar productos</span>
+          </div>
+        </button>
+
+        <button (click)="goToProveedores()" class="action-btn-compact accent">
+          <div class="action-icon-compact">
+            <mat-icon>business</mat-icon>
+          </div>
+          <div class="action-text-compact">
+            <span class="action-title-compact">Proveedores</span>
+            <span class="action-desc-compact">Gestión de suministros</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Estado del sistema -->
+    <div class="status-section">
+      <div *ngIf="tieneAlertasCriticas()" class="alertas-container">
+        <h3>⚠️ Alertas del Sistema</h3>
+        <div *ngFor="let alerta of getAlertasCriticas()" class="alerta-item">
+          <mat-icon>{{ getAlertaIcon(alerta) }}</mat-icon>
+          <div class="alerta-content">
+            <strong>{{ alerta.titulo }}</strong>
+            <p>{{ alerta.mensaje }}</p>
+          </div>
+          <button (click)="resolverAlerta(alerta)" class="btn-alerta">
+            {{ alerta.accion }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="!tieneAlertasCriticas()" class="status-card-compact success">
+        <div class="status-content">
+          <mat-icon>check_circle</mat-icon>
+          <div class="status-text">
+            <h4>Sistema en Óptimas Condiciones</h4>
+            <p>Todo el inventario está bajo control y no hay alertas críticas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

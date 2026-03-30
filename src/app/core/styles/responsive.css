@@ -1,0 +1,156 @@
+/* === UTILIDADES RESPONSIVE GLOBALES === */
+
+/* Breakpoints estándar */
+:root {
+  --breakpoint-xs: 320px;    /* iPhone SE */
+  --breakpoint-sm: 375px;    /* iPhone XR, 12 */
+  --breakpoint-md: 414px;    /* iPhone 14 Pro Max */
+  --breakpoint-lg: 768px;    /* iPad Mini */
+  --breakpoint-xl: 1024px;   /* iPad Pro */
+  --breakpoint-xxl: 1280px;  /* Laptops */
+  --breakpoint-xxxl: 1440px; /* Monitores grandes */
+  
+  /* Colores responsive */
+  --responsive-bg: #ffffff;
+  --responsive-surface: #f8f9fa;
+  --responsive-primary: #057cbe;
+  --responsive-secondary: #009949;
+}
+
+/* Mixins responsive (simulados con clases) */
+.responsive-container {
+  width: 100%;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Grid responsive */
+.responsive-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+
+/* Flex responsive */
+.responsive-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Texto responsive */
+.responsive-text {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  line-height: 1.5;
+}
+
+.responsive-heading-1 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+}
+
+.responsive-heading-2 {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-weight: 600;
+}
+
+.responsive-heading-3 {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  font-weight: 600;
+}
+
+/* Botones responsive */
+.responsive-button {
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  min-height: 44px; /* Tamaño mínimo táctil */
+  min-width: 44px;  /* Tamaño mínimo táctil */
+}
+
+/* Tablas responsive */
+.responsive-table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Cards responsive */
+.responsive-card {
+  background: var(--responsive-bg);
+  border-radius: clamp(8px, 2vw, 12px);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Inputs responsive */
+.responsive-input {
+  font-size: 16px !important; /* Evita zoom en iOS */
+  padding: 0.75rem;
+  min-height: 44px;
+}
+
+/* Safe area para dispositivos con muescas */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Orientación */
+@media (orientation: landscape) {
+  .landscape-hide {
+    display: none !important;
+  }
+  
+  .landscape-show {
+    display: block !important;
+  }
+}
+
+@media (orientation: portrait) {
+  .portrait-hide {
+    display: none !important;
+  }
+  
+  .portrait-show {
+    display: block !important;
+  }
+}
+
+/* Foldables (Galaxy Z Fold, Surface Duo) */
+@media (screen-spanning: single-fold-vertical) {
+  .foldable-column {
+    width: 50vw !important;
+  }
+}
+
+/* Dispositivos muy pequeños */
+@media (max-width: 320px) {
+  .tiny-device {
+    font-size: 0.8rem;
+  }
+  
+  .tiny-device .button {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Dispositivos grandes (Nest Hub) */
+@media (min-width: 1280px) and (max-height: 800px) {
+  .smart-display {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}

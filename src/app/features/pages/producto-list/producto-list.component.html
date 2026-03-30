@@ -1,0 +1,191 @@
+<!-- producto-list.component.html - DISEÑO MEJORADO -->
+<div class="producto-list-container">
+  <!-- Header mejorado -->
+  <div class="header-container">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">Gestión de Productos</h1>
+        
+        <!-- ✅ Indicador para vendedores -->
+        <div class="vendedor-notice" *ngIf="isVendedor">
+          <mat-icon>visibility</mat-icon>
+          <span>Vista de solo lectura - Módulo de ventas</span>
+        </div>
+      </div>
+
+      <!-- ✅ Botón de agregar -->
+      <div class="header-actions" *ngIf="canEdit()">
+        <button mat-raised-button color="primary" (click)="openAddDialog()" class="add-button">
+          <mat-icon>add</mat-icon>
+          Nuevo Producto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda compacta -->
+  <div class="search-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar productos</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Nombre, descripción...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Contenedor de tabla responsive -->
+  <div class="table-section">
+    <div class="table-container">
+      
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="loading-spinner">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando productos...</p>
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!isLoading" class="table-content">
+        <div class="table-wrapper" #tableWrapper>
+          <table mat-table [dataSource]="dataSource" matSort class="products-table">
+            
+            <!-- Columna Nombre -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-nombre"> 
+                <div class="column-header">Nombre</div>
+              </th>
+              <td mat-cell *matCellDef="let product" class="column-nombre"> 
+                <div class="product-name">{{product.nombre}}</div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Descripción (oculta en móviles) -->
+            <ng-container matColumnDef="descripcion">
+              <th mat-header-cell *matHeaderCellDef class="column-descripcion"> 
+                <div class="column-header">Descripción</div>
+              </th>
+              <td mat-cell *matCellDef="let product" class="column-descripcion"> 
+                <div class="product-desc">{{product.descripcion || 'Sin descripción'}}</div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Precio -->
+            <ng-container matColumnDef="precio">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-precio"> 
+                <div class="column-header">Precio</div>
+              </th>
+              <td mat-cell *matCellDef="let product" class="column-precio"> 
+                <div class="price">S/ {{product.precio | number:'1.2-2'}}</div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Stock -->
+            <ng-container matColumnDef="stock">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-stock"> 
+                <div class="column-header">Stock</div>
+              </th>
+              <td mat-cell *matCellDef="let product" class="column-stock"> 
+                <div class="stock-info" 
+                     [class.low-stock]="product.stock < 10"
+                     [class.no-stock]="product.stock === 0">
+                  {{product.stock}}
+                  <span *ngIf="product.stock === 0" class="stock-badge">Agotado</span>
+                  <span *ngIf="product.stock > 0 && product.stock < 10" class="stock-badge warning">Bajo</span>
+                </div>
+              </td>
+            </ng-container>
+
+                    <!-- Columna Stock Mínimo (NUEVA) -->
+          <ng-container matColumnDef="stockMinimo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-stock-minimo"> 
+              <div class="column-header">Stock Mínimo</div>
+            </th>
+            <td mat-cell *matCellDef="let product" class="column-stock-minimo"> 
+              <div class="stock-minimo-info" 
+                  [class.bajo-minimo]="product.stock < product.stockMinimo"
+                  [class.sin-stock]="product.stock === 0">
+                {{product.stockMinimo}}
+                <span *ngIf="product.stock < product.stockMinimo && product.stock > 0" class="min-badge warning">
+                  <mat-icon class="badge-icon">warning</mat-icon> Bajo mínimo
+                </span>
+                <span *ngIf="product.stock === 0 && product.stockMinimo > 0" class="min-badge danger">
+                  <mat-icon class="badge-icon">error</mat-icon> Sin stock
+                </span>
+              </div>
+            </td>
+          </ng-container>
+            <!-- Columna Categoría (oculta en tablets) -->
+            <ng-container matColumnDef="categoria">
+              <th mat-header-cell *matHeaderCellDef class="column-categoria"> 
+                <div class="column-header">Categoría</div>
+              </th>
+              <td mat-cell *matCellDef="let product" class="column-categoria"> 
+                <div class="category">{{product.categoriaNombre}}</div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Marca (oculta en tablets) -->
+            <ng-container matColumnDef="marca">
+              <th mat-header-cell *matHeaderCellDef class="column-marca"> 
+                <div class="column-header">Marca</div>
+              </th>
+              <td mat-cell *matCellDef="let product" class="column-marca"> 
+                <div class="brand">{{product.marcaNombre}}</div>
+              </td>
+            </ng-container>
+
+
+            <!-- Columna País Origen (oculta en móviles) -->
+            <ng-container matColumnDef="paisOrigen">
+              <th mat-header-cell *matHeaderCellDef class="column-pais"> 
+                <div class="column-header">País</div>
+              </th>
+              <td mat-cell *matCellDef="let product" class="column-pais"> 
+                <div class="country">{{product.paisOrigenNombre}}</div>
+              </td>
+            </ng-container>
+
+            <!-- ✅ COLUMNA ACCIONES - SOLO PARA NO VENDEDORES -->
+            <ng-container matColumnDef="acciones" *ngIf="canEdit()">
+              <th mat-header-cell *matHeaderCellDef class="column-acciones"> 
+                <div class="column-header">Acciones</div>
+              </th>
+              <td mat-cell *matCellDef="let product" class="column-acciones">
+                <div class="action-buttons">
+                  <button mat-icon-button color="primary" 
+                          (click)="openEditDialog(product)" 
+                          matTooltip="Editar producto"
+                          class="action-btn">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" 
+                          (click)="deleteProduct(product)" 
+                          matTooltip="Eliminar producto"
+                          class="action-btn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns" class="data-row"></tr>
+          </table>
+        </div>
+
+        <!-- Paginador -->
+        <mat-paginator [pageSizeOptions]="[5, 10, 20, 50]" 
+                       showFirstLastButtons
+                       aria-label="Seleccionar página de productos"
+                       class="custom-paginator">
+        </mat-paginator>
+
+        <!-- Mensaje cuando no hay datos -->
+        <div *ngIf="dataSource.data.length === 0 && !isLoading" class="no-data">
+          <mat-icon class="no-data-icon">inventory_2</mat-icon>
+          <h3>No se encontraron productos</h3>
+          <p *ngIf="canEdit()">Comienza agregando un nuevo producto</p>
+          <p *ngIf="!canEdit()">No hay productos disponibles para mostrar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

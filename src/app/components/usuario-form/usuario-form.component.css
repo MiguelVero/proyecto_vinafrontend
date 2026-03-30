@@ -1,0 +1,35 @@
+.form-actions { display:flex; gap:8px; margin-top:12px; }
+mat-form-field { display:block; margin-bottom:8px; }
+
+/* Limpiar button style (consistente con Ventas) */
+.limpiar-button {
+	background-color: #009949 !important;
+	color: #fff !important;
+	border-radius: 6px !important;
+	padding: 8px 12px !important;
+	font-weight: 600;
+}
+.limpiar-button:hover {
+	background-color: #008040 !important;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0,153,73,0.18);
+}
+
+.form-actions {
+	display: flex;
+	gap: 12px;
+	margin-top: 16px;
+	justify-content: flex-end;
+}
+
+::ng-deep .limpiar-button {
+	background-color: #009949 !important;
+	color: white !important;
+	border-radius: 8px !important;
+}
+
+::ng-deep .limpiar-button:hover {
+	background-color: #008040 !important;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0, 153, 73, 0.3) !important;
+}

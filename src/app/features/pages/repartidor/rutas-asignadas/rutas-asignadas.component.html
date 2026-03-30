@@ -1,0 +1,82 @@
+<!-- src/app/features/pages/repartidor/rutas-asignadas/rutas-asignadas.component.html -->
+<div class="repartidor-container">
+  <div class="header">
+    <h1><i class="fas fa-route"></i> Mis Rutas Asignadas</h1>
+    <p>Gestiona tus entregas programadas</p>
+  </div>
+
+  <div class="loading-section" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando rutas asignadas...</p>
+  </div>
+
+  <div class="error-section" *ngIf="error && !loading">
+    <div class="alert alert-error">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ error }}
+    </div>
+    <button class="btn btn-primary" (click)="cargarVentasAsignadas()">
+      <i class="fas fa-redo"></i> Reintentar
+    </button>
+  </div>
+
+  <div class="ventas-list" *ngIf="!loading && !error">
+    <div class="venta-card" *ngFor="let venta of ventas" (click)="verDetalleVenta(venta.id_venta)">
+      <div class="venta-header">
+        <div class="venta-info">
+          <h3>Entrega #{{ venta.id_venta }}</h3>
+          <span class="badge" [ngClass]="getEstadoBadgeClass(venta.estado)">
+            {{ venta.estado }}
+          </span>
+          <span *ngIf="isRutaIniciada(venta)" class="badge badge-success">
+            <i class="fas fa-play-circle"></i> Ruta Iniciada
+          </span>
+        </div>
+        <div class="venta-fecha">
+          <small>{{ venta.fecha }} {{ venta.hora }}</small>
+          <!-- En rutas-asignadas.component.html - línea corregida -->
+          <small *ngIf="venta.fecha_inicio_ruta" class="text-success">
+            <br><i class="fas fa-clock"></i> Iniciada: {{ formatearFechaInicio(venta.fecha_inicio_ruta) }}
+          </small>
+        </div>
+      </div>
+
+      <div class="venta-body">
+        <div class="cliente-info">
+          <h4>{{ venta.nombre_completo }}</h4>
+          <p *ngIf="venta.razon_social"><strong>Razón Social:</strong> {{ venta.razon_social }}</p>
+          <p><i class="fas fa-phone"></i> {{ venta.telefono }}</p>
+          <p><i class="fas fa-map-marker-alt"></i> {{ venta.direccion }}</p>
+        </div>
+
+        <div class="venta-details">
+          <p><strong>Total:</strong> S/ {{ venta.total }}</p>
+          <p><strong>Método de pago:</strong> {{ venta.metodo_pago }}</p>
+        </div>
+      </div>
+
+      <div class="venta-actions">
+        <button class="btn btn-sm" 
+        [ngClass]="getClaseBoton(venta)"
+        (click)="iniciarEntrega(venta.id_venta, $event)"
+        [disabled]="isRutaIniciada(venta)"
+        [title]="getTooltipUbicacion(venta)">
+  <i class="fas" [ngClass]="getIconoBoton(venta)"></i> 
+  {{ getTextoBoton(venta) }}
+  <span *ngIf="!isRutaIniciada(venta)" class="gps-indicator">
+    <i class="fas fa-map-marker-alt"></i>
+  </span>
+</button>
+        <button class="btn btn-info btn-sm" (click)="verDetalleVenta(venta.id_venta); $event.stopPropagation()">
+          <i class="fas fa-eye"></i> Ver Detalles
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="ventas.length === 0">
+      <i class="fas fa-route fa-3x"></i>
+      <h3>No tienes rutas asignadas</h3>
+      <p>Las rutas asignadas aparecerán aquí cuando te sean asignadas.</p>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,193 @@
+<!-- persona-list.component.html - DISEÑO MEJORADO -->
+<div class="persona-list-container">
+  <!-- Header mejorado -->
+  <div class="header-container">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">Gestión de Personas</h1>
+        <p class="page-subtitle">Administra la información de personas, clientes y usuarios del sistema</p>
+      </div>
+
+      <!-- Botón de crear persona -->
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="addPersona()" class="add-button">
+          <mat-icon>add</mat-icon>
+          Crear Persona
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda compacta -->
+  <div class="search-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar personas</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Nombre, documento, teléfono...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="filter-right">
+      <mat-form-field appearance="outline" class="page-size-field">
+        <mat-label>Mostrar</mat-label>
+        <mat-select [(value)]="pageSize" (selectionChange)="changePageSize($event.value)">
+          <mat-option [value]="5">5</mat-option>
+          <mat-option [value]="10">10</mat-option>
+          <mat-option [value]="20">20</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <span class="total-count">de {{ getTotalPersonas() }} personas</span>
+    </div>
+  </div>
+
+  <!-- Contenedor de tabla responsive -->
+  <div class="table-section">
+    <div class="table-container">
+      
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="loading-spinner">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando personas...</p>
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!isLoading" class="table-content">
+        <div class="table-wrapper" #tableWrapper>
+          <table mat-table [dataSource]="dataSource" matSort class="personas-table">
+            
+            <!-- Columna ID -->
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef class="column-id"> 
+                <div class="column-header">ID</div>
+              </th>
+              <td mat-cell *matCellDef="let persona" class="column-id"> 
+                <div class="persona-id">{{ persona.id_persona }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Documento -->
+            <ng-container matColumnDef="documento">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-documento"> 
+                <div class="column-header">Documento</div>
+              </th>
+              <td mat-cell *matCellDef="let persona" class="column-documento"> 
+                <div class="documento-info">
+                  <div class="numero-documento">{{ persona.numero_documento }}</div>
+                  <div class="tipo-documento" *ngIf="getTipoDocumento(persona.numero_documento)">
+                    {{ getTipoDocumento(persona.numero_documento) }}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Información Personal -->
+            <ng-container matColumnDef="informacion">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-informacion"> 
+                <div class="column-header">Información Personal</div>
+              </th>
+              <td mat-cell *matCellDef="let persona" class="column-informacion"> 
+                <div class="persona-info">
+                  <div class="nombre-completo">{{ persona.nombre_completo }}</div>
+                  <div class="contacto" *ngIf="persona.telefono">
+                    <mat-icon>phone</mat-icon> {{ persona.telefono }}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Dirección -->
+            <ng-container matColumnDef="direccion">
+              <th mat-header-cell *matHeaderCellDef class="column-direccion"> 
+                <div class="column-header">Dirección</div>
+              </th>
+              <td mat-cell *matCellDef="let persona" class="column-direccion"> 
+                <div class="direccion-info">
+                  <div class="direccion-texto" *ngIf="persona.direccion">
+                    <mat-icon>location_on</mat-icon> {{ persona.direccion }}
+                  </div>
+                  <div class="sin-direccion" *ngIf="!persona.direccion">
+                    <span class="empty-badge">Sin dirección</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Contacto -->
+            <ng-container matColumnDef="contacto">
+              <th mat-header-cell *matHeaderCellDef class="column-contacto"> 
+                <div class="column-header">Contacto</div>
+              </th>
+              <td mat-cell *matCellDef="let persona" class="column-contacto"> 
+                <div class="contacto-info">
+                  <div class="telefono" *ngIf="persona.telefono">
+                    <div class="contacto-item">
+                      <mat-icon>phone</mat-icon>
+                      <span>{{ persona.telefono }}</span>
+                    </div>
+                  </div>
+                  <div class="email" *ngIf="persona.email">
+                    <div class="contacto-item">
+                      <mat-icon>email</mat-icon>
+                      <span>{{ persona.email }}</span>
+                    </div>
+                  </div>
+                  <div class="sin-contacto" *ngIf="!persona.telefono && !persona.email">
+                    <span class="empty-badge">Sin contacto</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef class="column-acciones"> 
+                <div class="column-header">Acciones</div>
+              </th>
+              <td mat-cell *matCellDef="let persona" class="column-acciones">
+                <div class="action-buttons">
+                  <button mat-icon-button color="primary" 
+                          (click)="editPersona(persona)" 
+                          matTooltip="Editar persona"
+                          class="action-btn edit-btn">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" 
+                          (click)="deletePersona(persona)" 
+                          matTooltip="Eliminar persona"
+                          class="action-btn delete-btn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns" class="data-row"></tr>
+          </table>
+        </div>
+
+        <!-- Navegación personalizada (solo botones adelante/atrás) -->
+        <div class="custom-navigation" *ngIf="!isLoading && getTotalPersonas.length > 0">
+          <div class="nav-info">
+            <span>Mostrando {{getStartIndex() + 1}} - {{getEndIndex()}} de {{getTotalFiltered()}} personas</span>
+          </div>
+          <div class="nav-buttons">
+            <button mat-icon-button (click)="previousPage()" [disabled]="!hasPreviousPage()" class="nav-btn">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button mat-icon-button (click)="nextPage()" [disabled]="!hasNextPage()" class="nav-btn">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </div>
+
+          <!-- Mensaje cuando no hay datos -->
+        <div *ngIf="dataSource.data.length === 0 && !isLoading" class="no-data">
+          <mat-icon class="no-data-icon">people</mat-icon>
+          <h3>No se encontraron usuarios</h3>
+          <p *ngIf="authService.isAdmin()">Comienza creando un nuevo usuario</p>
+          <p *ngIf="!authService.isAdmin()">No hay usuarios disponibles para mostrar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

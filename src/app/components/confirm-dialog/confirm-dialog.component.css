@@ -1,0 +1,133 @@
+.confirm-dialog {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 350px;
+  max-width: 500px;
+}
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dialog-title.warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border-bottom-color: #ffeaa7;
+}
+
+.dialog-title.info {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border-bottom-color: #bbdefb;
+}
+
+.dialog-title.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-bottom-color: #c8e6c9;
+}
+
+.dialog-title.primary {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+  border-bottom-color: #e1bee7;
+}
+
+.title-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.dialog-title.warning .title-icon {
+  color: #f39c12;
+}
+
+.dialog-title.info .title-icon {
+  color: #2196f3;
+}
+
+.dialog-title.success .title-icon {
+  color: #4caf50;
+}
+
+.dialog-title.primary .title-icon {
+  color: #9c27b0;
+}
+
+.dialog-content {
+  padding: 24px;
+  margin: 0;
+  font-size: 15px;
+  color: #495057;
+  line-height: 1.5;
+  background-color: white;
+}
+
+.dialog-content p {
+  margin: 0 0 12px 0;
+}
+
+.dialog-content p:last-child {
+  margin-bottom: 0;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.cancel-btn {
+  color: #6c757d;
+  font-weight: 500;
+  padding: 8px 20px;
+}
+
+.confirm-btn {
+  font-weight: 500;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .confirm-dialog {
+    min-width: 280px;
+    max-width: 90vw;
+  }
+  
+  .dialog-title {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
+
+  .dialog-content {
+    padding: 20px;
+    font-size: 14px;
+  }
+
+  .dialog-actions {
+    padding: 16px 20px;
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .confirm-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

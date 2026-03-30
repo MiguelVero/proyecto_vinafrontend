@@ -1,0 +1,24 @@
+<div class="confirm-dialog">
+  <!-- Título dinámico -->
+  <h2 class="dialog-title" [class]="getTitleClass()">
+    <mat-icon class="title-icon" *ngIf="data.showIcon">{{ data.icon }}</mat-icon>
+    {{ data.title }}
+  </h2>
+
+  <!-- Contenido -->
+  <div class="dialog-content" [innerHTML]="data.message"></div>
+
+  <!-- Acciones -->
+  <div class="dialog-actions">
+    <button mat-button (click)="onCancel()" class="cancel-btn">
+      {{ data.cancelText }}
+    </button>
+    <button mat-raised-button 
+            [color]="data.confirmColor" 
+            (click)="onConfirm()" 
+            class="confirm-btn">
+      <mat-icon>{{ getConfirmIcon() }}</mat-icon>
+      {{ data.confirmText }}
+    </button>
+  </div>
+</div>

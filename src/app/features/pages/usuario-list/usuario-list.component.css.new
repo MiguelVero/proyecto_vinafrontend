@@ -1,0 +1,233 @@
+/* === ⚙️ ESTILO GENERAL === */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+.container {
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* === 🏷️ ENCABEZADO === */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-bottom: 6px;
+  border-bottom: 1.25px solid #c5e1a5;
+}
+
+.page-header h2 {
+  margin: 0;
+  color: #1b5e20;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.page-header button {
+  background-color: #43a047 !important;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 5px 16px;
+  transition: 0.2s;
+}
+
+.page-header button:hover {
+  background-color: #2e7d32 !important;
+  transform: translateY(-2px);
+}
+
+/* === 🔍 FILTRO === */
+.filter-bar {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-left {
+  width: 100%;
+  max-width: 420px;
+}
+
+.filter-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.total-count {
+  font-weight: 500;
+  color: #1b5e20;
+  font-size: 0.9rem;
+}
+
+/* === 📋 TABLA === */
+.table-container {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(27, 94, 32, 0.1);
+}
+
+table {
+  width: 100%;
+}
+
+::ng-deep th.mat-mdc-header-cell {
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  padding: 15px 12px;
+}
+
+::ng-deep td.mat-mdc-cell {
+  color: #333;
+  font-size: 14px;
+  padding: 12px;
+}
+
+::ng-deep tr:nth-child(even) td {
+  background: #f6fdf7;
+}
+
+::ng-deep tr:hover td {
+  background: #edf7ee;
+}
+
+/* === ⏳ LOADING === */
+.loading-shade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(249, 252, 249, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loading-shade p {
+  margin-top: 12px;
+  color: #1b5e20;
+  font-weight: 500;
+}
+
+/* === ⚙️ ACCIONES === */
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.actions button {
+  background-color: #43a047 !important;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 5px 16px;
+  transition: 0.2s;
+}
+
+.actions button:hover {
+  background-color: #2e7d32 !important;
+  transform: translateY(-2px);
+}
+
+.actions-container {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+::ng-deep button[mat-icon-button] {
+  transition: 0.2s ease;
+}
+
+::ng-deep button[mat-icon-button]:hover {
+  transform: scale(1.1);
+}
+
+/* === 🔘 PAGINADOR === */
+::ng-deep .mat-mdc-paginator-container {
+  background: #e8f5e9;
+  border-top: 2px solid #c8e6c9;
+  border-radius: 0 0 8px 8px;
+  padding: 8px 16px;
+}
+
+::ng-deep .mat-mdc-paginator-container button {
+  color: #1b5e20 !important;
+}
+
+::ng-deep .mat-mdc-paginator-container button:hover {
+  color: #43a047 !important;
+}
+
+/* === 🧾 N/A TEXT === */
+td:empty:before {
+  content: "N/A";
+  color: #9e9e9e;
+  font-style: italic;
+}
+
+/* === 🎚️ SCROLL PERSONALIZADO === */
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f8e9;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #a5d6a7;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #81c784;
+}
+
+/* === 📱 RESPONSIVE === */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .page-header h2 {
+    text-align: center;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-left {
+    max-width: 100%;
+  }
+
+  .actions-container {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

@@ -1,0 +1,138 @@
+<!-- src/app/features/pages/repartidor/entregas-pendientes/entregas-pendientes.component.html -->
+<div class="repartidor-container">
+  <div class="header">
+    <h1><i class="fas fa-truck-loading"></i> Entregas Pendientes</h1>
+    <p>Gestiona tus entregas en curso</p>
+  </div>
+
+  <div class="loading-section" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando entregas pendientes...</p>
+  </div>
+
+  <div class="error-section" *ngIf="error && !loading">
+    <div class="alert alert-error">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ error }}
+    </div>
+    <button class="btn btn-primary" (click)="cargarEntregasPendientes()">
+      <i class="fas fa-redo"></i> Reintentar
+    </button>
+  </div>
+
+  <div class="entregas-list" *ngIf="!loading && !error">
+    <div class="entrega-card" *ngFor="let entrega of entregas">
+      <div class="entrega-header">
+        <div class="entrega-info">
+          <h3>Entrega #{{ entrega.id_venta }}</h3>
+          <span class="badge" [ngClass]="getEstadoBadgeClass(entrega.estado)">
+            {{ entrega.estado }}
+          </span>
+          <span *ngIf="isRutaIniciada(entrega)" class="badge badge-info">
+            <i class="fas fa-clock"></i> 
+            {{ calcularTiempoTranscurrido(entrega.fecha_inicio_ruta) }}
+          </span>
+        </div>
+        <div class="entrega-fecha">
+          <small>{{ entrega.fecha }} {{ entrega.hora }}</small>
+          <small *ngIf="entrega.fecha_inicio_ruta" class="text-info">
+            <br><i class="fas fa-play-circle"></i> Iniciada: {{ formatearFechaHora(entrega.fecha_inicio_ruta) }}
+          </small>
+        </div>
+      </div>
+
+      <!-- SOLO UNA sección de estado de ruta - ELIMINAR LA DUPLICADA -->
+      <div class="ruta-estado-section">
+        <div class="ruta-estado" *ngIf="isRutaIniciada(entrega); else rutaNoIniciada">
+          <span class="badge badge-success">
+            <i class="fas fa-play-circle"></i> Ruta Iniciada
+          </span>
+          <small>Iniciada: {{ formatearFechaHora(entrega.fecha_inicio_ruta) }}</small>
+          <small *ngIf="entrega.ubicacion_inicio_ruta" class="text-muted">
+            | <i class="fas fa-map-marker-alt"></i> {{ entrega.ubicacion_inicio_ruta }}
+          </small>
+        </div>
+
+        <ng-template #rutaNoIniciada>
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Ruta no iniciada</strong>
+            <p>Para gestionar esta entrega, primero debe iniciar la ruta desde "Mis Rutas Asignadas".</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="entrega-body">
+        <div class="cliente-info">
+          <h4>{{ entrega.nombre_completo }}</h4>
+          <p *ngIf="entrega.razon_social"><strong>Razón Social:</strong> {{ entrega.razon_social }}</p>
+          <p><i class="fas fa-phone"></i> {{ entrega.telefono }}</p>
+          <p><i class="fas fa-map-marker-alt"></i> {{ entrega.direccion }}</p>
+          <p *ngIf="entrega.notas"><strong>Notas:</strong> {{ entrega.notas }}</p>
+        </div>
+
+        <div class="entrega-details">
+          <p><strong>Total a cobrar:</strong> S/ {{ entrega.total }}</p>
+          <p><strong>Método de pago:</strong> {{ entrega.metodo_pago }}</p>
+        </div>
+      </div>
+
+     <!-- REEMPLAZAR la sección de acciones con esta versión mejorada -->
+<div class="entrega-actions">
+  <!-- Botón de Cambiar Método de Pago - SOLO cuando ruta está iniciada -->
+  <button class="btn btn-warning" 
+          (click)="cambiarMetodoPago(entrega.id_venta)"
+          *ngIf="isRutaIniciada(entrega)"
+          [title]="'Cambiar método de pago'">
+    <i class="fas fa-exchange-alt"></i> Cambiar Pago
+  </button>
+  
+  <!-- Botón de Marcar como Pagado - SOLO cuando ruta está iniciada -->
+  <button class="btn btn-success" 
+          (click)="marcarComoEntregado(entrega.id_venta)"
+          *ngIf="isRutaIniciada(entrega)"
+          [title]="'Marcar entrega como completada y pagada'">
+    <i class="fas fa-check-circle"></i> Marcar como Pagado
+  </button>
+  
+  <!-- Botón de Cancelar Entrega - SIEMPRE disponible -->
+  <button class="btn btn-danger" 
+          (click)="marcarComoCancelado(entrega.id_venta)"
+          [title]="'Cancelar esta entrega'">
+    <i class="fas fa-times-circle"></i> Cancelar Entrega
+  </button>
+  
+  <!-- Botón de Iniciar Ruta - SOLO cuando ruta NO está iniciada -->
+  <button class="btn btn-primary" 
+          *ngIf="!isRutaIniciada(entrega)"
+          (click)="irARutasAsignadas()"
+          [title]="'Iniciar ruta desde Mis Rutas Asignadas'">
+    <i class="fas fa-play-circle"></i> Iniciar Ruta
+  </button>
+  
+<!-- En entregas-pendientes.component.html -->
+<div class="mapa-actions">
+  <button class="btn btn-info" 
+          (click)="abrirMapa(entrega.direccion, entrega.coordenadas)">
+    <i class="fas fa-map"></i> Ver en Mapa
+  </button>
+  <button class="btn btn-outline-info" 
+          (click)="copiarDireccion(entrega.direccion)">
+    <i class="fas fa-copy"></i> Copiar Dirección
+  </button>
+</div>
+  
+  <!-- Botón de Ver Detalles - SIEMPRE disponible -->
+  <button class="btn btn-secondary" (click)="verDetalleVenta(entrega.id_venta)">
+    <i class="fas fa-eye"></i> Ver Detalles
+  </button>
+</div>
+    </div>
+
+    <div class="empty-state" *ngIf="entregas.length === 0">
+      <i class="fas fa-check-circle fa-3x"></i>
+      <h3>No hay entregas pendientes</h3>
+      <p>¡Excelente trabajo! No tienes entregas pendientes en este momento.</p>
+    </div>
+  </div>
+</div>

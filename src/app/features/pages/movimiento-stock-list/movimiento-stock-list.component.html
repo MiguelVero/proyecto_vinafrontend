@@ -1,0 +1,298 @@
+<!-- movimiento-stock-list.component.html - VERSIÓN PROFESIONAL -->
+<div class="professional-container">
+  <!-- Header Mejorado -->
+  <div class="professional-header">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="header-icon">swap_vert</mat-icon>
+        <div class="title-text">
+          <h1>Movimientos de Stock</h1>
+          <p class="subtitle">Registro completo de ingresos, egresos y ajustes de inventario</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-number">{{ dataSource.data.length }}</span>
+          <span class="stat-label">Movimientos Totales</span>
+        </div>
+        <div class="stat-item primary">
+          <span class="stat-number">{{ getMovimientosHoy().length }}</span>
+          <span class="stat-label">Hoy</span>
+        </div>
+        <div class="stat-item success">
+          <span class="stat-number">{{ getIngresosMes().length }}</span>
+          <span class="stat-label">Ingresos Mes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel de Control -->
+  <div class="control-panel">
+    <div class="search-section">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar movimientos...</mat-label>
+        <input matInput (keyup)="applyFilter($event)" 
+               placeholder="Buscar por producto, lote, descripción...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+    <div class="filters-section">
+      <button mat-stroked-button (click)="toggleFiltrosAvanzados()" class="filter-btn">
+        <mat-icon>filter_list</mat-icon>
+        Filtros Avanzados
+      </button>
+      
+      
+      <div class="filtros-avanzados" *ngIf="mostrarFiltrosAvanzados">
+        <!-- En movimiento-stock-list.component.html - Modificar el mat-select -->
+          <mat-form-field appearance="outline" class="filter-select">
+            <mat-label>Tipo de Movimiento</mat-label>
+            <mat-select (selectionChange)="aplicarFiltroTipo($event.value)" 
+                        [value]="filtroActivo.tipos" multiple>
+              <mat-option value="ingreso">Ingreso</mat-option>
+              <mat-option value="egreso">Egreso</mat-option>
+              <mat-option value="ajuste">Ajuste</mat-option>
+              <mat-option value="devolucion">Devolución</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-select">
+          <mat-label>Rango de Fechas</mat-label>
+          <!-- En el mat-date-range-input -->
+          <mat-date-range-input [rangePicker]="picker">
+            <input matStartDate placeholder="Fecha inicio" (dateChange)="aplicarFiltroFecha()" #startDate>
+            <input matEndDate placeholder="Fecha fin" (dateChange)="aplicarFiltroFecha()" #endDate>
+          </mat-date-range-input>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+
+        <button mat-button color="warn" (click)="limpiarFiltros()" class="clear-filters">
+          <mat-icon>clear</mat-icon>
+          Limpiar
+        </button>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Resumen Rápido -->
+  <div class="quick-stats" *ngIf="dataSource.data.length > 0">
+    <div class="stat-card">
+      <div class="stat-icon success">
+        <mat-icon>trending_up</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ getTotalIngresos() }}</span>
+        <span class="stat-label1">Total Ingresos</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon danger">
+        <mat-icon>trending_down</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ getTotalEgresos() }}</span>
+        <span class="stat-label1">Total Egresos</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon warning">
+        <mat-icon>auto_graph</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ getPromedioDiario() }}</span>
+        <span class="stat-label1">Promedio Diario</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon info">
+        <mat-icon>today</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ getMovimientosHoy().length }}</span>
+        <span class="stat-label1">Hoy</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla Mejorada -->
+  <div class="table-wrapper">
+    <div class="table-header">
+      <div class="results-info">
+        <span class="results-count">
+          Mostrando {{ dataSource.filteredData.length }} de {{ dataSource.data.length }} movimientos
+        </span>
+        <span class="results-summary" *ngIf="dataSource.filteredData.length > 0">
+          • Balance: 
+          <span [class]="getBalanceTotal() >= 0 ? 'positive' : 'negative'">
+            {{ getBalanceTotal() >= 0 ? '+' : '' }}{{ getBalanceTotal() }}
+          </span>
+        </span>
+      </div>
+        <div class="table-actions">
+        <button mat-icon-button (click)="exportarExcel()" matTooltip="Exportar a Excel">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button mat-icon-button (click)="recargarDatos()" matTooltip="Recargar datos">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+      
+    </div>
+
+    <div class="table-container">
+      <div class="loading-shade" *ngIf="isLoading">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando movimientos...</p>
+      </div>
+
+      <table mat-table [dataSource]="dataSource" matSort class="professional-table">
+        
+        <!-- Columna ID -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-id">ID</th>
+          <td mat-cell *matCellDef="let row" class="column-id">
+            <span class="id-badge">#{{ row.id_movimiento }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Columna Fecha -->
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-fecha">Fecha y Hora</th>
+          <td mat-cell *matCellDef="let row" class="column-fecha">
+            <div class="fecha-info">
+              <span class="fecha">{{ row.fecha | date:'dd/MM/yyyy' }}</span>
+              <span class="hora">{{ row.fecha | date:'HH:mm' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Columna Producto -->
+        <ng-container matColumnDef="producto">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-producto">Producto</th>
+          <td mat-cell *matCellDef="let row" class="column-producto">
+            <div class="producto-info">
+              <span class="producto-nombre">{{ row.producto?.nombre }}</span>
+              <span class="producto-stock" *ngIf="row.producto">
+                Stock: {{ row.producto.stock }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Columna Tipo -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-tipo">Tipo</th>
+          <td mat-cell *matCellDef="let row" class="column-tipo">
+            <div class="tipo-movimiento">
+              <span class="tipo-badge" [class]="'tipo-' + row.tipo_movimiento">
+                <mat-icon class="tipo-icon">{{ getTipoIcon(row.tipo_movimiento) }}</mat-icon>
+                {{ getTipoText(row.tipo_movimiento) }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Columna Cantidad -->
+        <!-- Columna Cantidad - CORREGIDA -->
+<ng-container matColumnDef="cantidad">
+  <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-cantidad">Cantidad</th>
+  <td mat-cell *matCellDef="let row" class="column-cantidad">
+    <div class="cantidad-info">
+      <span class="cantidad" [class]="getCantidadClass(row)">
+        <mat-icon class="cantidad-icon">
+          {{ getCantidadIcon(row) }}
+        </mat-icon>
+        {{ row.cantidad > 0 ? '+' : '' }}{{ row.cantidad }}
+      </span>
+      <span class="cantidad-desc" *ngIf="row.descripcion">
+        {{ row.descripcion }}
+      </span>
+    </div>
+  </td>
+</ng-container>
+
+        <!-- Columna Lote -->
+        <ng-container matColumnDef="lote">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-lote">Lote</th>
+          <td mat-cell *matCellDef="let row" class="column-lote">
+            <div class="lote-info" *ngIf="row.lote; else sinLote">
+              <span class="numero-lote">{{ row.lote.numero_lote }}</span>
+              <span class="lote-caducidad" *ngIf="row.lote.fecha_caducidad">
+                Caduca: {{ row.lote.fecha_caducidad | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+            <ng-template #sinLote>
+              <span class="sin-lote">-- Sin lote --</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <!-- Columna Usuario -->
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-usuario">Usuario</th>
+          <td mat-cell *matCellDef="let row" class="column-usuario">
+            <div class="usuario-info">
+              <span class="usuario-nombre">{{ row.usuario?.nombre || 'Sistema' }}</span>
+              <span class="usuario-username" *ngIf="row.usuario?.username">
+                @{{ row.usuario.username }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+              <!-- Columna Acciones - NUEVA VERSIÓN -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef class="column-acciones">Acciones</th>
+              <td mat-cell *matCellDef="let row" class="column-acciones">
+                <div class="action-buttons">
+                  <!-- SOLO VER DETALLES (siempre visible) -->
+                  <button mat-icon-button color="accent" (click)="verDetallesMovimiento(row)" 
+                          matTooltip="Ver detalles" class="btn-details">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  
+                  <!-- ANULAR MOVIMIENTO (solo si es reciente y admin) 
+                   <button *ngIf="authService.isAdmin() && puedeAnular(row)" 
+                          mat-icon-button color="warn" (click)="anularMovimiento(row)" 
+                          matTooltip="Anular movimiento" class="btn-cancel">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                  -->
+                  
+                </div>
+              </td>
+            </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsProfessional" class="header-row"></tr>
+        <!-- En movimiento-stock-list.component.html, dentro de la fila -->
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsProfessional" 
+          [class.ingreso-row]="row.tipo_movimiento === 'ingreso'"
+          [class.egreso-row]="row.tipo_movimiento === 'egreso'"
+          [class.ajuste-row]="row.tipo_movimiento === 'ajuste'"
+          [class.devolucion-row]="row.tipo_movimiento === 'devolucion'"
+          [class.anulado-row]="row.anulado || (row.descripcion && row.descripcion.includes('ANULACIÓN'))"
+          class="data-row"></tr>
+      </table>
+
+      <!-- Mensaje sin resultados -->
+      <div class="no-results" *ngIf="dataSource.filteredData.length === 0 && !isLoading">
+        <mat-icon>swap_vert</mat-icon>
+        <h3>No se encontraron movimientos</h3>
+        <p>No hay movimientos que coincidan con los criterios de búsqueda actuales.</p>
+        <button mat-raised-button color="primary" (click)="crearMovimientoUnificado()" class="btn-crear-primero">
+          <mat-icon>add</mat-icon>
+          Crear Primer Movimiento
+        </button>
+      </div>
+    </div>
+
+    <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons 
+                   [length]="dataSource.filteredData.length"
+                   [pageSize]="10"
+                   class="professional-paginator">
+    </mat-paginator>
+  </div>
+</div>

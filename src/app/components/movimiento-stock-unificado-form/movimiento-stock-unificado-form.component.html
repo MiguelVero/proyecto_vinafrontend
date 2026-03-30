@@ -1,0 +1,186 @@
+<!-- src/app/components/movimiento-stock-unificado-form/movimiento-stock-unificado-form.component.html -->
+<div class="form-container" [class.loading]="isLoading">
+  <h2>🎯 Nuevo Movimiento de Stock</h2>
+
+  <div class="form-content">
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      <!-- Producto -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>📦 Producto *</mat-label>
+        <mat-select formControlName="id_producto">
+          <mat-option *ngFor="let producto of productos" [value]="producto.id_producto">
+            {{ producto.nombre }} - Stock: {{ producto.stock }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('id_producto')?.hasError('required')">
+          Seleccione un producto
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Tipo de Movimiento -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>🔄 Tipo de Movimiento *</mat-label>
+        <mat-select formControlName="tipo_movimiento">
+          <mat-option *ngFor="let tipo of tiposMovimiento" [value]="tipo.value">
+            {{ tipo.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Cantidad -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>📊 Cantidad *</mat-label>
+        <input matInput type="number" formControlName="cantidad" min="1" placeholder="Ingrese la cantidad">
+        <mat-error *ngIf="form.get('cantidad')?.hasError('required')">
+          La cantidad es requerida
+        </mat-error>
+        <mat-error *ngIf="form.get('cantidad')?.hasError('min')">
+          La cantidad debe ser mayor a 0
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Sección de Gestión de Lote -->
+      <div class="lote-section" *ngIf="form.get('id_producto')?.value">
+        <h4>🏷️ Gestión de Lote</h4>
+        
+        <!-- Selector de modo de gestión -->
+        <mat-radio-group formControlName="gestion_lote" class="radio-group" *ngIf="esIngreso">
+          <mat-radio-button value="automatico" class="radio-option">
+            <div class="radio-content">
+              <span class="radio-title">🔄 Automático</span>
+              <span class="radio-description">Generar lote automáticamente</span>
+            </div>
+          </mat-radio-button>
+
+          
+          <mat-radio-button value="existente" class="radio-option">
+            <div class="radio-content">
+              <span class="radio-title">📋 Existente</span>
+              <span class="radio-description">Usar lote existente</span>
+            </div>
+          </mat-radio-button>
+        </mat-radio-group>
+
+       <!-- En movimiento-stock-unificado-form.component.html - dentro de la sección de lote automático -->
+<div *ngIf="esIngreso && modoLoteActual === 'automatico'" class="lote-subsection automatico">
+  <div class="auto-lote-info">
+    <div class="info-item">
+      <strong>Número de Lote:</strong> 
+      <span class="lote-number">{{ numeroLoteDisplay || 'Generando...' }}</span>
+    </div>
+    
+    <!-- NUEVO: Selector de período de caducidad -->
+    <div class="info-item periodo-selector">
+      <strong>Período de Caducidad:</strong>
+      <mat-radio-group [(ngModel)]="periodoCaducidadSeleccionado" 
+                       (change)="actualizarFechaCaducidad()"
+                       [ngModelOptions]="{standalone: true}">
+        <mat-radio-button *ngFor="let opcion of opcionesCaducidadProductoActual" 
+                          [value]="opcion">
+          {{ opcion }} {{ opcion === 1 ? 'mes' : 'meses' }}
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+    
+    <div class="info-item">
+      <strong>Fecha de Caducidad:</strong> 
+      <span class="fecha-caducidad">
+        {{ fechaCaducidadCalculada | date:'dd/MM/yyyy' }}
+      </span>
+    </div>
+  </div>
+  <div class="info-note">
+    ✅ Este lote se generará automáticamente al guardar
+  </div>
+</div>
+
+        <!-- Lote Manual -->
+        <div *ngIf="esIngreso && modoLoteActual === 'manual'" class="lote-subsection manual">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Número de Lote *</mat-label>
+            <input matInput formControlName="numero_lote_manual" placeholder="Ej: LOTE-001-2024">
+            <mat-error *ngIf="form.get('numero_lote_manual')?.hasError('required')">
+              El número de lote es requerido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fecha de Caducidad *</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="fecha_caducidad_manual">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="form.get('fecha_caducidad_manual')?.hasError('required')">
+              La fecha de caducidad es requerida
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Lote Existente (para ingresos) -->
+        <div *ngIf="esIngreso && modoLoteActual === 'existente'" class="lote-subsection existente">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Seleccionar Lote Existente *</mat-label>
+            <mat-select formControlName="id_lote_existente">
+              <mat-option *ngFor="let lote of lotes" [value]="lote.id_lote">
+                {{ lote.numero_lote }} | Stock: {{ lote.cantidad_actual }} | Caduca: {{ lote.fecha_caducidad | date:'dd/MM/yyyy' }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('id_lote_existente')?.hasError('required')">
+              Seleccione un lote existente
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Lote para Egresos/Ajustes/Devoluciones -->
+        <div *ngIf="!esIngreso" class="lote-subsection no-ingreso">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Seleccionar Lote *</mat-label>
+            <input type="text" matInput formControlName="lote_search" [matAutocomplete]="auto" placeholder="Buscar lote...">
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onLoteSelected($event)">
+              <mat-option *ngFor="let lote of filteredLotes | async" [value]="lote">
+                <div class="lote-option">
+                  <strong>{{ lote.numero_lote }}</strong>
+                  <div class="lote-details">
+                    <span>Stock: {{ lote.cantidad_actual }}</span>
+                    <span>Caduca: {{ lote.fecha_caducidad | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                </div>
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="form.get('id_lote_existente')?.hasError('required')">
+              Seleccione un lote
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>📝 Descripción</mat-label>
+        <textarea matInput formControlName="descripcion" rows="3" 
+                  placeholder="Descripción opcional del movimiento..."></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="actions">
+    <button mat-raised-button color="primary" 
+            (click)="guardar()" 
+            [disabled]="isSubmitting || form.invalid"
+            class="btn-guardar">
+      <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+      {{ isSubmitting ? 'Guardando...' : 'Guardar Movimiento' }}
+    </button>
+    
+    <button mat-button type="button" (click)="cancelar()" [disabled]="isSubmitting">
+      Cancelar
+    </button>
+  </div>
+
+  <!-- Overlay de carga -->
+  <div class="overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+</div>

@@ -1,0 +1,187 @@
+/* src/app/features/components/cliente-rapido-form/cliente-rapido-form.component.css */
+
+/* Contenedor principal del diálogo */
+:host {
+  display: block;
+}
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0288d1;
+  margin: 0;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8fdff;
+}
+
+.title-icon {
+  color: #0288d1;
+}
+
+/* Contenido del diálogo - SIN SCROLL */
+.dialog-content {
+  padding: 20px 24px;
+  max-height: none !important; /* Elimina el scroll máximo */
+  overflow: visible !important; /* Elimina el scroll */
+}
+
+/* Formulario compacto */
+.cliente-form-rapido {
+  min-width: 700px;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Filas del formulario */
+.form-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* Campos del formulario */
+.form-field {
+  flex: 1;
+  min-width: 120px;
+}
+
+.form-field-large {
+  flex: 2;
+  min-width: 200px;
+}
+
+.form-field-full {
+  flex: 1;
+  min-width: 100%;
+}
+
+/* Estilos para los campos de Material */
+mat-form-field {
+  width: 100%;
+}
+
+/* Hint del documento más compacto */
+.document-hint {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Acciones del diálogo */
+.dialog-actions {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+  margin: 0;
+}
+
+.cancel-button {
+  margin-right: 8px;
+}
+
+.submit-button {
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Estilos para errores */
+mat-error {
+  font-size: 0.75rem;
+}
+
+/* Responsive para pantallas más pequeñas */
+@media (max-width: 768px) {
+  .cliente-form-rapido {
+    min-width: auto;
+    max-width: 100%;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-field,
+  .form-field-large,
+  .form-field-full {
+    min-width: 100%;
+  }
+  
+  .dialog-content {
+    padding: 16px;
+  }
+}
+
+/* Estilos para el diálogo global */
+::ng-deep .cliente-rapido-dialog {
+  max-height: 85vh !important;
+}
+
+::ng-deep .cliente-rapido-dialog .mat-dialog-container {
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+::ng-deep .cliente-rapido-dialog .mat-dialog-content {
+  max-height: none !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Snackbar styles */
+.success-snackbar {
+  background: #4caf50;
+  color: white;
+}
+
+.error-snackbar {
+  background: #f44336;
+  color: white;
+}
+
+/* Mejoras visuales para los campos */
+::ng-deep .cliente-rapido-dialog .mat-form-field-outline {
+  border-radius: 4px;
+}
+
+::ng-deep .cliente-rapido-dialog .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+::ng-deep .cliente-rapido-dialog .mat-form-field-subscript-wrapper {
+  position: relative;
+  margin-top: 2px;
+}
+.info-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #1976d2;
+}
+
+.info-message mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.document-hint {
+  color: #666;
+}

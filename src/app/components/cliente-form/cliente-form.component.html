@@ -1,0 +1,169 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon class="title-icon">{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
+  {{ isEditMode ? 'Editar' : 'Agregar' }} Cliente
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <form [formGroup]="clienteForm" class="cliente-form">
+    
+    <!-- Fila 1: Documento y Nombre -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Tipo de Documento *</mat-label>
+        <mat-select formControlName="tipo_documento" (selectionChange)="onTipoDocumentoChange()">
+          <mat-option *ngFor="let tipo of tiposDocumento" [value]="tipo.value">
+            {{ tipo.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="clienteForm.get('tipo_documento')?.hasError('required')">
+          Tipo de documento requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>N° Documento *</mat-label>
+        <input matInput 
+               formControlName="dni" 
+               required 
+               (input)="formatearDocumento($event)"
+               (keypress)="prevenirCaracteresNoPermitidos($event, 'numero')"
+               [placeholder]="clienteForm.get('tipo_documento')?.value === 'DNI' ? '12345678' : 
+                            clienteForm.get('tipo_documento')?.value === 'RUC' ? '12345678901' : 
+                            'ABC123456789'"/>
+        <mat-hint class="document-hint">
+          <span *ngIf="clienteForm.get('tipo_documento')?.value === 'DNI'">8 dígitos</span>
+          <span *ngIf="clienteForm.get('tipo_documento')?.value === 'RUC'">11 dígitos</span>
+          <span *ngIf="clienteForm.get('tipo_documento')?.value === 'CE'">9-12 caracteres alfanuméricos</span>
+        </mat-hint>
+        <mat-error>{{ getDocumentoError() }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field-large">
+        <mat-label>Nombre Completo *</mat-label>
+        <input matInput 
+               formControlName="nombre" 
+               required 
+               (keypress)="prevenirCaracteresNoPermitidos($event, 'letra')"
+               placeholder="Ej: Juan Pérez García"/>
+        <mat-error>{{ getNombreError() }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 2: Teléfono y Tipo de Cliente -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Teléfono *</mat-label>
+        <input matInput 
+               formControlName="telefono" 
+               required 
+               (input)="formatearTelefono($event)"
+               (keypress)="prevenirCaracteresNoPermitidos($event, 'numero')"
+               placeholder="912345678"
+               maxlength="9"/>
+        <mat-hint>9 dígitos que empiezan con 9</mat-hint>
+        <mat-error>{{ getTelefonoError() }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Tipo de Cliente *</mat-label>
+        <mat-select formControlName="tipo_cliente">
+          <mat-option *ngFor="let tipo of tiposCliente" [value]="tipo.value">
+            {{ tipo.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="clienteForm.get('tipo_cliente')?.hasError('required')">
+          Tipo de cliente requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field-large">
+        <mat-label>Razón Social</mat-label>
+        <input matInput 
+               formControlName="razon_social" 
+               placeholder="Para facturación (opcional)"/>
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 3: Dirección -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field-full">
+        <mat-label>Dirección Completa *</mat-label>
+        <textarea matInput 
+                  formControlName="direccion" 
+                  rows="2" 
+                  required
+                  placeholder="Dirección del cliente"></textarea>
+        <mat-error *ngIf="clienteForm.get('direccion')?.hasError('required')">
+          La dirección es requerida
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Sección de Coordenadas (Opcional) -->
+    <!--
+    <div class="form-row coordinates-section" *ngIf="clienteForm.get('coordenadas')?.value">
+      <mat-form-field appearance="outline" class="form-field-full">
+        <mat-label>Coordenadas</mat-label>
+        <input matInput formControlName="coordenadas" readonly
+               placeholder="Ej: -8.3791,-74.5539"/>
+        <mat-hint>Coordenadas calculadas automáticamente</mat-hint>
+      </mat-form-field>
+    </div>
+    -->
+
+    <!-- Botón de Geocodificación (Opcional) -->
+    <!--
+    <div class="form-row" *ngIf="!clienteForm.get('coordenadas')?.value">
+      <div class="geocode-container">
+        <button
+          type="button"
+          mat-raised-button
+          color="accent"
+          (click)="manualGeocode()"
+          [disabled]="!canGeocode() || isGeocoding"
+          class="geocode-btn"
+        >
+          <mat-icon>location_on</mat-icon>
+          {{ isGeocoding ? 'Calculando...' : 'Calcular Coordenadas' }}
+        </button>
+
+        <div class="geocode-status" *ngIf="isGeocoding">
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Buscando ubicación...</span>
+        </div>
+      </div>
+    </div>
+    -->
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button 
+    mat-raised-button 
+    class="limpiar-button" 
+    type="button" 
+    (click)="clearForm()">
+    <mat-icon>refresh</mat-icon>
+    Limpiar
+  </button>
+
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSubmit()"
+    [disabled]="clienteForm.invalid || isLoading"
+    class="submit-button"
+  >
+    <mat-icon *ngIf="isLoading" class="spinner-icon">
+      <mat-spinner diameter="16"></mat-spinner>
+    </mat-icon>
+    <span>{{ isLoading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Guardar') }}</span>
+  </button>
+
+  <button mat-button (click)="onCancel()" class="cancel-button">Cancelar</button>
+</mat-dialog-actions>

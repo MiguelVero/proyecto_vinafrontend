@@ -1,0 +1,230 @@
+<!-- cliente-list.component.html - PAGINACIÓN MANUAL -->
+<div class="cliente-list-container">
+  <!-- Header mejorado -->
+  <div class="header-container">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">Gestión de Clientes</h1>
+        <p class="page-subtitle">Administra la información de clientes, empresas y proveedores del sistema</p>
+      </div>
+
+      <!-- Botón de crear cliente -->
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="openAddDialog()" class="add-button">
+          <mat-icon>add</mat-icon>
+          Agregar Cliente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda compacta -->
+  <div class="search-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar clientes...</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Nombre, DNI, teléfono, dirección...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="filter-right">
+      <mat-form-field appearance="outline" class="page-size-field">
+        <mat-label>Mostrar</mat-label>
+        <mat-select [(value)]="pageSize" (selectionChange)="changePageSize($event.value)">
+          <mat-option [value]="5">5</mat-option>
+          <mat-option [value]="10">10</mat-option>
+          <mat-option [value]="20">20</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <span class="total-count">de {{ getTotalClientes() }} clientes</span>
+    </div>
+  </div>
+
+  <!-- Contenedor de tabla responsive -->
+  <div class="table-section">
+    <div class="table-container">
+      
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="loading-spinner">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando clientes...</p>
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!isLoading" class="table-content">
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="dataSource" class="clientes-table">
+            
+            <!-- Columna Número -->
+            <ng-container matColumnDef="numero">
+              <th mat-header-cell *matHeaderCellDef class="column-numero"> 
+                <div class="column-header">#</div>
+              </th>
+              <td mat-cell *matCellDef="let c; let i = index" class="column-numero"> 
+                <div class="cliente-numero">
+                  {{ getPageNumber(i) }}
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Información del Cliente -->
+            <ng-container matColumnDef="informacion">
+              <th mat-header-cell *matHeaderCellDef class="column-informacion"> 
+                <div class="column-header">Cliente</div>
+              </th>
+              <td mat-cell *matCellDef="let c" class="column-informacion"> 
+                <div class="cliente-info">
+                  <div class="nombre-cliente">{{ c.nombre }}</div>
+                  <div class="detalles-cliente">
+                    <span class="dni-badge" [ngClass]="getTipoDocumentoColor(c.tipo_documento)">
+                      {{ c.tipo_documento || 'DOC' }}
+                    </span>
+                    <span class="dni-numero">{{ c.dni }}</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Contacto -->
+            <ng-container matColumnDef="contacto">
+              <th mat-header-cell *matHeaderCellDef class="column-contacto"> 
+                <div class="column-header">Contacto</div>
+              </th>
+              <td mat-cell *matCellDef="let c" class="column-contacto"> 
+                <div class="contacto-info">
+                  <div class="telefono" *ngIf="c.telefono">
+                    <div class="contacto-item">
+                      <mat-icon>phone</mat-icon>
+                      <span>{{ c.telefono }}</span>
+                    </div>
+                  </div>
+                  <div class="sin-contacto" *ngIf="!c.telefono">
+                    <span class="empty-badge">Sin teléfono</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Dirección -->
+            <ng-container matColumnDef="direccion">
+              <th mat-header-cell *matHeaderCellDef class="column-direccion"> 
+                <div class="column-header">Dirección</div>
+              </th>
+              <td mat-cell *matCellDef="let c" class="column-direccion"> 
+                <div class="direccion-info">
+                  <div class="direccion-texto" *ngIf="c.direccion">
+                    <mat-icon>location_on</mat-icon> 
+                    <span class="direccion-truncated" [matTooltip]="c.direccion">
+                      {{ c.direccion }}
+                    </span>
+                  </div>
+                  <div class="sin-direccion" *ngIf="!c.direccion">
+                    <span class="empty-badge">Sin dirección</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Tipo de Cliente -->
+            <ng-container matColumnDef="tipo">
+              <th mat-header-cell *matHeaderCellDef class="column-tipo"> 
+                <div class="column-header">Tipo</div>
+              </th>
+              <td mat-cell *matCellDef="let c" class="column-tipo"> 
+                <div class="tipo-cliente">
+                  <span class="tipo-badge" [ngClass]="getTipoClienteColor(c.tipo_cliente)">
+                    {{ c.tipo_cliente || 'N/A' }}
+                  </span>
+                  <div class="razon-social" *ngIf="c.razon_social">
+                    {{ c.razon_social }}
+                  </div>
+                  <div class="sin-razon" *ngIf="!c.razon_social && c.tipo_cliente === 'Empresa'">
+                    <span class="empty-badge small">Sin razón social</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef class="column-acciones"> 
+                <div class="column-header">Acciones</div>
+              </th>
+              <td mat-cell *matCellDef="let c" class="column-acciones">
+                <div class="action-buttons">
+                  <button mat-icon-button color="primary" 
+                          (click)="openEditDialog(c)" 
+                          matTooltip="Editar cliente"
+                          class="action-btn edit-btn">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="accent" 
+                          (click)="openMapDialog(c)" 
+                          matTooltip="Ver en mapa"
+                          class="action-btn map-btn">
+                    <mat-icon>map</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" 
+                          (click)="deleteCliente(c)" 
+                          matTooltip="Eliminar cliente"
+                          class="action-btn delete-btn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns" class="data-row"></tr>
+          </table>
+        </div>
+
+        <!-- Paginación manual -->
+        <div class="custom-pagination" *ngIf="!isLoading && filteredClientes.length > 0">
+          <div class="pagination-info">
+            <span>
+              Mostrando 
+              <strong>{{ getCurrentPageStart() }}</strong> - 
+              <strong>{{ getCurrentPageEnd() }}</strong> 
+              de <strong>{{ getTotalFiltered() }}</strong> clientes
+              <span *ngIf="getTotalFiltered() !== getTotalClientes()">
+                (filtrado de {{ getTotalClientes() }} totales)
+              </span>
+            </span>
+          </div>
+          
+          <div class="pagination-controls">
+            <button mat-icon-button (click)="firstPage()" [disabled]="!hasPreviousPage()" class="pagination-btn">
+              <mat-icon>first_page</mat-icon>
+            </button>
+            <button mat-icon-button (click)="previousPage()" [disabled]="!hasPreviousPage()" class="pagination-btn">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            
+            <span class="page-indicator">
+              Página {{ currentPage + 1 }} de {{ getTotalPages() }}
+            </span>
+            
+            <button mat-icon-button (click)="nextPage()" [disabled]="!hasNextPage()" class="pagination-btn">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+            <button mat-icon-button (click)="lastPage()" [disabled]="!hasNextPage()" class="pagination-btn">
+              <mat-icon>last_page</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mensaje cuando no hay datos -->
+        <div *ngIf="filteredClientes.length === 0 && !isLoading" class="no-data">
+          <mat-icon class="no-data-icon">person_outline</mat-icon>
+          <h3>No se encontraron clientes</h3>
+          <p *ngIf="getTotalClientes() > 0">Intenta con otro término de búsqueda</p>
+          <p *ngIf="getTotalClientes() === 0">Comienza agregando un nuevo cliente</p>
+          <button mat-raised-button color="primary" (click)="openAddDialog()" class="no-data-button">
+            <mat-icon>add</mat-icon>
+            Agregar Primer Cliente
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

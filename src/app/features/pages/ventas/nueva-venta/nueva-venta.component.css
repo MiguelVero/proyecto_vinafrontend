@@ -1,0 +1,1059 @@
+/* nueva-venta.component.css - VERSIÓN COMPACTA */
+
+/* === VARIABLES DE DISEÑO COMPACTO === */
+:root {
+  --venta-spacing: clamp(0.5rem, 1.5vw, 1rem); /* Reducido */
+  --venta-radius: clamp(8px, 1.5vw, 12px); /* Reducido */
+  --venta-font-base: clamp(0.8rem, 1.5vw, 0.9rem); /* Reducido */
+  --venta-font-heading: clamp(1rem, 2.5vw, 1.2rem); /* Reducido */
+  
+  /* Paleta de colores profesional (mantenida) */
+  --primary-color: #057cbe;
+  --primary-dark: #0469a0;
+  --secondary-color: #009949;
+  --secondary-dark: #007a3c;
+  --accent-color: #FF6B35;
+  --light-bg: #f5f7fa;
+  --surface-color: #ffffff;
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.08);
+  --shadow-md: 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+/* === CONTENEDOR PRINCIPAL COMPACTO === */
+.nueva-venta-container {
+  background: #f5f7fa;
+  min-height: 100vh;
+  padding: 0.75rem; /* Reducido */
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === HEADER COMPACTO === */
+.header {
+  background: #5babd6;
+  color: #1a202c;
+  padding: 0.75rem 1rem; /* Reducido */
+  border-radius: clamp(8px, 1.5vw, 12px);
+  margin-bottom: 1rem; /* Reducido */
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.header h1 {
+  font-size: clamp(1.2rem, 3vw, 1.5rem); /* Reducido */
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Reducido */
+}
+
+.header h1::before {
+  content: '💰';
+  font-size: 1.2rem;
+}
+
+.header-subtitle {
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem); /* Reducido */
+  opacity: 0.8;
+  margin: 0.25rem 0 0.75rem; /* Reducido */
+}
+
+.header-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1rem; /* Reducido */
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* Reducido */
+  background: rgba(5, 124, 190, 0.08);
+  padding: 0.25rem 0.5rem; /* Reducido */
+  border-radius: 12px;
+  font-size: 0.75rem; /* Reducido */
+}
+
+/* === CONTENEDOR DE CONTENIDO COMPACTO === */
+.venta-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem; /* Reducido */
+  flex: 1;
+  width: 100%;
+}
+
+/* === TARJETAS DE SECCIÓN COMPACTAS === */
+.section {
+  background: #5db5e4;
+  padding: 1rem; /* Reducido */
+  border-radius: clamp(8px, 1.5vw, 12px);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.section h2 {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  color: #1a202c;
+  margin-bottom: 0.75rem; /* Reducido */
+  padding-bottom: 0.5rem; /* Reducido */
+  border-bottom: 1px solid #e2e8f0; /* Reducido */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+  font-weight: 600;
+}
+
+/* === BÚSQUEDAS COMPACTAS === */
+.search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Reducido */
+  width: 100%;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f5f7fa;
+  border-radius: clamp(8px, 1.5vw, 12px);
+  border: 1px solid #e2e8f0; /* Reducido */
+  overflow: hidden;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.5rem 0.5rem 0.5rem 2rem; /* Reducido */
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  border: none;
+  background: transparent;
+  color: #1a202c;
+  min-height: 36px; /* Reducido */
+  outline: none;
+}
+
+.search-box::before {
+  content: '';
+  position: absolute;
+  left: 0.5rem; /* Reducido */
+  color: #4a5568;
+  font-size: 0.9rem; /* Reducido */
+}
+
+/* === BOTONES COMPACTOS === */
+.btn-agregar-cliente {
+  background: #009949;
+  color: rgb(213, 231, 227);
+  border: none;
+  padding: 0.5rem 1rem; /* Reducido */
+  border-radius: clamp(8px, 1.5vw, 12px);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Reducido */
+  min-height: 36px; /* Reducido */
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+}
+
+.btn-clear {
+  background: none;
+  border: none;
+  color: #4a5568;
+  padding: 0.25rem 0.5rem; /* Reducido */
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* === CLIENTE SELECCIONADO COMPACTO === */
+.selected-client-card {
+  background: linear-gradient(135deg, #f0f9ff, #e6f7ff);
+  border: 1px solid #bae6fd; /* Reducido */
+  border-radius: clamp(8px, 1.5vw, 12px);
+  padding: 0.75rem; /* Reducido */
+  margin-top: 0.75rem; /* Reducido */
+}
+
+.client-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* Reducido */
+}
+
+.client-avatar {
+  font-size: 1.5rem; /* Reducido */
+  color: #057cbe;
+}
+
+.client-details {
+  flex: 1;
+}
+
+.client-details h3 {
+  color: #1a202c;
+  margin-bottom: 0.25rem; /* Reducido */
+  font-size: 1rem; /* Reducido */
+}
+
+.client-details p {
+  color: #4a5568;
+  font-size: 0.8rem; /* Reducido */
+  margin-bottom: 0.5rem; /* Reducido */
+}
+
+.tag {
+  background: #e6fffa;
+  color: #065f46;
+  padding: 0.125rem 0.5rem; /* Reducido */
+  border-radius: 12px;
+  font-size: 0.7rem; /* Reducido */
+}
+
+/* === RESULTADOS COMPACTOS === */
+.results-container {
+  margin-top: 0.75rem; /* Reducido */
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem; /* Reducido */
+  padding: 0.25rem 0; /* Reducido */
+}
+
+.results-count {
+  color: #4a5568;
+  font-size: 0.8rem; /* Reducido */
+}
+
+.results-list {
+  max-height: min(30vh, 200px); /* Reducido */
+  overflow-y: auto;
+  border-radius: clamp(8px, 1.5vw, 12px);
+  background: #f5f7fa;
+  border: 1px solid #e2e8f0;
+  margin-top: 0.25rem; /* Reducido */
+}
+
+.result-item {
+  padding: 0.5rem 0.75rem; /* Reducido */
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+}
+
+.result-icon {
+  color: #4a5568;
+  font-size: 1rem; /* Reducido */
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem; /* Reducido */
+  color: #4a5568;
+  font-size: 0.75rem; /* Reducido */
+}
+
+/* === PRODUCTO SELECCIONADO COMPACTO === */
+.selected-product-card {
+  background: linear-gradient(135deg, #f0fcff, #dcebff);
+  border: 1px solid #bbebf7; /* Reducido */
+  border-radius: clamp(8px, 1.5vw, 12px);
+  padding: 0.75rem; /* Reducido */
+  margin-top: 0.75rem; /* Reducido */
+}
+
+.product-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem; /* Reducido */
+  padding-bottom: 0.5rem; /* Reducido */
+  border-bottom: 1px solid rgba(0, 153, 73, 0.2); /* Reducido */
+}
+
+.product-card-header h3 {
+  color: #1a202c;
+  font-size: 1rem; /* Reducido */
+  font-weight: 600;
+  margin: 0;
+}
+
+.product-price {
+  background: #009949;
+  color: rgb(199, 198, 214);
+  padding: 0.25rem 0.5rem; /* Reducido */
+  border-radius: 12px;
+  font-size: 0.9rem; /* Reducido */
+}
+
+.product-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Reducido */
+  gap: 0.5rem; /* Reducido */
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+  padding: 0.5rem; /* Reducido */
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.stat i {
+  color: #057cbe;
+  font-size: 1rem; /* Reducido */
+}
+
+.stat span {
+  color: #1a202c;
+  font-size: 0.85rem; /* Reducido */
+}
+
+/* === CONTROLES DE CANTIDAD COMPACTOS === */
+.add-product-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Reducido */
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+}
+
+.quantity-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* Reducido */
+}
+
+.qty-btn {
+  background: #f5f7fa;
+  border: 1px solid #e2e8f0; /* Reducido */
+  color: #1a202c;
+  width: 32px; /* Reducido */
+  height: 32px; /* Reducido */
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.quantity-input {
+  width: 60px; /* Reducido */
+  padding: 0.5rem; /* Reducido */
+  border: 1px solid #e2e8f0; /* Reducido */
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem; /* Reducido */
+}
+
+.add-buttons {
+  display: flex;
+  gap: 0.5rem; /* Reducido */
+}
+
+.btn-add, .btn-cancel {
+  padding: 0.5rem 1rem; /* Reducido */
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  min-width: auto;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+}
+
+/* === CARRITO DE COMPRAS COMPACTO === */
+.empty-cart-state {
+  text-align: center;
+  padding: 1.5rem 1rem; /* Reducido */
+  color: #4a5568;
+}
+
+.empty-cart-icon {
+  font-size: 2.5rem; /* Reducido */
+  color: #0c62be;
+  margin-bottom: 0.75rem; /* Reducido */
+}
+
+.empty-cart-state h3 {
+  color: #1a202c;
+  font-size: 1.1rem; /* Reducido */
+  margin-bottom: 0.25rem; /* Reducido */
+}
+
+.empty-cart-state p {
+  font-size: 0.85rem; /* Reducido */
+  margin-bottom: 1rem; /* Reducido */
+}
+
+.btn-explore-products {
+  background: #057cbe;
+  color: rgb(188, 187, 218);
+  border: none;
+  padding: 0.5rem 1rem; /* Reducido */
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+}
+
+/* === ITEMS DEL CARRITO COMPACTOS === */
+.cart-items {
+  max-height: min(30vh, 200px); /* Reducido */
+  overflow-y: auto;
+  border-radius: clamp(8px, 1.5vw, 12px);
+  background: #f5f7fa;
+  padding: 0.5rem; /* Reducido */
+}
+
+.cart-item {
+  background: white;
+  padding: 0.75rem; /* Reducido */
+  border-radius: 8px;
+  margin-bottom: 0.5rem; /* Reducido */
+  border: 1px solid #e2e8f0;
+}
+
+.cart-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem; /* Reducido */
+}
+
+.cart-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.25rem; /* Reducido */
+}
+
+.cart-item-header h4 {
+  color: #1a202c;
+  font-size: 0.9rem; /* Reducido */
+  margin: 0;
+}
+
+.cart-item-price {
+  color: #009949;
+  font-weight: 700;
+  font-size: 0.9rem; /* Reducido */
+}
+
+.cart-item-meta {
+  display: flex;
+  gap: 0.75rem; /* Reducido */
+}
+
+.btn-remove {
+  background: transparent;
+  border: none;
+  color: #e53e3e;
+  cursor: pointer;
+  font-size: 1.2rem; /* Reducido */
+  padding: 0.25rem; /* Reducido */
+}
+
+/* === RESUMEN DEL CARRITO COMPACTO === */
+.cart-summary {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: clamp(8px, 1.5vw, 12px);
+  padding: 0.75rem; /* Reducido */
+  border: 1px solid #e2e8f0; /* Reducido */
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0; /* Reducido */
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.total-row {
+  margin-top: 0.25rem; /* Reducido */
+  padding-top: 0.5rem; /* Reducido */
+  border-top: 1px solid #e2e8f0; /* Reducido */
+}
+
+.total-amount {
+  color: #009949 !important;
+  font-size: 1.1rem !important; /* Reducido */
+}
+
+/* === MÉTODOS DE PAGO COMPACTOS === */
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Reducido */
+}
+
+.payment-icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Reducido */
+  gap: 0.5rem; /* Reducido */
+}
+
+.payment-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem; /* Reducido */
+  padding: 0.5rem; /* Reducido */
+  border: 1px solid #e2e8f0; /* Reducido */
+  border-radius: 8px;
+  cursor: pointer;
+  background: rgb(255, 255, 255);
+}
+
+.payment-icon i {
+  font-size: 1.5rem; /* Reducido */
+}
+
+.payment-icon span {
+  font-size: 0.8rem; /* Reducido */
+}
+
+/* === COMPROBANTES COMPACTOS === */
+.comprobante-types {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Reducido */
+}
+
+.comprobante-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+  padding: 0.75rem; /* Reducido */
+  border: 1px solid #e2e8f0; /* Reducido */
+  border-radius: 8px;
+  cursor: pointer;
+  background: white;
+}
+
+.comprobante-option i:first-child {
+  font-size: 1.5rem; /* Reducido */
+}
+
+.option-content h4 {
+  margin: 0 0 0.125rem 0; /* Reducido */
+  font-size: 0.9rem; /* Reducido */
+}
+
+.option-content p {
+  margin: 0;
+  font-size: 0.8rem; /* Reducido */
+}
+
+/* === PREVIEW DE COMPROBANTE COMPACTO === */
+.comprobante-preview {
+  background: linear-gradient(135deg, #f0fff4, #dcffe4);
+  border: 1px solid #bbf7d0; /* Reducido */
+  border-radius: clamp(8px, 1.5vw, 12px);
+  padding: 0.75rem; /* Reducido */
+  margin-top: 0.75rem; /* Reducido */
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+  margin-bottom: 0.5rem; /* Reducido */
+  padding-bottom: 0.5rem; /* Reducido */
+  border-bottom: 1px solid rgba(0, 153, 73, 0.2); /* Reducido */
+}
+
+.preview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; /* Reducido */
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* === ACCIONES COMPACTAS === */
+/*
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 0.75rem; 
+}
+*/
+.btn-primary {
+  background: #057cbe;
+  color: rgb(159, 166, 206);
+  border: none;
+  padding: 0.5rem 1.5rem; /* Reducido */
+  border-radius: 25px;
+  font-size: 0.9rem; /* Reducido */
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 150px; /* Reducido */
+}
+
+.btn-secondary, .btn-outline {
+  padding: 0.5rem 1rem; /* Reducido */
+  border-radius: 25px;
+  font-size: 0.9rem; /* Reducido */
+  font-weight: 600;
+}
+
+/* === ACTION STATUS COMPACTO === */
+ /* .action-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+/*
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; 
+  padding: 0.5rem; 
+  border-radius: 6px;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+}
+*/
+.status-item span {
+  font-size: 0.8rem; /* Reducido */
+}
+
+/* === MENSAJES DE ERROR COMPACTOS === */
+.error-message {
+  background: linear-gradient(135deg, #fed7d7, #feb2b2);
+  border: 1px solid #fc8181; /* Reducido */
+  color: #c53030;
+  padding: 0.5rem 0.75rem; /* Reducido */
+  border-radius: 8px;
+  margin: 0.5rem 0; /* Reducido */
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+}
+
+.error-content h4 {
+  margin: 0 0 0.125rem 0; /* Reducido */
+  font-size: 0.9rem; /* Reducido */
+}
+
+.error-content p {
+  margin: 0;
+  font-size: 0.8rem; /* Reducido */
+}
+
+/* === FOOTER INFORMATIVO COMPACTO === */
+.footer-info {
+  margin-top: 1rem; /* Reducido */
+  padding-top: 0.75rem; /* Reducido */
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+  color: #4a5568;
+  font-size: 0.75rem; /* Reducido */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem; /* Reducido */
+}
+
+/* === FORMULARIOS COMPACTOS === */
+.form-select, .elegant-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem; /* Reducido */
+  border: 1px solid #e2e8f0; /* Reducido */
+  border-radius: 6px;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  background: white;
+  color: #1a202c;
+}
+
+/* === RESPONSIVE AVANZADO === */
+
+/* Tablets pequeñas */
+@media (min-width: 640px) {
+  .search-container {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .btn-agregar-cliente {
+    min-width: 140px; /* Reducido */
+  }
+}
+
+/* Tablets */
+@media (min-width: 768px) {
+  .venta-content {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "cliente productos"
+      "carrito carrito"
+      "pago comprobante"
+      "acciones acciones";
+    gap: 1rem; /* Reducido */
+  }
+  
+  .section {
+    padding: 1rem; /* Mantenido */
+  }
+}
+
+/* Laptops */
+@media (min-width: 1024px) {
+  .venta-content {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      "cliente productos carrito"
+      "pago comprobante acciones";
+  }
+  
+  .nueva-venta-container {
+    padding: 1rem; /* Reducido */
+  }
+  
+  .header {
+    padding: 0.75rem 1.5rem; /* Reducido */
+  }
+}
+
+/* Escritorio grande */
+@media (min-width: 1280px) {
+  .venta-content {
+    grid-template-columns: 1.2fr 1.2fr 0.8fr;
+    grid-template-areas:
+      "cliente productos carrito"
+      "cliente productos pago"
+      "comprobante acciones acciones";
+    gap: 1rem; /* Reducido */
+  }
+  
+  .btn-primary {
+    min-width: 180px; /* Reducido */
+    padding: 0.75rem 2rem; /* Reducido */
+  }
+}
+
+/* === LAYOUT DE 3 COLUMNAS COMPACTO === */
+@media (min-width: 1024px) {
+  .venta-content {
+    display: grid;
+    grid-template-columns: 1.1fr 1.1fr 0.8fr; /* Ajustado */
+    grid-template-areas:
+      "izquierda centro derecha"
+      "acciones acciones acciones";
+    gap: 0.75rem; /* Reducido */
+  }
+  
+  .columna-izquierda,
+  .columna-centro {
+    gap: 0.75rem; /* Reducido */
+  }
+  
+  .cart-items {
+    max-height: 200px; /* Reducido */
+  }
+  
+  .productos-section .results-list {
+    max-height: 200px; /* Reducido */
+  }
+}
+
+/* Tablets (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .venta-content {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "izquierda centro"
+      "derecha derecha"
+      "acciones acciones";
+    gap: 0.75rem; /* Reducido */
+  }
+  
+  .columna-izquierda,
+  .columna-centro {
+    gap: 0.75rem; /* Reducido */
+  }
+}
+
+/* === PARA SER MÁS COMPACTO EL CONTENIDO === */
+.product-image-placeholder {
+  width: 40px; /* Reducido */
+  height: 40px; /* Reducido */
+  font-size: 1.2rem; /* Reducido */
+}
+
+.section-badge {
+  padding: 0.25rem 0.5rem; /* Reducido */
+  border-radius: 12px;
+  font-size: 0.75rem; /* Reducido */
+}
+
+.section-badge-primary {
+  padding: 0.3rem 0.6rem; /* Reducido */
+  font-size: 0.8rem; /* Reducido */
+}
+
+/* Ajustar todos los íconos para ser más compactos */
+.material-icons {
+  font-size: 1.1rem; /* Reducido globalmente */
+}
+
+/* Reducir todos los espacios verticales */
+* {
+  line-height: 1.4; /* Reducido */
+}
+/* === SECCIÓN DE ACCIONES MEJORADA === */
+.seccion-acciones {
+  grid-column: 1 / -1; /* Ocupa todas las columnas */
+  background: white;
+  border-radius:  clamp(8px, 1.5vw, 12px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+  padding: 1rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.acciones-contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Fila superior - Botones */
+.acciones-fila-superior {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Fila inferior - Estado y Comprobante */
+.acciones-fila-inferior {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Botones de acción */
+.btn-accion {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  min-width: 160px;
+}
+
+.btn-finalizar {
+  background: linear-gradient(135deg, #009949, #007a3c);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 153, 73, 0.3);
+}
+
+.btn-finalizar:hover:not(:disabled) {
+  background: linear-gradient(135deg, #007a3c, #00662f);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 153, 73, 0.4);
+}
+
+.btn-finalizar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-limpiar {
+  background: #f5f7fa;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+}
+
+.btn-limpiar:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e0;
+  transform: translateY(-2px);
+}
+
+.btn-volver {
+  background: white;
+  color: #057cbe;
+  border: 2px solid #057cbe;
+}
+
+.btn-volver:hover {
+  background: #057cbe;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Estado de la venta */
+.estado-venta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.estado-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.icono-estado {
+  font-size: 1rem;
+}
+
+.icono-advertencia {
+  color: #e53e3e;
+}
+
+.icono-exito {
+  color: #009949;
+}
+
+/* Comprobante generado */
+.comprobante-generado {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #f0fff4, #dcffe4);
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  min-width: 250px;
+}
+
+.comprobante-generado i {
+  color: #009949;
+  font-size: 1.2rem;
+}
+
+.comprobante-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.comprobante-texto {
+  font-size: 0.75rem;
+  color: #4a5568;
+}
+
+.comprobante-numero {
+  font-size: 0.9rem;
+  color: #1a202c;
+}
+
+/* Spinner para botón de procesamiento */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive para la sección de acciones */
+@media (max-width: 768px) {
+  .acciones-fila-superior {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .btn-accion {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .acciones-fila-inferior {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .estado-venta {
+    justify-content: center;
+  }
+  
+  .comprobante-generado {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .seccion-acciones {
+    padding: 0.75rem;
+  }
+  
+  .btn-accion {
+    min-width: 140px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .estado-item {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}

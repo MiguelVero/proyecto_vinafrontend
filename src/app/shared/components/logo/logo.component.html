@@ -1,0 +1,26 @@
+<!-- src/app/shared/components/logo/logo.component.html -->
+<div class="logo-container" [class.clickable]="clickable" (click)="onClick()">
+  <!-- Si hay imagen de logo para este tipo -->
+  <img 
+    *ngIf="logoUrl && !imageError" 
+    [src]="logoUrl" 
+    [alt]="nombreSistema"
+    class="logo-img"
+    [class.logo-login]="tipo === 'login'"
+    [class.logo-navbar]="tipo === 'navbar'"
+    (error)="onImageError()"
+  >
+  
+  <!-- Fallback: texto del logo o iniciales -->
+  <div *ngIf="!logoUrl || imageError" 
+       class="logo-fallback"
+       [class.logo-login-fallback]="tipo === 'login'"
+       [class.logo-navbar-fallback]="tipo === 'navbar'">
+    <span class="logo-text">{{ textoMostrar }}</span>
+  </div>
+  
+  <!-- Mostrar nombre del sistema solo en navbar -->
+  <span *ngIf="tipo === 'navbar'" class="logo-system-name">
+    {{ nombreSistema }}
+  </span>
+</div>

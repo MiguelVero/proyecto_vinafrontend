@@ -1,0 +1,106 @@
+.form-container {
+  position: relative;
+  padding: 20px;
+  min-width: 400px;
+  max-width: 500px;
+  max-height: 80vh; /* ✅ LIMITAR ALTURA MÁXIMA */
+  display: flex;
+  flex-direction: column;
+}
+
+h2 {
+  text-align: center;
+  color: #3f51b5;
+  margin-bottom: 20px;
+  flex-shrink: 0; /* ✅ EVITAR QUE SE ENCOJA */
+}
+
+.form-content {
+  flex: 1; /* ✅ OCUPAR ESPACIO DISPONIBLE */
+  overflow-y: auto; /* ✅ PERMITIR SCROLL INTERNO */
+  padding-right: 5px; /* ✅ ESPACIO PARA SCROLL */
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+/* ✅ ESTILOS PARA EL SCROLL INTERNO */
+.form-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.form-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.form-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.form-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  flex-shrink: 0; /* ✅ EVITAR QUE SE ENCOJAN LOS BOTONES */
+  background: white;
+  position: sticky;
+  bottom: 0;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* ✅ MEJORAR APARIENCIA DE LOS SELECTORES DE LOTE */
+.lote-option {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+.lote-numero {
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+
+.lote-info {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* ✅ ESTILOS RESPONSIVOS */
+@media (max-height: 600px) {
+  .form-container {
+    max-height: 70vh;
+  }
+  
+  .full-width {
+    margin-bottom: 10px;
+  }
+}

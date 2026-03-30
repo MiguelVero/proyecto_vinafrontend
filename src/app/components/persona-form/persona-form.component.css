@@ -1,0 +1,15 @@
+.form-actions { display:flex; gap:8px; margin-top:12px }
+
+/* Botón Limpiar estilo Ventas */
+.limpiar-button {
+	background-color: #009949 !important;
+	color: #fff !important;
+	border-radius: 6px !important;
+	padding: 8px 12px !important;
+	font-weight: 600;
+}
+.limpiar-button:hover {
+	background-color: #008040 !important;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0,153,73,0.18);
+}

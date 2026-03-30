@@ -1,0 +1,412 @@
+<!-- frontend/src/app/features/pages/sunat/pages/sunat-principal/sunat-principal.component.html -->
+<div class="sunat-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="title-section">
+      <h1>
+        <mat-icon class="header-icon">receipt_long</mat-icon>
+        Comprobantes Electrónicos SUNAT
+      </h1>
+      <p class="subtitle">Gestiona y consulta todos los comprobantes electrónicos emitidos</p>
+    </div>
+    <div class="stats">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-number">{{ totalItems | formatNumber }}</div>
+          <div class="stat-label">Total Comprobantes</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-grid">
+        <!-- Búsqueda -->
+        <div class="filter-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Buscar</mat-label>
+            <input matInput 
+                   [(ngModel)]="searchTerm" 
+                   (keyup.enter)="aplicarFiltros()"
+                   placeholder="Buscar por cliente o serie...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Tipo -->
+        <div class="filter-item">
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo</mat-label>
+            <mat-select [(ngModel)]="filtroTipo" (selectionChange)="aplicarFiltros()">
+              <mat-option *ngFor="let tipo of tiposComprobante" [value]="tipo.value">
+                {{ tipo.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Estado -->
+        <div class="filter-item">
+          <mat-form-field appearance="outline">
+            <mat-label>Estado</mat-label>
+            <mat-select [(ngModel)]="filtroEstado" (selectionChange)="aplicarFiltros()">
+              <mat-option *ngFor="let estado of estadosComprobante" [value]="estado.value">
+                {{ estado.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+            <!-- Reemplaza los dos filtros de fecha actuales con estos: -->
+        <div class="filter-item">
+          <mat-form-field appearance="outline">
+            <mat-label>Desde</mat-label>
+            <input matInput 
+                  [matDatepicker]="pickerDesde" 
+                  [(ngModel)]="filtroFechaDesdeObj"
+                  (dateChange)="onFechaDesdeChange()"
+                  placeholder="Seleccionar fecha">
+            <mat-datepicker-toggle matSuffix [for]="pickerDesde"></mat-datepicker-toggle>
+            <mat-datepicker #pickerDesde></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="filter-item">
+          <mat-form-field appearance="outline">
+            <mat-label>Hasta</mat-label>
+            <input matInput 
+                  [matDatepicker]="pickerHasta" 
+                  [(ngModel)]="filtroFechaHastaObj"
+                  (dateChange)="onFechaHastaChange()"
+                  placeholder="Seleccionar fecha">
+            <mat-datepicker-toggle matSuffix [for]="pickerHasta"></mat-datepicker-toggle>
+            <mat-datepicker #pickerHasta></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Botones -->
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" (click)="aplicarFiltros()">
+            <mat-icon>filter_list</mat-icon>
+            Aplicar
+          </button>
+          <button mat-button (click)="limpiarFiltros()">
+            <mat-icon>clear_all</mat-icon>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando comprobantes...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon color="warn">error</mat-icon>
+        <p>{{ error }}</p>
+        <button mat-button color="primary" (click)="cargarComprobantes()">
+          Reintentar
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Tabla de comprobantes -->
+  <div *ngIf="!loading && !error" class="table-container">
+    <mat-card>
+      <mat-card-content>
+        <div class="table-responsive">
+          <table mat-table [dataSource]="comprobantes" class="mat-elevation-z0">
+            
+            <!-- ID Comprobante -->
+            <ng-container matColumnDef="id_comprobante">
+              <th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let comp">#{{ comp.id_comprobante }}</td>
+            </ng-container>
+
+            <!-- Venta -->
+            <ng-container matColumnDef="venta">
+              <th mat-header-cell *matHeaderCellDef>Venta</th>
+              <td mat-cell *matCellDef="let comp">
+                <a [routerLink]="['/ventas', comp.id_venta]" class="venta-link">
+                  #{{ comp.id_venta }}
+                </a>
+              </td>
+            </ng-container>
+
+            <!-- Tipo -->
+            <ng-container matColumnDef="tipo">
+              <th mat-header-cell *matHeaderCellDef>Tipo</th>
+              <td mat-cell *matCellDef="let comp">
+                <span class="tipo-badge" [ngClass]="getTipoClass(comp.tipo)">
+                  {{ comp.tipo }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Serie/Número -->
+            <ng-container matColumnDef="serie_numero">
+              <th mat-header-cell *matHeaderCellDef>Serie/Número</th>
+              <td mat-cell *matCellDef="let comp">
+                <strong>{{ comp.serie }}-{{ (comp.numero_secuencial || 0).toString().padStart(8, '0') }}</strong>
+              </td>
+            </ng-container>
+
+            <!-- Cliente -->
+            <ng-container matColumnDef="cliente">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let comp">{{ comp.cliente_nombre | truncate:20 }}</td>
+            </ng-container>
+
+            <!-- Después de la columna cliente, añade esta nueva columna -->
+           <!-- Después de la columna cliente, reemplaza con esto -->
+              <ng-container matColumnDef="documento">
+                <th mat-header-cell *matHeaderCellDef>RUC/DNI</th>
+                <td mat-cell *matCellDef="let comp">
+                  <div class="documento-container">
+                    <span *ngIf="comp.tipo === 'FACTURA'" class="documento-ruc" [class.sin-documento]="!comp.cliente_ruc">
+                      {{ comp.cliente_ruc || '—' }}
+                      <span class="documento-tipo" *ngIf="comp.cliente_ruc">RUC</span>
+                    </span>
+                    <span *ngIf="comp.tipo === 'BOLETA'" class="documento-dni" [class.sin-documento]="!comp.cliente_dni">
+                      {{ comp.cliente_dni || '—' }}
+                      <span class="documento-tipo" *ngIf="comp.cliente_dni">DNI</span>
+                    </span>
+                    <span *ngIf="comp.tipo === 'FACTURA' && !comp.cliente_ruc && comp.cliente_dni" class="documento-advertencia">
+                      ⚠️ Usando DNI para FACTURA
+                    </span>
+                  </div>
+                </td>
+              </ng-container>
+            <!-- Total -->
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let comp" class="text-right">
+                S/ {{ comp.total | number:'1.2-2' }}
+              </td>
+            </ng-container>
+
+            <!-- Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let comp">
+                <span class="estado-badge" [ngClass]="getEstadoClass(comp.estado)">
+                  {{ comp.estado }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Fecha Envío -->
+            <ng-container matColumnDef="fecha_envio">
+              <th mat-header-cell *matHeaderCellDef>Fecha Emisión</th>
+              <td mat-cell *matCellDef="let comp">{{ formatearFecha(comp.fecha_envio) }}</td>
+            </ng-container>
+
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let comp">
+                <div class="action-buttons">
+                  <button mat-icon-button color="primary" 
+                          matTooltip="Ver detalles"
+                          (click)="verDetalle(comp)">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button mat-icon-button color="accent"
+                          matTooltip="Descargar XML"
+                          (click)="descargarXml(comp)">
+                    <mat-icon>download</mat-icon>
+                  </button>
+                  <button *ngIf="comp.estado === 'RECHAZADO'" 
+                          mat-icon-button color="warn"
+                          matTooltip="Reenviar a SUNAT"
+                          (click)="reenviarComprobante(comp)">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <!-- Sin resultados -->
+        <div *ngIf="comprobantes.length === 0" class="no-results">
+          <mat-icon>receipt</mat-icon>
+          <h3>No hay comprobantes</h3>
+          <p>No se encontraron comprobantes con los filtros aplicados.</p>
+        </div>
+
+        <!-- Paginación -->
+        <mat-paginator *ngIf="comprobantes.length > 0"
+                       [length]="totalItems"
+                       [pageSize]="itemsPorPagina"
+                       [pageSizeOptions]="[5, 10, 25, 50]"
+                       (page)="cambiarPagina($event)"
+                       showFirstLastButtons
+                       class="paginator">
+        </mat-paginator>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+<!-- Modal de detalles MEJORADO -->
+<div *ngIf="comprobanteSeleccionado" class="modal-overlay" (click)="cerrarDetalle()">
+  <mat-card class="modal-card modal-card-modern" (click)="$event.stopPropagation()">
+    <mat-card-header class="modal-header">
+      <mat-card-title>
+        <mat-icon>receipt</mat-icon>
+        <span>Comprobante Electrónico</span>
+      </mat-card-title>
+      <button mat-icon-button class="close-btn" (click)="cerrarDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <!-- Estado badge grande -->
+      <div class="estado-header" [ngClass]="'estado-' + comprobanteSeleccionado.estado.toLowerCase()">
+        <mat-icon>{{ getEstadoIcon(comprobanteSeleccionado.estado) }}</mat-icon>
+        <span>{{ comprobanteSeleccionado.estado }} por SUNAT</span>
+      </div>
+
+      <!-- Grid de información principal -->
+      <div class="info-grid">
+        <!-- Columna izquierda -->
+        <div class="info-column">
+          <div class="info-section">
+            <h3>Información del Comprobante</h3>
+            <div class="info-row">
+              <span class="info-label">ID Comprobante:</span>
+              <span class="info-value highlight">#{{ comprobanteSeleccionado.id_comprobante }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Venta asociada:</span>
+              <a [routerLink]="['/ventas', comprobanteSeleccionado.id_venta]" class="venta-link">
+                #{{ comprobanteSeleccionado.id_venta }}
+              </a>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Tipo:</span>
+              <span class="tipo-badge" [ngClass]="getTipoClass(comprobanteSeleccionado.tipo)">
+                {{ comprobanteSeleccionado.tipo }}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Serie - Número:</span>
+              <span class="info-value serie-numero">
+                {{ comprobanteSeleccionado.serie }}-{{ comprobanteSeleccionado.numero_secuencial | number:'8.0' }}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Fecha Emisión:</span>
+              <span class="info-value">{{ formatearFecha(comprobanteSeleccionado.fecha_envio) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Fecha Generación:</span>
+              <span class="info-value">{{ formatearFecha(comprobanteSeleccionado.fecha_generacion) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna derecha -->
+        <div class="info-column">
+          <div class="info-section">
+            <h3>Información del Cliente</h3>
+            <div class="info-row">
+              <span class="info-label">Cliente:</span>
+              <span class="info-value">{{ comprobanteSeleccionado.cliente_nombre }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Documento:</span>
+              <span class="info-value" *ngIf="comprobanteSeleccionado.tipo === 'FACTURA'">
+                <span class="documento-badge ruc">RUC: {{ comprobanteSeleccionado.cliente_ruc || 'No especificado' }}</span>
+              </span>
+              <span class="info-value" *ngIf="comprobanteSeleccionado.tipo === 'BOLETA'">
+                <span class="documento-badge dni">DNI: {{ comprobanteSeleccionado.cliente_dni || 'No especificado' }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Información Económica</h3>
+            <div class="info-row total-row">
+              <span class="info-label">Total:</span>
+              <span class="info-value total-amount">S/ {{ comprobanteSeleccionado.total | number:'1.2-2' }}</span>
+            </div>
+            <div class="info-row" *ngIf="comprobanteSeleccionado.igv">
+              <span class="info-label">IGV (18%):</span>
+              <span class="info-value">S/ {{ comprobanteSeleccionado.igv | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Respuesta SUNAT mejorada -->
+      <div *ngIf="comprobanteSeleccionado.respuesta_sunat" class="sunat-response">
+        <div class="sunat-response-header">
+          <mat-icon>cloud_done</mat-icon>
+          <h4>Respuesta de SUNAT</h4>
+        </div>
+        
+        <div class="sunat-response-content">
+          <div class="response-item" *ngIf="comprobanteSeleccionado.respuesta_sunat.code">
+            <span class="response-label">Código:</span>
+            <span class="response-value">{{ comprobanteSeleccionado.respuesta_sunat.code }}</span>
+          </div>
+          <div class="response-item" *ngIf="comprobanteSeleccionado.respuesta_sunat.description">
+            <span class="response-label">Descripción:</span>
+            <span class="response-value">{{ comprobanteSeleccionado.respuesta_sunat.description }}</span>
+          </div>
+          <div class="response-item" *ngIf="comprobanteSeleccionado.respuesta_sunat.hash">
+            <span class="response-label">Hash:</span>
+            <span class="response-value hash-value">{{ comprobanteSeleccionado.respuesta_sunat.hash }}</span>
+          </div>
+        </div>
+
+        <!-- Mostrar notas si existen -->
+        <div *ngIf="comprobanteSeleccionado.respuesta_sunat.notes?.length" class="sunat-notes">
+          <h5>Notas:</h5>
+          <ul>
+            <li *ngFor="let note of comprobanteSeleccionado.respuesta_sunat.notes">{{ note }}</li>
+          </ul>
+        </div>
+
+        <!-- Vista previa del JSON (opcional) -->
+        <details class="json-preview">
+          <summary>Ver respuesta completa</summary>
+          <pre>{{ comprobanteSeleccionado.respuesta_sunat | json }}</pre>
+        </details>
+      </div>
+
+      <!-- Acciones del modal -->
+      <div class="modal-actions modern-actions">
+        <button mat-raised-button color="primary" (click)="descargarXml(comprobanteSeleccionado!)">
+          <mat-icon>download</mat-icon>
+          <span>Descargar XML</span>
+        </button>
+        <button mat-raised-button color="accent" *ngIf="comprobanteSeleccionado.estado === 'RECHAZADO'" 
+                (click)="reenviarComprobante(comprobanteSeleccionado!)">
+          <mat-icon>refresh</mat-icon>
+          <span>Reenviar a SUNAT</span>
+        </button>
+        <button mat-button (click)="cerrarDetalle()">
+          <mat-icon>close</mat-icon>
+          <span>Cerrar</span>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+</div>

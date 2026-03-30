@@ -1,0 +1,716 @@
+/* lote-list.component.css - VERSIÓN PROFESIONAL */
+.professional-container {
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Header Profesional */
+.professional-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.title-text h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0.25rem 0 0 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.header-stats {
+  display: flex;
+  gap: 2rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  min-width: 100px;
+}
+
+.stat-item.warning {
+  background: rgba(255, 152, 0, 0.2);
+}
+
+.stat-number {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* Panel de Control */
+.control-panel {
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 2rem;
+}
+
+.search-section {
+  flex: 1;
+}
+
+.search-field {
+  width: 100%;
+}
+
+.filters-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filter-btn {
+  white-space: nowrap;
+}
+
+.filtros-avanzados {
+  display: flex;
+  gap: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.filter-select {
+  min-width: 180px;
+}
+
+/* Tabla Profesional */
+.table-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem 2rem 2rem;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0 0.5rem;
+}
+
+.results-info {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.table-container {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.loading-shade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loading-shade p {
+  margin-top: 1rem;
+  color: #64748b;
+}
+
+/* Tabla Estilos */
+.professional-table {
+  width: 100%;
+  background: white;
+}
+
+.header-row {
+  background: #f8fafc;
+}
+
+.header-row th {
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.data-row {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.data-row:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.row-warning {
+  background: #fffaf0 !important;
+  border-left: 4px solid #f59e0b;
+}
+
+.row-danger {
+  background: #fef2f2 !important;
+  border-left: 4px solid #ef4444;
+}
+
+.row-low-stock {
+  background: #fffbeb !important;
+  border-left: 4px solid #f59e0b;
+}
+
+/* Columnas Específicas */
+.column-id {
+  width: 80px;
+  text-align: center;
+}
+
+.id-badge {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.column-producto {
+  min-width: 200px;
+}
+
+.producto-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.producto-nombre {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 2px;
+}
+
+.producto-detalle {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.column-lote {
+  min-width: 150px;
+}
+
+.lote-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.numero-lote {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #1e293b;
+  background: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.lote-estado {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.column-stock {
+  min-width: 120px;
+}
+
+.stock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stock-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #10b981;
+  transition: width 0.3s ease;
+}
+
+.stock-numbers {
+  font-size: 0.8rem;
+  color: #64748b;
+  min-width: 60px;
+}
+
+.stock-porcentaje {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.column-caducidad {
+  min-width: 140px;
+}
+
+.caducidad-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fecha-caducidad {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.dias-restantes {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.column-estado {
+  min-width: 120px;
+}
+
+.estado-completo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.estado-badge {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.column-acciones {
+  width: 140px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.btn-edit, .btn-delete, .btn-details {
+  transition: all 0.2s ease;
+}
+
+.btn-edit:hover {
+  background: #3b82f6 !important;
+  color: white !important;
+}
+
+.btn-delete:hover {
+  background: #ef4444 !important;
+  color: white !important;
+}
+
+.btn-details:hover {
+  background: #8b5cf6 !important;
+  color: white !important;
+}
+
+/* Estados de Stock */
+.stock-normal .lote-estado,
+.stock-normal {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.stock-bajo .lote-estado,
+.stock-bajo {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stock-medio .lote-estado,
+.stock-medio {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stock-agotado .lote-estado,
+.stock-agotado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Estados de Caducidad */
+.caducidad-normal {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.caducidad-proxima {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.caducidad-advertencia {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+.caducidad-critica {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.caducado {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+/* Sin resultados */
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #64748b;
+}
+
+.no-results mat-icon {
+  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-results h3 {
+  margin: 0 0 0.5rem 0;
+  color: #475569;
+}
+
+.no-results p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Paginador Profesional */
+.professional-paginator {
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .control-panel {
+    flex-direction: column;
+  }
+
+  .filtros-avanzados {
+    flex-direction: column;
+  }
+
+  .filter-select {
+    min-width: 100%;
+  }
+
+  .table-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .action-buttons {
+    justify-content: flex-start;
+  }
+}
+/* ===== BOTONES DE ACCIÓN MEJORADOS ===== */
+/* Copiar los mismos estilos del movimiento-stock-list.component.css */
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-details, 
+.btn-deactivate {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-details {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  color: white !important;
+}
+
+.btn-details:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4) !important;
+}
+
+.btn-deactivate {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+  color: white !important;
+}
+
+.btn-deactivate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(107, 114, 128, 0.4) !important;
+}
+
+/* Efecto de brillo */
+.btn-details::before,
+.btn-deactivate::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-details:hover::before,
+.btn-deactivate:hover::before {
+  left: 100%;
+}
+
+
+
+/* Iconos */
+.btn-details mat-icon,
+.btn-deactivate mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+
+/* Efecto ripple */
+.btn-details:active::after,
+.btn-deactivate:active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+  animation: ripple 0.4s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20, 20);
+    opacity: 0;
+  }
+}
+
+/* Versión móvil */
+@media (max-width: 768px) {
+  .action-buttons {
+    gap: 4px;
+  }
+  
+  .btn-details, 
+  .btn-deactivate {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .btn-details mat-icon,
+  .btn-deactivate mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+  }
+}
+
+/* Animación de entrada */
+.action-buttons button {
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+/* ===== TABLA RESPONSIVE MEJORADA ===== */
+
+/* Contenedor de tabla con scroll horizontal */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -1px; /* Evita bordes cortados */
+}
+
+/* Versión card para móviles muy pequeños */
+@media (max-width: 640px) {
+  .professional-table {
+    min-width: 640px; /* Fuerza scroll horizontal */
+  }
+  
+  /* Alternativa: convertir filas en cards */
+  .mobile-card-view .professional-table,
+  .professional-table.mobile-optimized {
+    min-width: auto;
+  }
+  
+  .mobile-card-view .data-row,
+  .professional-table.mobile-optimized .data-row {
+    display: block;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .mobile-card-view td,
+  .professional-table.mobile-optimized td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border: none;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+  
+  .mobile-card-view td:last-child,
+  .professional-table.mobile-optimized td:last-child {
+    border-bottom: none;
+  }
+  
+  .mobile-card-view td::before,
+  .professional-table.mobile-optimized td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    margin-right: 1rem;
+    min-width: 100px;
+  }
+  
+  /* Ocultar headers en modo card */
+  .mobile-card-view .header-row,
+  .professional-table.mobile-optimized .header-row {
+    display: none;
+  }
+}
+
+/* Mejora touch para móviles */
+@media (max-width: 768px) {
+  .action-buttons button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .id-badge {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+  }
+}

@@ -1,0 +1,319 @@
+/* ====== FORMULARIO DE CLIENTE COMPACTO ====== */
+
+/* Contenedor principal del diálogo */
+:host {
+  display: block;
+}
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0288d1;
+  margin: 0;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8fdff;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.title-icon {
+  color: #0288d1;
+}
+
+/* Contenido del diálogo - SIN SCROLL */
+.dialog-content {
+  padding: 24px;
+  max-height: none !important;
+  overflow: visible !important;
+  position: relative;
+}
+
+/* Formulario compacto */
+.cliente-form {
+  min-width: 750px;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Filas del formulario */
+.form-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* Campos del formulario */
+.form-field {
+  flex: 1;
+  min-width: 140px;
+}
+
+.form-field-large {
+  flex: 2;
+  min-width: 220px;
+}
+
+.form-field-full {
+  flex: 1;
+  min-width: 100%;
+}
+
+/* Estilos para los campos de Material */
+mat-form-field {
+  width: 100%;
+}
+
+/* Hint del documento más compacto */
+.document-hint {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Sección de coordenadas */
+.coordinates-section {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+/* Contenedor de geocodificación */
+.geocode-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.geocode-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.geocode-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.geocode-status mat-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+/* Acciones del diálogo */
+.dialog-actions {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+  margin: 0;
+  gap: 12px;
+}
+
+.cancel-button {
+  margin-right: 8px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.submit-button {
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.spinner-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+/* Estilo general del modal */
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 12px !important;
+}
+
+/* Estilos para geocodificación */
+.geocode-btn {
+  background-color: #2196f3;
+  color: white;
+  margin-top: 8px;
+}
+
+.geocode-btn:disabled {
+  background-color: #cccccc;
+}
+
+.geocode-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  color: #666;
+  font-size: 12px;
+}
+
+.geocode-status mat-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+/* Botón Limpiar (estilo consistente con Ventas) */
+.limpiar-button {
+  background-color: #009949 !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  padding: 8px 14px !important;
+  font-weight: 600;
+}
+
+.limpiar-button:hover {
+  background-color: #008040 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,153,73,0.18);
+}
+
+/* Campo de coordenadas readonly */
+mat-form-field .mat-mdc-input-element:read-only {
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 8px;
+}
+
+/* Estilos para errores */
+mat-error {
+  font-size: 0.75rem;
+}
+
+/* Responsive para pantallas más pequeñas */
+@media (max-width: 768px) {
+  .cliente-form {
+    min-width: auto;
+    max-width: 100%;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .form-field,
+  .form-field-large,
+  .form-field-full {
+    min-width: 100%;
+  }
+  
+  .dialog-content {
+    padding: 16px;
+  }
+  
+  .geocode-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* Estilos para el diálogo global */
+::ng-deep .cliente-form-dialog {
+  max-height: 85vh !important;
+}
+
+::ng-deep .cliente-form-dialog .mat-dialog-container {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+::ng-deep .cliente-form-dialog .mat-dialog-content {
+  max-height: none !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Mejoras visuales para los campos */
+::ng-deep .cliente-form-dialog .mat-form-field-outline {
+  border-radius: 4px;
+}
+
+::ng-deep .cliente-form-dialog .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+::ng-deep .cliente-form-dialog .mat-form-field-subscript-wrapper {
+  position: relative;
+  margin-top: 2px;
+}
+
+/* Snackbar styles */
+::ng-deep .success-snackbar {
+  background-color: #4caf50;
+  color: white;
+}
+
+::ng-deep .error-snackbar {
+  background-color: #f44336;
+  color: white;
+}
+
+::ng-deep .warn-snackbar {
+  background-color: #ff9800;
+  color: white;
+}
+/* Agregar estas reglas al archivo CSS existente */
+
+/* Mejoras para los hints de validación */
+.document-hint {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Estilos para campos con errores */
+.mat-form-field-invalid .mat-form-field-outline-thick {
+  color: #f44336;
+}
+
+/* Mejoras de accesibilidad para campos requeridos */
+.mat-form-field-required-marker {
+  color: #f44336;
+}
+
+/* Responsive mejorado para validaciones */
+@media (max-width: 768px) {
+  .document-hint {
+    font-size: 0.7rem;
+  }
+}
+
+/* Estilos para campos deshabilitados durante carga */
+.cliente-form:disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}

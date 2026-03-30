@@ -1,0 +1,254 @@
+<div class="proveedores-container">
+  <!-- Header con título y acciones principales -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">inventory_2</mat-icon>
+        Proveedores
+      </h1>
+      <span class="total-count" *ngIf="dataSource.data.length > 0">
+        {{ dataSource.data.length }} registros
+      </span>
+    </div>
+    
+    <div class="header-actions">
+      <button mat-stroked-button class="btn-export" (click)="exportData()">
+        <mat-icon>download</mat-icon>
+        <span class="btn-text">Exportar</span>
+      </button>
+      <button mat-raised-button class="btn-primary" (click)="addProveedor()">
+        <mat-icon>add</mat-icon>
+        <span class="btn-text">Nuevo Proveedor</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros y búsqueda avanzada -->
+  <div class="filters-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar proveedor</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input 
+        matInput 
+        (keyup)="applyFilter($event)" 
+        placeholder="Nombre, documento o razón social..."
+        #searchInput
+      >
+      <button 
+      *ngIf="searchInput.value" 
+      matSuffix 
+      mat-icon-button 
+      aria-label="Clear" 
+      (click)="clearSearch()"
+      class="clear-btn"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    </mat-form-field>
+
+    <div class="filter-chips">
+      <mat-chip-listbox aria-label="Estado" class="status-filter">
+        <mat-chip-option 
+          selected 
+          color="primary"
+          (click)="filterByStatus('todos')"
+        >
+          Todos
+        </mat-chip-option>
+        <mat-chip-option 
+          color="primary"
+          (click)="filterByStatus('activos')"
+        >
+          <span class="status-indicator active"></span>
+          Activos
+        </mat-chip-option>
+        <mat-chip-option 
+          color="primary"
+          (click)="filterByStatus('inactivos')"
+        >
+          <span class="status-indicator inactive"></span>
+          Inactivos
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+  </div>
+
+  <!-- Vista de tabla para escritorio / Vista de cards para móvil -->
+  <div class="data-container">
+    <!-- Loading state mejorado -->
+    <div class="loading-shade" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando proveedores...</p>
+    </div>
+
+    <!-- Vista Desktop: Tabla -->
+    <div class="table-view desktop-only" *ngIf="!isLoading">
+      <div class="table-wrapper mat-elevation-z2">
+        <table mat-table [dataSource]="dataSource" matSort>
+          <!-- ID (oculto en móvil) -->
+          <ng-container matColumnDef="id_proveedor">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+            <td mat-cell *matCellDef="let row">#{{ row.id_proveedor }}</td>
+          </ng-container>
+
+          <!-- Razón Social -->
+          <ng-container matColumnDef="razon_social">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Razón Social</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="cell-with-icon">
+                <mat-icon class="company-icon">business</mat-icon>
+                <span class="truncate-text">{{ row.razon_social }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Contacto (Nombre y Teléfono combinados para mejor espacio) -->
+          <ng-container matColumnDef="contacto">
+            <th mat-header-cell *matHeaderCellDef>Contacto</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="contact-info">
+                <span class="contact-name">{{ row.nombre_completo }}</span>
+                <span class="contact-phone">
+                  <mat-icon class="small-icon">phone</mat-icon>
+                  {{ row.telefono || 'N/A' }}
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Documento -->
+          <ng-container matColumnDef="documento">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Documento</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="document-badge">
+                {{ row.tipo_documento }}: {{ row.numero_documento }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Dirección (con ícono) -->
+          <ng-container matColumnDef="direccion">
+            <th mat-header-cell *matHeaderCellDef>Dirección</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="address-cell" *ngIf="row.direccion; else noAddress">
+                <mat-icon class="small-icon">location_on</mat-icon>
+                <span class="truncate-text">{{ row.direccion }}</span>
+              </div>
+              <ng-template #noAddress>
+                <span class="na-text">—</span>
+              </ng-template>
+            </td>
+          </ng-container>
+
+          <!-- Estado mejorado -->
+          <ng-container matColumnDef="activo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="status-badge-modern" [class.active]="row.activo" [class.inactive]="!row.activo">
+                <span class="status-dot"></span>
+                {{ row.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="action-buttons">
+                <button mat-icon-button class="action-btn edit-btn" (click)="editProveedor(row)" matTooltip="Editar proveedor">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button class="action-btn delete-btn" (click)="deleteProveedor(row)" matTooltip="Eliminar proveedor">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <!-- Fila cuando no hay datos -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+              <div class="no-data-container">
+                <mat-icon class="no-data-icon">inbox</mat-icon>
+                <p class="no-data-text">No se encontraron proveedores</p>
+                <button mat-stroked-button color="primary" (click)="addProveedor()">
+                  Crear nuevo proveedor
+                </button>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <mat-paginator 
+        [pageSizeOptions]="[5, 10, 25, 50]" 
+        [pageSize]="10"
+        showFirstLastButtons
+        class="paginator-modern">
+      </mat-paginator>
+    </div>
+
+    <!-- Vista Móvil: Cards -->
+    <div class="mobile-view mobile-only" *ngIf="!isLoading">
+      <div class="cards-container">
+        <mat-card class="proveedor-card" *ngFor="let proveedor of filteredData" (click)="viewDetails(proveedor)">
+          <mat-card-header>
+            <div mat-card-avatar class="card-avatar" [class.active-avatar]="proveedor.activo">
+              <mat-icon>business</mat-icon>
+            </div>
+            <mat-card-title>{{ proveedor.razon_social }}</mat-card-title>
+            <mat-card-subtitle>
+              <span class="card-id">#{{ proveedor.id_proveedor }}</span>
+              <span class="status-badge-mini" [class.active]="proveedor.activo" [class.inactive]="!proveedor.activo">
+                {{ proveedor.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </mat-card-subtitle>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="card-details">
+              <div class="detail-item">
+                <mat-icon class="detail-icon">person</mat-icon>
+                <span>{{ proveedor.nombre_completo }}</span>
+              </div>
+              <div class="detail-item" *ngIf="proveedor.telefono">
+                <mat-icon class="detail-icon">phone</mat-icon>
+                <span>{{ proveedor.telefono }}</span>
+              </div>
+              <div class="detail-item">
+                <mat-icon class="detail-icon">badge</mat-icon>
+                <span>{{ proveedor.tipo_documento }}: {{ proveedor.numero_documento }}</span>
+              </div>
+              <div class="detail-item" *ngIf="proveedor.direccion">
+                <mat-icon class="detail-icon">location_on</mat-icon>
+                <span class="truncate-text">{{ proveedor.direccion }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions align="end">
+            <button mat-button color="primary" (click)="editProveedor(proveedor); $event.stopPropagation()">
+              <mat-icon>edit</mat-icon> Editar
+            </button>
+            <button mat-button color="warn" (click)="deleteProveedor(proveedor); $event.stopPropagation()">
+              <mat-icon>delete</mat-icon> Eliminar
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Mensaje sin resultados para móvil -->
+        <div class="no-data-mobile" *ngIf="filteredData.length === 0">
+          <mat-icon class="no-data-icon">inbox</mat-icon>
+          <p>No se encontraron proveedores</p>
+          <button mat-raised-button color="primary" (click)="addProveedor()">
+            Agregar proveedor
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

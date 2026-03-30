@@ -1,0 +1,251 @@
+/* src/app/features/pages/insumo-list/insumo-list.component.css */
+.insumos-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+/* Header */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  margin: 0 0 8px 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-icon {
+  font-size: 2.2rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  color: #27ae60;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.add-button {
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0 24px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+/* Search */
+.search-section {
+  margin-bottom: 24px;
+}
+
+.search-field {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Table */
+.table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.mat-header-cell {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.85rem;
+  padding: 16px 12px;
+}
+
+.mat-cell {
+  padding: 12px;
+  font-size: 0.9rem;
+}
+
+.nombre-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.descripcion {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+.unidad-badge {
+  background: #ecf0f1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.stock {
+  font-weight: 600;
+}
+
+.stock.status-agotado {
+  color: #e74c3c;
+}
+
+.stock.status-bajo {
+  color: #f39c12;
+}
+
+.stock.status-normal {
+  color: #27ae60;
+}
+
+.costo {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.estado-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.estado-badge.activo {
+  background: #e8f5e9;
+  color: #27ae60;
+}
+
+.estado-badge.inactivo {
+  background: #ffebee;
+  color: #e74c3c;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+/* Loading */
+.loading-shade {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  background: white;
+  border-radius: 12px;
+}
+
+/* No data */
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  color: #7f8c8d;
+  text-align: center;
+}
+
+.no-data mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* Mobile Cards */
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.insumo-card {
+  border-radius: 12px;
+  border-left: 4px solid #27ae60;
+}
+
+.card-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.card-badge.status-agotado {
+  background: #ffebee;
+  color: #e74c3c;
+}
+
+.card-badge.status-bajo {
+  background: #fff3e0;
+  color: #f39c12;
+}
+
+.card-badge.status-normal {
+  background: #e8f5e9;
+  color: #27ae60;
+}
+
+.card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-item mat-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: #7f8c8d;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .insumos-container {
+    padding: 16px;
+  }
+
+  .header-section {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .page-title {
+    font-size: 1.6rem;
+  }
+}

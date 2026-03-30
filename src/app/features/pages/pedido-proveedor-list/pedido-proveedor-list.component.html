@@ -1,0 +1,350 @@
+<!-- pedido-proveedor-list.component.html - VERSIÓN COMPLETA CORREGIDA -->
+<div class="container">
+  <div class="header-section">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">inventory</mat-icon>
+        Pedidos a Proveedor
+      </h1>
+      <p class="page-subtitle">Gestiona y realiza seguimiento a tus pedidos de insumos</p>
+    </div>
+    
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="addPedido()" class="new-order-btn">
+        <mat-icon>add</mat-icon>
+        Nuevo Pedido
+      </button>
+    </div>
+  </div>
+
+<!-- Panel de Filtros y Búsqueda - VERSIÓN CORREGIDA -->
+<!-- pedido-proveedor-list.component.html - CORREGIR FILTRO ESTADO -->
+<div class="filters-panel">
+  <div class="filters-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar pedidos</mat-label>
+      <input matInput (keyup)="applyFilter($event)" 
+             placeholder="Buscar por proveedor, estado o ID..."/>
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <!-- ✅ CORREGIDO: Cambiar a select simple como en ventas -->
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Estado</mat-label>
+      <mat-select (selectionChange)="filterByEstado($event.value)" [value]="selectedEstado">
+        <mat-option [value]="0">Todos los estados</mat-option>
+        <mat-option [value]="1">Solicitado</mat-option>
+        <mat-option [value]="2">Confirmado</mat-option>
+        <mat-option [value]="3">En camino</mat-option>
+        <mat-option [value]="4">Recibido</mat-option>
+        <mat-option [value]="5">Cancelado</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Campos de fecha (mantener igual) -->
+    <mat-form-field appearance="outline" class="date-field">
+      <mat-label>Fecha desde</mat-label>
+      <input matInput [matDatepicker]="startPicker" 
+             (dateChange)="filterByDate()"
+             [(ngModel)]="fechaInicio"
+             placeholder="DD/MM/AAAA">
+      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="date-field">
+      <mat-label>Fecha hasta</mat-label>
+      <input matInput [matDatepicker]="endPicker" 
+             (dateChange)="filterByDate()"
+             [(ngModel)]="fechaFin"
+             placeholder="DD/MM/AAAA">
+      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+      <mat-icon>clear</mat-icon>
+      Limpiar Filtros
+    </button>
+  </div>
+</div>
+
+  <!-- Tarjetas para Vista Móvil -->
+  <div class="cards-container" *ngIf="isMobileView">
+    <div class="loading-shade" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando pedidos...</p>
+    </div>
+
+    <mat-card *ngFor="let pedido of dataSource.data" class="pedido-card" 
+              [class]="'estado-' + (pedido.estado?.estado?.toLowerCase()?.replace(' ', '-') || 'desconocido')">
+      <mat-card-header>
+        <mat-card-title>Pedido #{{ pedido.id_pedido }}</mat-card-title>
+        <mat-card-subtitle>{{ pedido.proveedor?.razon_social }}</mat-card-subtitle>
+        <div class="card-badge" [class]="'badge-' + (pedido.estado?.estado?.toLowerCase()?.replace(' ', '-') || 'desconocido')">
+          {{ pedido.estado?.estado || 'Desconocido' }}
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="card-details">
+          <div class="detail-item">
+            <mat-icon>event</mat-icon>
+            <span>{{ pedido.fecha | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>payments</mat-icon>
+            <span>{{ pedido.total | currency:'PEN':'S/ ' }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>inventory_2</mat-icon>
+            <span>{{ getCantidadItems(pedido) }} items</span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-icon-button color="primary" (click)="verDetallesModal(pedido)" 
+                matTooltip="Ver detalles completos">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button mat-icon-button color="accent" (click)="editPedido(pedido)" 
+                matTooltip="Editar pedido"
+                [disabled]="pedido.id_estado_pedido === 4 || pedido.id_estado_pedido === 5">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deletePedido(pedido)" 
+                matTooltip="Eliminar pedido"
+                [disabled]="pedido.id_estado_pedido !== 1">
+          <mat-icon>delete</mat-icon>
+        </button>
+        
+        <!-- Menú de estado rápido para móviles -->
+        <button mat-icon-button [matMenuTriggerFor]="statusMenu" 
+                class="action-btn" 
+                matTooltip="Cambiar estado">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #statusMenu="matMenu" class="status-menu">
+          <button mat-menu-item (click)="cambiarEstado(pedido, 2)" 
+                  [disabled]="pedido.id_estado_pedido !== 1">
+            <mat-icon>check_circle</mat-icon>
+            <span>Confirmar</span>
+          </button>
+          <button mat-menu-item (click)="cambiarEstado(pedido, 3)" 
+                  [disabled]="pedido.id_estado_pedido !== 2">
+            <mat-icon>local_shipping</mat-icon>
+            <span>En camino</span>
+          </button>
+          <button mat-menu-item (click)="cambiarEstado(pedido, 4)" 
+                  [disabled]="pedido.id_estado_pedido !== 3">
+            <mat-icon>inventory</mat-icon>
+            <span>Recibir</span>
+          </button>
+          <button mat-menu-item (click)="cambiarEstado(pedido, 5)" 
+                  [disabled]="pedido.id_estado_pedido === 4 || pedido.id_estado_pedido === 5">
+            <mat-icon>cancel</mat-icon>
+            <span>Cancelar</span>
+          </button>
+        </mat-menu>
+      </mat-card-actions>
+    </mat-card>
+
+ <!-- En la sección de tarjetas móviles -->
+<div class="no-data" *ngIf="!isLoading && dataSource.data.length === 0">
+  <mat-icon>inventory</mat-icon>
+  <h3>No se encontraron pedidos</h3>
+  <!-- ✅ CORREGIDO: Cambiar selectedEstados por selectedEstado -->
+  <p *ngIf="selectedEstado > 0 || fechaInicio || fechaFin">
+    Intenta ajustar los filtros aplicados
+  </p>
+  <p *ngIf="selectedEstado === 0 && !fechaInicio && !fechaFin">
+    Comienza creando tu primer pedido a proveedor
+  </p>
+  <button mat-raised-button color="primary" (click)="addPedido()">
+    <mat-icon>add</mat-icon>
+    Crear Primer Pedido
+  </button>
+</div>
+  </div>
+
+  <!-- Tabla para Vista Desktop -->
+  <div class="table-container" *ngIf="!isMobileView">
+    <div class="loading-shade" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando pedidos...</p>
+    </div>
+
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 custom-table">
+      
+      <!-- Columna ID -->
+      <ng-container matColumnDef="id_pedido">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+        <td mat-cell *matCellDef="let row" class="id-cell">
+          <strong>#{{ row.id_pedido }}</strong>
+        </td>
+      </ng-container>
+
+      <!-- Columna Proveedor -->
+      <ng-container matColumnDef="proveedor">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Proveedor</th>
+        <td mat-cell *matCellDef="let row" class="proveedor-cell">
+          <div class="proveedor-info">
+            <mat-icon class="cell-icon">business</mat-icon>
+            <span>{{ row.proveedor?.razon_social }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Columna Fecha -->
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+        <td mat-cell *matCellDef="let row" class="fecha-cell">
+          <div class="fecha-info">
+            <mat-icon class="cell-icon">event</mat-icon>
+            <span>{{ row.fecha | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Columna Total -->
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+        <td mat-cell *matCellDef="let row" class="total-cell">
+          <div class="total-info">
+            <mat-icon class="cell-icon">payments</mat-icon>
+            <span>{{ row.total | currency:'PEN':'S/ ' }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Columna Estado -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="estado-badge" [class]="'estado-' + (row.estado?.estado?.toLowerCase()?.replace(' ', '-') || 'desconocido')">
+            <mat-icon class="estado-icon">{{ getEstadoIcon(row.estado?.estado) }}</mat-icon>
+            {{ row.estado?.estado || 'Desconocido' }}
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Columna Detalles -->
+      <ng-container matColumnDef="detalles">
+        <th mat-header-cell *matHeaderCellDef>Insumos</th>
+        <td mat-cell *matCellDef="let row" class="detalles-cell">
+          <div class="detalles-resumen">
+            <div class="items-count">
+              <mat-icon class="cell-icon">inventory_2</mat-icon>
+              <span>{{ getCantidadItems(row) }} items</span>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Columna Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="actions-header">Acciones</th>
+        <td mat-cell *matCellDef="let row" class="actions-cell">
+          <div class="actions-container">
+            <button mat-icon-button color="primary" (click)="verDetallesModal(row)" 
+                    class="action-btn" matTooltip="Ver detalles completos">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            
+            <button mat-icon-button color="accent" (click)="editPedido(row)" 
+                    class="action-btn" matTooltip="Editar pedido"
+                    [disabled]="row.id_estado_pedido === 4 || row.id_estado_pedido === 5">
+              <mat-icon>edit</mat-icon>
+            </button>
+            
+            <button mat-icon-button color="warn" (click)="deletePedido(row)" 
+                    class="action-btn" matTooltip="Eliminar pedido"
+                    [disabled]="row.id_estado_pedido !== 1">
+              <mat-icon>delete</mat-icon>
+            </button>
+
+            <!-- Menú de estado rápido - MEJORADO -->
+            <button mat-icon-button [matMenuTriggerFor]="statusMenu" 
+                    class="action-btn" 
+                    matTooltip="Cambiar estado del pedido">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #statusMenu="matMenu" class="status-menu">
+              <div class="menu-header">
+                <h4>Cambiar Estado</h4>
+                <p>Pedido #{{ row.id_pedido }}</p>
+              </div>
+              <mat-divider></mat-divider>
+              
+              <button mat-menu-item (click)="cambiarEstado(row, 2)" 
+                      [disabled]="row.id_estado_pedido !== 1"
+                      class="menu-item">
+                <mat-icon color="primary">check_circle</mat-icon>
+                <div class="menu-item-content">
+                  <span class="menu-title">Confirmar</span>
+                  <span class="menu-description">El proveedor aceptó el pedido</span>
+                </div>
+              </button>
+              
+              <button mat-menu-item (click)="cambiarEstado(row, 3)" 
+                      [disabled]="row.id_estado_pedido !== 2"
+                      class="menu-item">
+                <mat-icon color="accent">local_shipping</mat-icon>
+                <div class="menu-item-content">
+                  <span class="menu-title">En camino</span>
+                  <span class="menu-description">Los insumos están en transporte</span>
+                </div>
+              </button>
+              
+              <button mat-menu-item (click)="cambiarEstado(row, 4)" 
+                      [disabled]="row.id_estado_pedido !== 3"
+                      class="menu-item">
+                <mat-icon color="primary">inventory</mat-icon>
+                <div class="menu-item-content">
+                  <span class="menu-title">Recibir</span>
+                  <span class="menu-description">Los insumos llegaron al almacén</span>
+                </div>
+              </button>
+              
+              <button mat-menu-item (click)="cambiarEstado(row, 5)" 
+                      [disabled]="row.id_estado_pedido === 4 || row.id_estado_pedido === 5"
+                      class="menu-item cancel-item">
+                <mat-icon color="warn">cancel</mat-icon>
+                <div class="menu-item-content">
+                  <span class="menu-title">Cancelar</span>
+                  <span class="menu-description">Anular este pedido</span>
+                </div>
+              </button>
+            </mat-menu>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+     <!-- En la tabla desktop -->
+<tr class="mat-row no-data-row" *matNoDataRow>
+  <td class="mat-cell" colspan="7">
+    <div class="no-data-table">
+      <mat-icon>search_off</mat-icon>
+      <h3>No se encontraron pedidos</h3>
+      <!-- ✅ CORREGIDO: Cambiar selectedEstados por selectedEstado -->
+      <p *ngIf="selectedEstado > 0 || fechaInicio || fechaFin">
+        Intenta ajustar los filtros aplicados
+      </p>
+      <p *ngIf="selectedEstado === 0 && !fechaInicio && !fechaFin">
+        Crea un nuevo pedido para comenzar
+      </p>
+    </div>
+  </td>
+</tr>
+    </table>
+
+    <!-- En pedido-proveedor-list.component.html - línea 346 -->
+<mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons
+               [length]="dataSource.filteredData.length || 0" class="custom-paginator">
+</mat-paginator>
+  </div>
+</div>
