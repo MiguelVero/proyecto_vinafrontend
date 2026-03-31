@@ -19,7 +19,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { Product } from '../../core/models/producto.model';
 import { ClienteRapidoFormComponent } from '../cliente-rapido-form/cliente-rapido-form.component';
 import Swal from 'sweetalert2';
-
+import { PersonalizacionService } from '../../core/services/personalizacion.service';
 @Component({
   selector: 'app-recarga-rapida',
   standalone: true,
@@ -46,7 +46,7 @@ export class RecargaRapidaComponent implements OnInit {
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
-
+  public personalizacionService = inject(PersonalizacionService);
   // Datos del formulario
   clientes: ClienteVenta[] = [];
   productos: Product[] = [];
@@ -55,7 +55,19 @@ export class RecargaRapidaComponent implements OnInit {
   cantidad: number = 1;
   metodoPago: number = 1; // 1: Efectivo, 2: Yape
   notas: string = '';
-  
+  // Agregar esta propiedad computada
+get telefonoYape(): string {
+  const telefono = this.personalizacionService.config()?.telefono;
+  if (telefono && telefono.trim() !== '') {
+    // Formatear el teléfono para mostrar (ej: 959 203 847)
+    const numeros = telefono.replace(/\D/g, '');
+    if (numeros.length === 9) {
+      return `${numeros.slice(0, 3)} ${numeros.slice(3, 6)} ${numeros.slice(6, 9)}`;
+    }
+    return telefono;
+  }
+  return '999 999 999'; // fallback por si no hay teléfono configurado
+}
   // Estados
   loading = false;
   searchCliente = '';
@@ -253,7 +265,7 @@ export class RecargaRapidaComponent implements OnInit {
                 
                 <div style="background: #f0f0f0; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
                   <p><strong>Número Yape de la empresa:</strong></p>
-                  <p style="font-size: 1.2rem; font-weight: bold; color: #25D366;">999 999 999</p>
+                  <p style="font-size: 1.2rem; font-weight: bold; color: #25D366;">${this.telefonoYape}</p>
                 </div>
                 
                 <div id="yape-status" style="margin: 1rem 0; padding: 0.75rem; background: #e3f2fd; border-radius: 8px;">
