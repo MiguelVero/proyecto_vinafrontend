@@ -221,10 +221,9 @@ get telefonoYape(): string {
     }
   }
 
-  private procesarYape(total: number, concepto: string): void {
+private procesarYape(total: number, concepto: string): void {
   this.loading = true;
   
-  // Primero crear la recarga en estado "pendiente" (estado 4 = Listo para repartos)
   const recargaData = {
     id_cliente: this.clienteSeleccionado!.id_cliente,
     id_producto: this.productoSeleccionado!.id_producto!,
@@ -238,161 +237,119 @@ get telefonoYape(): string {
     next: (response) => {
       const id_venta = response.recarga.id_venta;
       
-      // Solicitar código de verificación
-      this.recargaService.solicitarCodigoYape(id_venta, total).subscribe({
-        next: (codigoResponse) => {
-          const codigo = codigoResponse.codigo;
-          
-          this.loading = false;
-          
-          // Mostrar modal con código
-          Swal.fire({
-            title: '💛 Pago con Yape',
-            html: `
-              <div style="text-align: center;">
-                <div style="font-size: 2rem; margin: 1rem 0;">💛</div>
-                <p><strong>Monto a pagar: S/ ${total.toFixed(2)}</strong></p>
-                
-                <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                  <p><strong>🔐 CÓDIGO DE VERIFICACIÓN:</strong></p>
-                  <p style="font-size: 2rem; font-weight: bold; font-family: monospace; letter-spacing: 2px;">
-                    ${codigo}
-                  </p>
-                  <p style="font-size: 0.8rem; color: #856404;">
-                    El cliente debe colocar ESTE CÓDIGO en el mensaje de Yape
-                  </p>
-                </div>
-                
-                <div style="background: #f0f0f0; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-                  <p><strong>Número Yape de la empresa:</strong></p>
-                  <p style="font-size: 1.2rem; font-weight: bold; color: #25D366;">${this.telefonoYape}</p>
-                </div>
-                
-                <div id="yape-status" style="margin: 1rem 0; padding: 0.75rem; background: #e3f2fd; border-radius: 8px;">
-                  <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                    <div class="spinner" style="width: 16px; height: 16px;"></div>
-                    <span>Esperando confirmación de Yape...</span>
-                  </div>
-                  <small id="yape-timer" style="display: block; margin-top: 0.5rem; color: #666;">
-                    Tiempo de espera: 2:00
-                  </small>
-                </div>
-                
-                <div id="yape-success" style="display: none; margin: 1rem 0; padding: 0.75rem; background: #e8f5e9; border-radius: 8px; color: #2e7d32;">
-                  ✅ ¡Pago confirmado! Redirigiendo...
-                </div>
-                
-                <div id="yape-error" style="display: none; margin: 1rem 0; padding: 0.75rem; background: #ffebee; border-radius: 8px; color: #c62828;">
-                  ❌ Tiempo de espera agotado. El pago no fue confirmado.
-                </div>
+      // ✅ YA NO SE SOLICITA CÓDIGO - se elimina esta parte
+      // this.recargaService.solicitarCodigoYape(id_venta, total).subscribe(...)
+      
+      this.loading = false;
+      
+      // Mostrar modal ESPERANDO PAGO (sin código)
+      Swal.fire({
+        title: '💛 Pago con Yape',
+        html: `
+          <div style="text-align: center;">
+            <div style="font-size: 2rem; margin: 1rem 0;">💛</div>
+            <p><strong>Monto a pagar: S/ ${total.toFixed(2)}</strong></p>
+            
+            <div style="background: #f0f0f0; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+              <p><strong>Número Yape de la empresa:</strong></p>
+              <p style="font-size: 1.2rem; font-weight: bold; color: #25D366;">${this.telefonoYape}</p>
+            </div>
+            
+            <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+              <p><strong>📱 Instrucciones:</strong></p>
+              <p>El cliente debe realizar el pago por Yape al número de la empresa.</p>
+              <p>El sistema detectará automáticamente el pago cuando llegue la notificación.</p>
+              <p style="font-size: 0.8rem; color: #666;">No es necesario escribir ningún código en el mensaje.</p>
+            </div>
+            
+            <div id="yape-status" style="margin: 1rem 0; padding: 0.75rem; background: #e3f2fd; border-radius: 8px;">
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <div class="spinner" style="width: 16px; height: 16px;"></div>
+                <span>Esperando confirmación de Yape...</span>
               </div>
-            `,
-            icon: 'info',
-            showConfirmButton: false,
-            showCancelButton: true,
-            cancelButtonText: 'Cancelar',
-            cancelButtonColor: '#d33',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-              let tiempoRestante = 120;
-              const timerElement = document.getElementById('yape-timer');
-              const statusElement = document.getElementById('yape-status');
-              const successElement = document.getElementById('yape-success');
-              const errorElement = document.getElementById('yape-error');
-              
-              // Iniciar polling para verificar el pago
-              const subscription = this.recargaService.verificarPagoYape(id_venta, 120)
-                .subscribe({
-                  next: (result: any) => {
-                    if (result.pagado) {
-                      // Pago confirmado
-                      if (timerElement) timerElement.style.display = 'none';
-                      if (statusElement) statusElement.style.display = 'none';
-                      if (successElement) successElement.style.display = 'block';
-                      
-                      Swal.showLoading();
-                      
-                      setTimeout(() => {
-                        subscription.unsubscribe();
-                        Swal.fire({
-                          title: '✅ Pago Confirmado',
-                          html: `
-                            <p>El pago con Yape ha sido confirmado</p>
-                            <p><strong>Transacción:</strong> ${result.transaction_id}</p>
-                            <p><strong>Cliente:</strong> ${this.clienteSeleccionado?.nombre_completo}</p>
-                            <p><strong>Monto:</strong> S/ ${total.toFixed(2)}</p>
-                          `,
-                          icon: 'success',
-                          confirmButtonText: 'Aceptar'
-                        }).then(() => {
-                          this.limpiarFormulario();
-                          window.dispatchEvent(new CustomEvent('recarga-realizada'));
-                        });
-                      }, 1500);
-                    } else if (result.timeout) {
-                      // Tiempo agotado
-                      if (timerElement) timerElement.style.display = 'none';
-                      if (statusElement) statusElement.style.display = 'none';
-                      if (errorElement) errorElement.style.display = 'block';
-                      
-                      subscription.unsubscribe();
-                      
-                      Swal.fire({
-                        title: '⏱️ Tiempo agotado',
-                        text: 'No se recibió confirmación de pago. Por favor, verifique si el cliente realizó el pago correctamente.',
-                        icon: 'warning',
-                        confirmButtonText: 'Entendido'
-                      }).then(() => {
-                        // Opcional: cancelar la venta pendiente
-                        this.cancelarVentaPendiente(id_venta);
-                      });
-                    }
-                  },
-                  error: (err) => {
-                    console.error('Error verificando pago:', err);
-                    subscription.unsubscribe();
-                    if (statusElement) statusElement.style.display = 'none';
-                    if (errorElement) errorElement.style.display = 'block';
-                  }
-                });
-              
-              // Temporizador visual
-              const intervalId = setInterval(() => {
-                tiempoRestante--;
-                const minutos = Math.floor(tiempoRestante / 60);
-                const segundos = tiempoRestante % 60;
-                
-                if (timerElement) {
-                  timerElement.innerHTML = `Tiempo de espera: ${minutos}:${segundos.toString().padStart(2, '0')}`;
+              <small id="yape-timer" style="display: block; margin-top: 0.5rem; color: #666;">
+                Tiempo de espera: 2:00
+              </small>
+            </div>
+            
+            <div id="yape-success" style="display: none; margin: 1rem 0; padding: 0.75rem; background: #e8f5e9; border-radius: 8px; color: #2e7d32;">
+              ✅ ¡Pago confirmado! Redirigiendo...
+            </div>
+            
+            <div id="yape-error" style="display: none; margin: 1rem 0; padding: 0.75rem; background: #ffebee; border-radius: 8px; color: #c62828;">
+              ❌ Tiempo de espera agotado. El pago no fue confirmado.
+            </div>
+          </div>
+        `,
+        icon: 'info',
+        showConfirmButton: false,
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+        cancelButtonColor: '#d33',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          // Iniciar polling para verificar el pago
+          const subscription = this.recargaService.verificarPagoYape(id_venta, 120)
+            .subscribe({
+              next: (result: any) => {
+                if (result.pagado) {
+                  // Pago confirmado
+                  Swal.fire({
+                    title: '✅ Pago Confirmado',
+                    html: `
+                      <p>El pago con Yape ha sido confirmado</p>
+                      <p><strong>Código de seguridad:</strong> ${result.codigo_seguridad || 'N/A'}</p>
+                      <p><strong>Cliente:</strong> ${this.clienteSeleccionado?.nombre_completo}</p>
+                      <p><strong>Monto:</strong> S/ ${total.toFixed(2)}</p>
+                    `,
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar'
+                  }).then(() => {
+                    this.limpiarFormulario();
+                    window.dispatchEvent(new CustomEvent('recarga-realizada'));
+                  });
+                } else if (result.timeout) {
+                  subscription.unsubscribe();
+                  Swal.fire({
+                    title: '⏱️ Tiempo agotado',
+                    text: 'No se recibió confirmación de pago. Por favor, verifique si el cliente realizó el pago correctamente.',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                  }).then(() => {
+                    this.cancelarVentaPendiente(id_venta);
+                  });
                 }
-                
-                if (tiempoRestante <= 0) {
-                  clearInterval(intervalId);
-                }
-              }, 1000);
-              
-              // Guardar referencias para limpiar al cerrar
-              (Swal as any).getPopup()?.setAttribute('data-subscription', subscription);
-              (Swal as any).getPopup()?.setAttribute('data-interval', intervalId);
-            },
-            willClose: () => {
-              const subscription = (Swal as any).getPopup()?.getAttribute('data-subscription');
-              const interval = (Swal as any).getPopup()?.getAttribute('data-interval');
-              if (subscription) subscription.unsubscribe();
-              if (interval) clearInterval(interval);
+              },
+              error: (err) => {
+                console.error('Error verificando pago:', err);
+                subscription.unsubscribe();
+              }
+            });
+          
+          // Temporizador visual
+          let tiempoRestante = 120;
+          const timerElement = document.getElementById('yape-timer');
+          const intervalId = setInterval(() => {
+            tiempoRestante--;
+            const minutos = Math.floor(tiempoRestante / 60);
+            const segundos = tiempoRestante % 60;
+            if (timerElement) {
+              timerElement.innerHTML = `Tiempo de espera: ${minutos}:${segundos.toString().padStart(2, '0')}`;
             }
-          });
+            if (tiempoRestante <= 0) {
+              clearInterval(intervalId);
+            }
+          }, 1000);
+          
+          (Swal as any).getPopup()?.setAttribute('data-subscription', subscription);
+          (Swal as any).getPopup()?.setAttribute('data-interval', intervalId);
         },
-        error: (err) => {
-          this.loading = false;
-          console.error('Error generando código Yape:', err);
-          Swal.fire({
-            title: '❌ Error',
-            text: 'No se pudo generar el código de verificación',
-            icon: 'error',
-            confirmButtonText: 'Entendido'
-          });
+        willClose: () => {
+          const subscription = (Swal as any).getPopup()?.getAttribute('data-subscription');
+          const interval = (Swal as any).getPopup()?.getAttribute('data-interval');
+          if (subscription) subscription.unsubscribe();
+          if (interval) clearInterval(interval);
         }
       });
     },

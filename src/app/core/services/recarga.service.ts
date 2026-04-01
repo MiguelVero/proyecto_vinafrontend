@@ -22,10 +22,10 @@ export class RecargaService {
     return this.http.patch(`${this.apiUrl}/${id_venta}/cancelar`, { motivo });
   }
 
-  // Solicitar código Yape
-  solicitarCodigoYape(id_venta: number, monto: number): Observable<any> {
-    return this.http.post(`${this.yapeApiUrl}/solicitar-codigo`, { id_venta, monto });
-  }
+ // Eliminar o comentar este método ya que no se usará
+// solicitarCodigoYape(id_venta: number, monto: number): Observable<any> {
+//   return this.http.post(`${this.yapeApiUrl}/solicitar-codigo`, { id_venta, monto });
+// }
 
   // Verificar estado de pago Yape (polling cada 3 segundos)
   verificarPagoYape(id_venta: number, timeoutSegundos: number = 120): Observable<any> {
