@@ -33,36 +33,32 @@
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
-       <div class="filters-section">
+
+    <div class="filters-section">
       <button mat-stroked-button (click)="toggleFiltrosAvanzados()" class="filter-btn">
         <mat-icon>filter_list</mat-icon>
         Filtros Avanzados
       </button>
-      
-   
-      <div class="filtros-avanzados" *ngIf="mostrarFiltrosAvanzados">
-       <!-- En lote-list.component.html - Modificar los mat-select -->
-          <mat-form-field appearance="outline" class="filter-select">
-            <mat-label>Estado de Stock</mat-label>
-            <mat-select (selectionChange)="aplicarFiltroStock($event.value)" 
-                        [value]="filtrosLotes.stock" multiple>
-              <mat-option value="normal">Stock Normal</mat-option>
-              <mat-option value="bajo">Stock Bajo</mat-option>
-              <!-- <mat-option value="agotado">Agotado</mat-option> -->
-            </mat-select>
-          </mat-form-field>
 
-          <mat-form-field appearance="outline" class="filter-select">
-            <mat-label>Estado de Caducidad</mat-label>
-            <mat-select (selectionChange)="aplicarFiltroCaducidad($event.value)" 
-                        [value]="filtrosLotes.caducidad" multiple>
-              <mat-option value="normal">Caducidad Normal</mat-option>
-              <mat-option value="proxima">Próximo a Caducar</mat-option>
-              <mat-option value="critica">Caducidad Crítica</mat-option>
-              <mat-option value="caducado">Caducado</mat-option>
-            </mat-select>
-          </mat-form-field>
-        <!-- En el botón de limpiar filtros -->
+      <div class="filtros-avanzados" *ngIf="mostrarFiltrosAvanzados">
+        <mat-form-field appearance="outline" class="filter-select">
+          <mat-label>Estado de Stock</mat-label>
+          <mat-select (selectionChange)="aplicarFiltroStock($event.value)" 
+                      [value]="filtrosLotes.stock" multiple>
+            <mat-option value="normal">Stock Normal</mat-option>
+            <mat-option value="bajo">Stock Bajo</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-select">
+          <mat-label>Estado de Caducidad</mat-label>
+          <mat-select (selectionChange)="aplicarFiltroCaducidad($event.value)" 
+                      [value]="filtrosLotes.caducidad" multiple>
+            <mat-option value="proxima">Próximo a Caducar</mat-option>
+            <mat-option value="caducado">Caducado</mat-option>
+          </mat-select>
+        </mat-form-field>
+
         <button mat-button color="warn" (click)="limpiarFiltrosLotes()" class="clear-filters">
           <mat-icon>clear</mat-icon>
           Limpiar
@@ -79,14 +75,6 @@
           Mostrando {{ dataSource.filteredData.length }} de {{ dataSource.data.length }} lotes
         </span>
       </div>
-      <div class="table-actions">
-        <button mat-icon-button (click)="exportarExcel()" matTooltip="Exportar a Excel">
-          <mat-icon>download</mat-icon>
-        </button>
-        <button mat-icon-button (click)="recargarDatos()" matTooltip="Recargar datos">
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </div>
     </div>
 
     <div class="table-container">
@@ -96,7 +84,7 @@
       </div>
 
       <table mat-table [dataSource]="dataSource" matSort class="professional-table">
-        
+
         <!-- Columna ID -->
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-id">ID</th>
@@ -162,52 +150,41 @@
           </td>
         </ng-container>
 
-       <!-- Columna Estado - Versión mejorada -->
-<ng-container matColumnDef="estado">
-  <th mat-header-cell *matHeaderCellDef class="column-estado">Estado</th>
-  <td mat-cell *matCellDef="let row" class="column-estado">
-    <div class="estado-completo">
-      <!-- Estado de Stock -->
-      <span class="estado-badge stock" [class]="getStockClass(row)" 
-            matTooltip="Estado de stock: {{ getStockText(row) }}">
-        <mat-icon class="estado-icon">
-          {{ getStockIcon(row) }}
-        </mat-icon>
-        {{ getStockText(row) }}
-      </span>
-      
-      <!-- Estado de Caducidad -->
-      <span class="estado-badge caducidad" [class]="getDiasClass(row.fecha_caducidad)"
-            matTooltip="Días para caducar: {{ calcularDiasParaCaducar(row.fecha_caducidad) }}">
-        <mat-icon class="estado-icon">
-          {{ getCaducidadIcon(row.fecha_caducidad) }}
-        </mat-icon>
-        {{ getCaducidadText(row.fecha_caducidad) }}
-      </span>
-    </div>
-  </td>
-</ng-container>
+        <!-- Columna Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef class="column-estado">Estado</th>
+          <td mat-cell *matCellDef="let row" class="column-estado">
+            <div class="estado-completo">
+              <span class="estado-badge caducidad" [class]="getDiasClass(row.fecha_caducidad)"
+                    matTooltip="Días para caducar: {{ calcularDiasParaCaducar(row.fecha_caducidad) }}">
+                <mat-icon class="estado-icon">{{ getCaducidadIcon(row.fecha_caducidad) }}</mat-icon>
+                {{ getCaducidadText(row.fecha_caducidad) }}
+              </span>
+              <span class="stock-badge" [class]="getStockClass(row)"
+                    matTooltip="Estado de stock: {{ getStockText(row) }}">
+                {{ getStockText(row) }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
 
-        <!-- Columna Acciones - NUEVA VERSIÓN -->
-<ng-container matColumnDef="acciones">
-  <th mat-header-cell *matHeaderCellDef class="column-acciones">Acciones</th>
-  <td mat-cell *matCellDef="let row" class="column-acciones">
-    <div class="action-buttons">
-      <!-- VER DETALLES -->
-      <button mat-icon-button color="accent" (click)="verDetallesLote(row)" 
-              matTooltip="Ver detalles" class="btn-details">
-        <mat-icon>visibility</mat-icon>
-      </button>
-      
-      <!-- DESACTIVAR LOTE (solo admin y si tiene stock) -->
-      <button *ngIf="authService.isAdmin() && row.cantidad_actual === 0" 
-              mat-icon-button color="warn" (click)="desactivarLote(row)" 
-              matTooltip="Desactivar lote" class="btn-deactivate">
-        <mat-icon>delete_outline</mat-icon>
-      </button>
-    </div>
-  </td>
-</ng-container>
+        <!-- Columna Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="column-acciones">Acciones</th>
+          <td mat-cell *matCellDef="let row" class="column-acciones">
+            <div class="action-buttons">
+              <button mat-icon-button color="accent" (click)="verDetallesLote(row)" 
+                      matTooltip="Ver detalles" class="btn-details">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button *ngIf="authService.isAdmin() && row.cantidad_actual === 0" 
+                      mat-icon-button color="warn" (click)="desactivarLote(row)" 
+                      matTooltip="Desactivar lote" class="btn-deactivate">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumnsProfessional" class="header-row"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumnsProfessional" 

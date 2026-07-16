@@ -5,149 +5,73 @@
     <p>Estado actual del inventario y valoración del almacén</p>
   </div>
 
-  <!-- Filtros simplificados -->
+  <!-- Filtros simplificados y compactos -->
   <mat-card class="filtros-card">
     <mat-card-header>
-      <mat-card-title>🔍 Filtros del Reporte</mat-card-title>
-      <mat-card-subtitle>Selecciona el tipo de reporte que deseas generar</mat-card-subtitle>
+      <div class="header-filtros">
+        <div class="header-titulo">
+          <mat-icon>filter_list</mat-icon>
+          <div>
+            <mat-card-title>Filtros del Reporte</mat-card-title>
+            <mat-card-subtitle>Selecciona el tipo de reporte que deseas generar</mat-card-subtitle>
+          </div>
+        </div>
+        <div class="header-acciones">
+          <!-- ✅ BOTÓN PDF - Rojo -->
+          <button mat-raised-button color="warn" (click)="exportarPDF()" 
+                  [disabled]="!datosCargados || exportando" class="export-btn pdf-btn">
+            <mat-icon *ngIf="!exportando">picture_as_pdf</mat-icon>
+            <mat-spinner *ngIf="exportando" diameter="16"></mat-spinner>
+            {{ exportando ? '' : 'PDF' }}
+          </button>
+          <!-- ✅ BOTÓN EXCEL - Verde -->
+          <button mat-raised-button color="primary" (click)="exportarExcel()" 
+                  [disabled]="!datosCargados || exportando" class="export-btn excel-btn">
+            <mat-icon *ngIf="!exportando">table_chart</mat-icon>
+            <mat-spinner *ngIf="exportando" diameter="16"></mat-spinner>
+            {{ exportando ? '' : 'Excel' }}
+          </button>
+        </div>
+      </div>
     </mat-card-header>
     <mat-card-content>
       <form [formGroup]="filtrosForm" class="filtros-form">
         <div class="filtros-row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Tipo de Reporte</mat-label>
-            <mat-select formControlName="tipoReporte">
-              <mat-option value="stock-general">
+            <mat-select 
+              formControlName="tipoReporte" 
+              (selectionChange)="onTipoReporteChange()"
+              [compareWith]="compareOptions">
+              
+              <!-- ✅ TRIGGER: Solo muestra el texto SIN ícono -->
+              <mat-select-trigger>
+                {{ filtrosForm.get('tipoReporte')?.value?.label || 'Seleccionar...' }}
+              </mat-select-trigger>
+              
+              <!-- ✅ OPCIONES: Muestran ícono + texto -->
+              <mat-option 
+                *ngFor="let option of opcionesReporte" 
+                [value]="option">
                 <div class="option-content">
-                  <mat-icon>inventory</mat-icon>
-                  <span>Stock General - Todos los productos</span>
-                </div>
-              </mat-option>
-              <mat-option value="stock-bajo">
-                <div class="option-content">
-                  <mat-icon>warning</mat-icon>
-                  <span>Stock Bajo - Productos bajo mínimo</span>
-                </div>
-              </mat-option>
-              <mat-option value="agotado">
-                <div class="option-content">
-                  <mat-icon>cancel</mat-icon>
-                  <span>Productos Agotados</span>
+                  <mat-icon>{{ option.icon }}</mat-icon>
+                  <span>{{ option.label }}</span>
                 </div>
               </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
-
-        <div class="acciones-filtros">
-          <button 
-            mat-raised-button 
-            color="primary" 
-            (click)="generarReporte()" 
-            [disabled]="cargando"
-            class="generate-btn">
-            <mat-icon *ngIf="!cargando">analytics</mat-icon>
-            <mat-spinner *ngIf="cargando" diameter="20"></mat-spinner>
-            {{ cargando ? 'Generando...' : 'Generar Reporte' }}
-          </button>
-          
-          <div class="export-buttons">
-            <button mat-stroked-button color="accent" (click)="exportarPDF()" 
-                    [disabled]="!datosCargados || exportando">
-              <mat-icon *ngIf="!exportando">picture_as_pdf</mat-icon>
-              <mat-spinner *ngIf="exportando" diameter="20"></mat-spinner>
-              {{ exportando ? 'Exportando...' : 'PDF' }}
-            </button>
-            
-            <button mat-stroked-button color="accent" (click)="exportarExcel()" 
-                    [disabled]="!datosCargados || exportando">
-              <mat-icon *ngIf="!exportando">table_chart</mat-icon>
-              <mat-spinner *ngIf="exportando" diameter="20"></mat-spinner>
-              {{ exportando ? 'Exportando...' : 'Excel' }}
-            </button>
-          </div>
-        </div>
       </form>
     </mat-card-content>
   </mat-card>
-
-  <!-- Resumen Ejecutivo mejorado -->
-  <div *ngIf="datosCargados" class="resumen-ejecutivo">
-    <div class="resumen-header">
-      <h2>📈 Resumen Ejecutivo</h2>
-      <span class="fecha-generacion">Generado: {{ fechaGeneracion | date:'dd/MM/yyyy HH:mm' }}</span>
-    </div>
-    
-    <div class="metricas-grid">
-      <mat-card class="metrica-card productos">
-        <mat-card-content>
-          <div class="metrica">
-            <div class="metrica-icon">
-              <mat-icon>inventory_2</mat-icon>
-            </div>
-            <div class="metrica-info">
-              <h3>Productos</h3>
-              <p class="metrica-valor">{{ metricas.totalProductos }}</p>
-              <span class="metrica-desc">En inventario</span>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="metrica-card valor">
-        <mat-card-content>
-          <div class="metrica">
-            <div class="metrica-icon">
-              <mat-icon>attach_money</mat-icon>
-            </div>
-            <div class="metrica-info">
-              <h3>Valor Total</h3>
-              <p class="metrica-valor">{{ metricas.valorTotal | currency:'PEN':'S/ ' }}</p>
-              <span class="metrica-desc">Comercial</span>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="metrica-card movimientos">
-        <mat-card-content>
-          <div class="metrica">
-            <div class="metrica-icon">
-              <mat-icon>swap_vert</mat-icon>
-            </div>
-            <div class="metrica-info">
-              <h3>Movimientos</h3>
-              <p class="metrica-valor">{{ metricas.totalMovimientos }}</p>
-              <span class="metrica-desc">Registrados</span>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="metrica-card alertas" *ngIf="productosConProblemas > 0">
-        <mat-card-content>
-          <div class="metrica">
-            <div class="metrica-icon">
-              <mat-icon>warning</mat-icon>
-            </div>
-            <div class="metrica-info">
-              <h3>Atención</h3>
-              <p class="metrica-valor">{{ productosConProblemas }}</p>
-              <span class="metrica-desc">Productos críticos</span>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </div>
-
-  <!-- Detalle del Reporte mejorado -->
+  <!-- Detalle del Reporte -->
   <mat-card *ngIf="datosCargados" class="resultados-card">
     <mat-card-header>
       <div class="card-header-content">
         <mat-card-title>
           <mat-icon>table_view</mat-icon>
           Detalle del Inventario
+          <span class="fecha-generacion">Generado: {{ fechaGeneracion | date:'dd/MM/yyyy HH:mm' }}</span>
         </mat-card-title>
         <div class="header-stats">
           <span class="total-registros">
@@ -161,7 +85,6 @@
     </mat-card-header>
     
     <mat-card-content>
-      <!-- Resumen de estados compacto -->
       <div *ngIf="datosReporte.length > 0" class="resumen-estados-compacto">
         <div class="estado-summary">
           <span class="estado-indicator normal">
@@ -190,7 +113,6 @@
               <th class="categoria-col">Categoría</th>
               <th class="stock-col">Stock</th>
               <th class="stock-min-col">Mínimo</th>
-              <th class="diferencia-col">Disponible</th>
               <th class="precio-col">Precio</th>
               <th class="valor-col">Valor</th>
               <th class="estado-col">Estado</th>
@@ -201,22 +123,16 @@
               <td class="producto-nombre">
                 <div class="producto-info">
                   <strong>{{ item.producto }}</strong>
-                  <small *ngIf="item.descripcion" class="producto-desc">{{ item.descripcion | truncate:60 }}</small>
                 </div>
               </td>
               <td class="categoria">
                 <span class="categoria-badge">{{ item.categoria }}</span>
               </td>
-              <td class="stock-actual">
-                <span [class]="getStockClass(item)">{{ item.stockActual }}</span>
+              <td class="stock-actual" [class.stock-bajo]="item.stockActual <= item.stockMinimo">
+                {{ item.stockActual }}
               </td>
               <td class="stock-minimo">
                 {{ item.stockMinimo }}
-              </td>
-              <td class="diferencia">
-                <span [class]="getDiferenciaClass(item)">
-                  {{ item.stockActual - item.stockMinimo }}
-                </span>
               </td>
               <td class="precio-unitario">
                 {{ item.precio | currency:'PEN':'S/ ' }}
@@ -239,23 +155,6 @@
           </tbody>
         </table>
       </div>
-
-      <!-- Pie de tabla -->
-      <div *ngIf="datosReporte.length > 0" class="tabla-footer">
-        <div class="footer-content">
-          <div class="resumen-final">
-            <p><strong>Resumen:</strong> 
-              <span class="estado-resumen normal">{{ contarPorEstado('normal') }} normal</span> • 
-              <span class="estado-resumen bajo">{{ contarPorEstado('bajo') }} bajo stock</span> • 
-              <span class="estado-resumen agotado">{{ contarPorEstado('agotado') }} agotado</span>
-            </p>
-          </div>
-          <div class="total-final">
-            <p><strong>Valor total del inventario:</strong> {{ metricas.valorTotal | currency:'PEN':'S/ ' }}</p>
-          </div>
-        </div>
-      </div>
-
       <div *ngIf="datosReporte.length === 0" class="sin-resultados">
         <mat-icon>search_off</mat-icon>
         <h3>No se encontraron productos</h3>

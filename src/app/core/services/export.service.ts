@@ -20,13 +20,11 @@ export class ExportService {
       // Preparar datos para Excel
       const excelData = data.map(item => ({
         'Producto': item.producto,
-        'Descripción': item.descripcion || '',
         'Categoría': item.categoria,
         'Marca': item.marca,
         'Precio Unitario': item.precio,
         'Stock Actual': item.stockActual,
         'Stock Mínimo': item.stockMinimo,
-        'Diferencia': item.stockActual - item.stockMinimo,
         'Valor Total': item.valorTotal,
         'Estado': this.getEstadoText(item.estado)
       }));
@@ -37,13 +35,11 @@ export class ExportService {
       // Ajustar anchos de columnas
       const columnWidths = [
         { wch: 30 }, // Producto
-        { wch: 40 }, // Descripción
         { wch: 15 }, // Categoría
         { wch: 15 }, // Marca
         { wch: 15 }, // Precio Unitario
         { wch: 15 }, // Stock Actual
         { wch: 15 }, // Stock Mínimo
-        { wch: 15 }, // Diferencia
         { wch: 15 }, // Valor Total
         { wch: 15 }  // Estado
       ];
@@ -108,7 +104,6 @@ export class ExportService {
         pdf.setFontSize(12);
         pdf.text(`Productos analizados: ${metrics.totalProductos}`, 20, 25);
         pdf.text(`Valor total del stock: S/ ${metrics.valorTotal.toFixed(2)}`, 20, 32);
-        pdf.text(`Movimientos: ${metrics.totalMovimientos}`, 20, 39);
       }
 
       // Capturar el elemento como imagen
