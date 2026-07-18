@@ -199,12 +199,21 @@ agregarDetalle(): void {
     });
   }
 
-  loadInsumos(): void {
-    this.insumoService.getInsumos().subscribe({
-      next: data => this.insumos = data,
-      error: () => this.showError('Error al cargar insumos')
-    });
-  }
+ // En pedido-proveedor-form.component.ts - cambiar el método loadInsumos
+
+loadInsumos(): void {
+  // ✅ USAR getInsumosActivos() en lugar de getInsumos()
+  this.insumoService.getInsumosActivos().subscribe({
+    next: (data) => {
+      this.insumos = data;
+      console.log('📦 Insumos activos cargados:', this.insumos.length);
+    },
+    error: (error) => {
+      console.error('Error al cargar insumos:', error);
+      this.showError('Error al cargar insumos');
+    }
+  });
+}
 
   loadEstados(): void {
     this.pedidoService.getEstadosPedido().subscribe({

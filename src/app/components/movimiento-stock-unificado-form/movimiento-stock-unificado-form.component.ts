@@ -5,7 +5,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, of } from 'rxjs';
 import { map, startWith, debounceTime, switchMap } from 'rxjs/operators';
-
+import Swal from 'sweetalert2'; // ✅ AGREGAR ESTA IMPORTACIÓN
 import { MovimientoStockService } from '../../core/services/movimiento-stock.service';
 import { LoteService } from '../../core/services/lote.service';
 import { ProductService } from '../../core/services/producto.service';
@@ -298,73 +298,116 @@ actualizarFechaCaducidad(): void {
     });
   }
 
-  async guardar(): Promise<void> {
-    if (this.form.invalid) {
-      this.marcarCamposInvalidos();
-      this.mostrarError('Por favor complete todos los campos requeridos');
-      return;
-    }
-
-    this.isSubmitting = true;
-    const formValue = this.form.getRawValue();
-
-    try {
-      let idLote: number | undefined = undefined;
-      let movimientoData: any;
-
-      // Lógica de gestión de lote
-      if (formValue.tipo_movimiento === 'ingreso') {
-        idLote = await this.gestionarLoteIngreso(formValue);
-        
-        // Obtener nombre del producto
-        const nombreProducto = this.productos.find(p => p.id_producto === formValue.id_producto)?.nombre || 'Producto';
-        
-        movimientoData = {
-          id_producto: formValue.id_producto,
-          tipo_movimiento: formValue.tipo_movimiento,
-          cantidad: formValue.cantidad,
-          descripcion: formValue.descripcion || `Ingreso - ${nombreProducto} - ${formValue.cantidad} unidades`,
-          id_lote: idLote
-        };
-      } else {
-        idLote = formValue.id_lote_existente || undefined;
-        
-        // Validar stock para egresos
-        if (formValue.tipo_movimiento === 'egreso' && idLote) {
-          const loteSeleccionado = this.lotes.find(l => l.id_lote === idLote);
-          if (loteSeleccionado && loteSeleccionado.cantidad_actual < formValue.cantidad) {
-            throw new Error(`Stock insuficiente. Disponible: ${loteSeleccionado.cantidad_actual}`);
-          }
-        }
-        
-        movimientoData = {
-          id_producto: formValue.id_producto,
-          tipo_movimiento: formValue.tipo_movimiento,
-          cantidad: formValue.cantidad,
-          descripcion: formValue.descripcion || this.generarDescripcionAutomatica(formValue),
-          id_lote: idLote
-        };
-      }
-
-      // Enviar movimiento al backend
-      const resultado = await this.movimientoService.createMovimiento(movimientoData).toPromise();
-      
-      this.mostrarExito('Movimiento registrado correctamente');
-      
-      // 🟢 DISPARAR EVENTO DE ACTUALIZACIÓN
-      window.dispatchEvent(new CustomEvent('inventario-actualizado'));
-      
-      // 🟢 CERRAR MODAL CON RETRASO PARA PERMITIR ACTUALIZACIÓN
-      setTimeout(() => {
-        this.dialogRef.close(true);
-      }, 500);
-
-    } catch (error: any) {
-      console.error('Error:', error);
-      this.mostrarError(error.message || 'Error al registrar movimiento');
-      this.isSubmitting = false;
-    }
+ // ✅ MODIFICAR EL MÉTODO guardar
+async guardar(): Promise<void> {
+  if (this.form.invalid) {
+    this.marcarCamposInvalidos();
+    
+    // ✅ USAR SweetAlert2 para error de validación
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Campos incompletos',
+      text: 'Por favor complete todos los campos requeridos',
+      confirmButtonColor: '#3f51b5',
+      confirmButtonText: 'Entendido'
+    });
+    return;
   }
+
+  this.isSubmitting = true;
+  const formValue = this.form.getRawValue();
+
+  try {
+    let idLote: number | undefined = undefined;
+    let movimientoData: any;
+
+    // Lógica de gestión de lote
+    if (formValue.tipo_movimiento === 'ingreso') {
+      idLote = await this.gestionarLoteIngreso(formValue);
+      
+      const nombreProducto = this.productos.find(p => p.id_producto === formValue.id_producto)?.nombre || 'Producto';
+      
+      movimientoData = {
+        id_producto: formValue.id_producto,
+        tipo_movimiento: formValue.tipo_movimiento,
+        cantidad: formValue.cantidad,
+        descripcion: formValue.descripcion || `Ingreso - ${nombreProducto} - ${formValue.cantidad} unidades`,
+        id_lote: idLote
+      };
+    } else {
+      idLote = formValue.id_lote_existente || undefined;
+      
+      // ✅ Validar stock para egresos con SweetAlert2
+      if (formValue.tipo_movimiento === 'egreso' && idLote) {
+        const loteSeleccionado = this.lotes.find(l => l.id_lote === idLote);
+        if (loteSeleccionado && loteSeleccionado.cantidad_actual < formValue.cantidad) {
+          // ✅ MOSTRAR ALERTA DE STOCK INSUFICIENTE CON SWEETALERT2
+          await Swal.fire({
+            icon: 'error',
+            title: '❌ Stock insuficiente',
+            html: `
+              <div style="text-align: left; padding: 10px;">
+                <p><strong>Producto:</strong> ${this.productos.find(p => p.id_producto === formValue.id_producto)?.nombre}</p>
+                <p><strong>Lote:</strong> ${loteSeleccionado.numero_lote}</p>
+                <p><strong>Stock disponible:</strong> <span style="color: #2e7d32; font-weight: bold;">${loteSeleccionado.cantidad_actual}</span></p>
+                <p><strong>Cantidad solicitada:</strong> <span style="color: #d32f2f; font-weight: bold;">${formValue.cantidad}</span></p>
+                <hr style="margin: 10px 0;">
+                <p style="color: #d32f2f; font-weight: bold;">⚠️ No hay suficiente stock en este lote</p>
+              </div>
+            `,
+            confirmButtonColor: '#d32f2f',
+            confirmButtonText: 'Entendido'
+          });
+          this.isSubmitting = false;
+          return;
+        }
+      }
+      
+      movimientoData = {
+        id_producto: formValue.id_producto,
+        tipo_movimiento: formValue.tipo_movimiento,
+        cantidad: formValue.cantidad,
+        descripcion: formValue.descripcion || this.generarDescripcionAutomatica(formValue),
+        id_lote: idLote
+      };
+    }
+
+    // Enviar movimiento al backend
+    const resultado = await this.movimientoService.createMovimiento(movimientoData).toPromise();
+    
+    // ✅ MOSTRAR ÉXITO CON SWEETALERT2
+    await Swal.fire({
+      icon: 'success',
+      title: '✅ Movimiento registrado',
+      text: 'El movimiento de stock se ha registrado correctamente',
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true
+    });
+    
+    // 🟢 DISPARAR EVENTO DE ACTUALIZACIÓN
+    window.dispatchEvent(new CustomEvent('inventario-actualizado'));
+    
+    // 🟢 CERRAR MODAL CON RETRASO
+    setTimeout(() => {
+      this.dialogRef.close(true);
+    }, 500);
+
+  } catch (error: any) {
+    console.error('Error:', error);
+    
+    // ✅ MOSTRAR ERROR CON SWEETALERT2
+    await Swal.fire({
+      icon: 'error',
+      title: '❌ Error al registrar movimiento',
+      text: error.message || 'Ha ocurrido un error inesperado',
+      confirmButtonColor: '#d32f2f',
+      confirmButtonText: 'Cerrar'
+    });
+    
+    this.isSubmitting = false;
+  }
+}
 
   private async gestionarLoteIngreso(formValue: any): Promise<number> {
     if (!formValue.id_producto) {

@@ -34,6 +34,24 @@ import { Lote } from '../../core/models/lote.model';
       </div>
 
       <div class="modal-body">
+        <!-- ✅ ALERTA DE CADUCADO -->
+        <div *ngIf="getDiasRestantes() < 0" class="alert-caducado">
+          <mat-icon>warning</mat-icon>
+          <div class="alert-content">
+            <strong>⚠️ LOTE CADUCADO</strong>
+            <!-- ✅ USAR getDiasAbsolutos() en lugar de Math.abs() -->
+            <p>Este lote caducó hace {{ getDiasAbsolutos() }} días</p>
+          </div>
+        </div>
+
+        <div *ngIf="getDiasRestantes() >= 0 && getDiasRestantes() <= 7" class="alert-critico">
+          <mat-icon>warning</mat-icon>
+          <div class="alert-content">
+            <strong>⚠️ CADUCIDAD CRÍTICA</strong>
+            <p>Quedan {{ getDiasRestantes() }} días para la caducidad</p>
+          </div>
+        </div>
+
         <!-- Información General -->
         <div class="info-section">
           <h3>📦 Información del Producto</h3>
@@ -45,12 +63,12 @@ import { Lote } from '../../core/models/lote.model';
             
             <div class="info-item" *ngIf="data.producto?.marca">
               <span class="label">Marca:</span>
-              <span class="value">{{ data.producto?.marca }}</span>  <!-- ✅ Usar ?. -->
+              <span class="value">{{ data.producto?.marca }}</span>
             </div>
             
             <div class="info-item" *ngIf="data.producto?.categoria">
               <span class="label">Categoría:</span>
-               <span class="value">{{ data.producto?.categoria }}</span>  <!-- ✅ Usar ?. -->
+              <span class="value">{{ data.producto?.categoria }}</span>
             </div>
           </div>
         </div>
@@ -156,22 +174,22 @@ import { Lote } from '../../core/models/lote.model';
   `,
   styles: [`
     .detalle-modal {
-  min-width: min(90vw, 500px);  /* ✅ CAMBIADO: 90vw en móviles, máximo 500px */
-  max-width: 95vw;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-}
+      min-width: min(90vw, 500px);
+      max-width: 95vw;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
 
     .modal-header {
-  padding: clamp(1rem, 3vw, 1.5rem);  /* ✅ CAMBIADO: responsive padding */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+      padding: clamp(1rem, 3vw, 1.5rem);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
     .modal-header.warning {
       background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
@@ -204,10 +222,11 @@ import { Lote } from '../../core/models/lote.model';
     }
 
     .modal-body {
-  padding: clamp(1rem, 3vw, 1.5rem);  /* ✅ CAMBIADO: responsive padding */
-  overflow-y: auto;  /* ✅ AGREGADO: permite scroll si el contenido es muy grande */
-  flex: 1;
-}
+      padding: clamp(1rem, 3vw, 1.5rem);
+      overflow-y: auto;
+      flex: 1;
+    }
+
     .info-section {
       margin-bottom: 1.5rem;
     }
@@ -220,11 +239,12 @@ import { Lote } from '../../core/models/lote.model';
       letter-spacing: 0.5px;
     }
 
-   .info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));  /* ✅ CAMBIADO */
-  gap: clamp(0.75rem, 2vw, 1rem);
-}
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+      gap: clamp(0.75rem, 2vw, 1rem);
+    }
+
     .info-item {
       display: flex;
       flex-direction: column;
@@ -350,27 +370,82 @@ import { Lote } from '../../core/models/lote.model';
       gap: 4px;
     }
 
-  .modal-footer {
-  padding: clamp(1rem, 3vw, 1.5rem);
-  display: flex;
-  justify-content: flex-end;
-  border-top: 1px solid #e2e8f0;
-}
+    .modal-footer {
+      padding: clamp(1rem, 3vw, 1.5rem);
+      display: flex;
+      justify-content: flex-end;
+      border-top: 1px solid #e2e8f0;
+    }
 
- @media (max-width: 480px) {
-  .detalle-modal {
-    min-width: 95vw;
-    max-height: 95vh;
-  }
-  
-  .info-grid {
-    grid-template-columns: 1fr;  /* Una columna en móviles */
-  }
-  
-  .header-content h2 {
-    font-size: 1.2rem;  /* Título más pequeño en móviles */
-  }
-}
+    @media (max-width: 480px) {
+      .detalle-modal {
+        min-width: 95vw;
+        max-height: 95vh;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-content h2 {
+        font-size: 1.2rem;
+      }
+    }
+
+    /* ===== ALERTAS ===== */
+    .alert-caducado {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #d32f2f;
+      color: white;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .alert-caducado mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .alert-caducado .alert-content strong {
+      display: block;
+      font-size: 1.1em;
+    }
+
+    .alert-caducado .alert-content p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .alert-critico {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #f57c00;
+      color: white;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .alert-critico mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .alert-critico .alert-content strong {
+      display: block;
+      font-size: 1.1em;
+    }
+
+    .alert-critico .alert-content p {
+      margin: 0;
+      opacity: 0.9;
+    }
   `]
 })
 export class DetalleLoteModalComponent {
@@ -396,6 +471,11 @@ export class DetalleLoteModalComponent {
 
   getDiasRestantes(): number {
     return this.calcularDiasParaCaducar();
+  }
+
+  // ✅ NUEVO MÉTODO: Obtener el valor absoluto de los días
+  getDiasAbsolutos(): number {
+    return Math.abs(this.getDiasRestantes());
   }
 
   getDiasClass(): string {

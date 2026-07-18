@@ -302,35 +302,68 @@ export class LoteListComponent implements OnInit, AfterViewInit {
     });
   }
 
-  desactivarLote(lote: Lote): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '450px',
-      data: {
-        title: '⚠️ Desactivar Lote',
-        message: `¿Estás seguro de DESACTIVAR el lote <strong>${lote.numero_lote}</strong>?<br><br>
-                  Esta acción marcará el lote como inactivo y no aparecerá en las listas.`,
-        confirmText: 'Sí, Desactivar',
-        cancelText: 'Cancelar',
-        confirmColor: 'warn',
-        icon: 'warning'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loteService.updateLote(lote.id_lote, { activo: false }).subscribe({
-          next: () => {
-            this.showSuccess('Lote desactivado correctamente');
-            this.loadLotes();
-          },
-          error: (err) => {
-            console.error('Error al desactivar lote:', err);
-            this.showError('Error al desactivar lote');
-          }
-        });
-      }
-    });
+// Modificar el método desactivarLote
+desactivarLote(lote: Lote): void {
+  const esCaducado = this.isLoteCaducado(lote.fecha_caducidad);
+  const esAgotado = lote.cantidad_actual === 0;
+  
+  let mensaje = '';
+  let titulo = '⚠️ Desactivar Lote';
+  
+  if (esCaducado) {
+    titulo = '⚠️ Desactivar Lote Caducado';
+    mensaje = `
+      <p>El lote <strong>${lote.numero_lote}</strong> está <strong style="color: #d32f2f;">CADUCADO</strong>.</p>
+      <p>Stock actual: <strong>${lote.cantidad_actual}</strong> unidades</p>
+      <br>
+      <p><strong>¿Estás seguro de desactivar este lote?</strong></p>
+      <p style="color: #d32f2f; font-size: 0.9rem;">
+        ⚠️ El stock de este lote se eliminará del inventario y no podrá ser utilizado.
+      </p>
+    `;
+  } else if (esAgotado) {
+    titulo = '⚠️ Desactivar Lote Agotado';
+    mensaje = `
+      <p>El lote <strong>${lote.numero_lote}</strong> está <strong style="color: #f57c00;">AGOTADO</strong>.</p>
+      <br>
+      <p><strong>¿Estás seguro de desactivar este lote?</strong></p>
+      <p style="color: #f57c00; font-size: 0.9rem;">
+        ⚠️ El lote no tiene stock disponible y será ocultado del sistema.
+      </p>
+    `;
   }
+  
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '450px',
+    data: {
+      title: titulo,
+      message: mensaje,
+      confirmText: 'Sí, Desactivar',
+      cancelText: 'Cancelar',
+      confirmColor: 'warn',
+      icon: 'warning',
+      showIcon: true
+    }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.loteService.updateLote(lote.id_lote, { activo: false }).subscribe({
+        next: () => {
+          this.showSuccess(esCaducado 
+            ? '✅ Lote caducado desactivado correctamente' 
+            : '✅ Lote desactivado correctamente'
+          );
+          this.loadLotes();
+        },
+        error: (err) => {
+          console.error('Error al desactivar lote:', err);
+          this.showError('Error al desactivar lote');
+        }
+      });
+    }
+  });
+}
 
   recargarDatos(): void {
     this.loadLotes();
@@ -357,4 +390,36 @@ export class LoteListComponent implements OnInit, AfterViewInit {
       panelClass: ['error-snackbar']
     });
   }
+// lote-list.component.ts - AGREGAR ESTE MÉTODO
+
+// ============================================
+// 🔴 VERIFICAR SI UN LOTE ESTÁ CADUCADO
+// ============================================
+isLoteCaducado(fechaCaducidad: string): boolean {
+  const dias = this.calcularDiasParaCaducar(fechaCaducidad);
+  return dias < 0;
+}
+
+// ============================================
+// 🟡 OBTENER EL COLOR DEL ESTADO DEL LOTE
+// ============================================
+getLoteStatusColor(fechaCaducidad: string): string {
+  const dias = this.calcularDiasParaCaducar(fechaCaducidad);
+  if (dias < 0) return '#d32f2f'; // Rojo - Caducado
+  if (dias <= 7) return '#f57c00'; // Naranja - Crítico
+  if (dias <= 30) return '#f9a825'; // Amarillo - Próximo
+  return '#2e7d32'; // Verde - Normal
+}
+
+// ============================================
+// 🟢 TEXTO DEL ESTADO DEL LOTE
+// ============================================
+getLoteStatusText(fechaCaducidad: string): string {
+  const dias = this.calcularDiasParaCaducar(fechaCaducidad);
+  if (dias < 0) return 'CADUCADO';
+  if (dias <= 7) return 'CRÍTICO';
+  if (dias <= 30) return 'PRÓXIMO';
+  return 'NORMAL';
+}
+
 }

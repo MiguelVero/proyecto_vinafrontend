@@ -560,3 +560,31 @@
     padding: 1px 4px;
   }
 }
+/* Agregar a producto-list.component.css */
+
+/* ===== STOCK INCONSISTENTE ===== */
+.stock-inconsistente {
+  color: #d32f2f;
+  background-color: rgba(211, 47, 47, 0.05);
+  border-radius: 4px;
+  padding: 4px 8px;
+  border: 1px solid #ffcdd2;
+}
+
+.stock-badge.danger {
+  background-color: #ffcdd2;
+  color: #c62828;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.stock-badge.danger mat-icon {
+  font-size: 12px;
+  width: 12px;
+  height: 12px;
+}

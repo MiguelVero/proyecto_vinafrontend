@@ -14,7 +14,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { Insumo, InsumoCreate, InsumoUpdate } from '../../core/models/insumo.model';
 import { InsumoService } from '../../core/services/insumo.service';
-import { ProveedorService } from '../../core/services/proveedor.service';
 
 @Component({
   selector: 'app-insumo-form',
@@ -38,7 +37,7 @@ export class InsumoFormComponent implements OnInit {
   form: FormGroup;
   isEditMode = false;
   isLoading = false;
-  proveedores: any[] = [];
+  insumoOriginal: Insumo | null = null;
 
   unidadesMedida = [
     'unidades',
@@ -59,18 +58,19 @@ export class InsumoFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private insumoService: InsumoService,
-    private proveedorService: ProveedorService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<InsumoFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { insumo?: Insumo }
   ) {
     this.isEditMode = !!data?.insumo;
+    if (this.isEditMode && data.insumo) {
+      this.insumoOriginal = { ...data.insumo };
+    }
     this.form = this.createForm();
   }
 
   ngOnInit(): void {
-    this.loadProveedores();
-    if (this.isEditMode && this.data.insumo) {
+    if (this.isEditMode && this.insumoOriginal) {
       this.loadFormData();
     }
   }
@@ -81,33 +81,18 @@ export class InsumoFormComponent implements OnInit {
       descripcion: [''],
       unidad_medida: ['unidades', Validators.required],
       stock_minimo: [0, [Validators.required, Validators.min(0)]],
-      costo_promedio: [0, [Validators.required, Validators.min(0)]],
-      id_proveedor_principal: [null],
       activo: [true]
     });
   }
 
-  loadProveedores(): void {
-    this.proveedorService.getProveedores().subscribe({
-      next: (data) => {
-        this.proveedores = data.filter(p => p.activo);
-      },
-      error: (error) => {
-        console.error('Error loading proveedores:', error);
-      }
-    });
-  }
-
   loadFormData(): void {
-    if (this.data.insumo) {
+    if (this.insumoOriginal) {
       this.form.patchValue({
-        nombre: this.data.insumo.nombre,
-        descripcion: this.data.insumo.descripcion,
-        unidad_medida: this.data.insumo.unidad_medida,
-        stock_minimo: this.data.insumo.stock_minimo,
-        costo_promedio: this.data.insumo.costo_promedio,
-        id_proveedor_principal: this.data.insumo.id_proveedor_principal,
-        activo: this.data.insumo.activo
+        nombre: this.insumoOriginal.nombre || '',
+        descripcion: this.insumoOriginal.descripcion || '',
+        unidad_medida: this.insumoOriginal.unidad_medida || 'unidades',
+        stock_minimo: this.insumoOriginal.stock_minimo || 0,
+        activo: this.insumoOriginal.activo !== undefined ? this.insumoOriginal.activo : true
       });
     }
   }
@@ -122,19 +107,17 @@ export class InsumoFormComponent implements OnInit {
     this.isLoading = true;
     const formValue = this.form.value;
 
-    if (this.isEditMode && this.data.insumo) {
+    if (this.isEditMode && this.insumoOriginal) {
       const payload: InsumoUpdate = {
         nombre: formValue.nombre,
         descripcion: formValue.descripcion,
         unidad_medida: formValue.unidad_medida,
         stock_minimo: formValue.stock_minimo,
-        costo_promedio: formValue.costo_promedio,
-        id_proveedor_principal: formValue.id_proveedor_principal,
         activo: formValue.activo
       };
 
-      this.insumoService.updateInsumo(this.data.insumo.id_insumo, payload).subscribe({
-        next: () => {
+      this.insumoService.updateInsumo(this.insumoOriginal.id_insumo, payload).subscribe({
+        next: (response) => {
           this.isLoading = false;
           this.snackBar.open('Insumo actualizado correctamente', 'Cerrar', { duration: 3000 });
           this.dialogRef.close(true);
@@ -150,9 +133,7 @@ export class InsumoFormComponent implements OnInit {
         nombre: formValue.nombre,
         descripcion: formValue.descripcion,
         unidad_medida: formValue.unidad_medida,
-        stock_minimo: formValue.stock_minimo,
-        costo_promedio: formValue.costo_promedio,
-        id_proveedor_principal: formValue.id_proveedor_principal
+        stock_minimo: formValue.stock_minimo
       };
 
       this.insumoService.createInsumo(payload).subscribe({

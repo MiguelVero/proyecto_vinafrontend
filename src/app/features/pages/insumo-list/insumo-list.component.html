@@ -18,13 +18,25 @@
     </div>
   </div>
 
-  <!-- Búsqueda -->
+  <!-- Búsqueda y Filtros -->
   <div class="search-section">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Buscar insumos</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput (keyup)="applyFilter($event)" placeholder="Nombre, proveedor...">
-    </mat-form-field>
+    <div class="search-filters-row">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar insumos</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Nombre, descripción...">
+      </mat-form-field>
+
+      <!-- ✅ NUEVO: Filtro de estado -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Estado</mat-label>
+        <mat-select (selectionChange)="filterByEstado($event.value)" [value]="selectedEstado">
+          <mat-option [value]="'todos'">Todos</mat-option>
+          <mat-option [value]="'activo'">Activos</mat-option>
+          <mat-option [value]="'inactivo'">Inactivos</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
   </div>
 
   <!-- Loading -->
@@ -78,22 +90,6 @@
         <td mat-cell *matCellDef="let row">{{ row.stock_minimo }}</td>
       </ng-container>
 
-      <!-- Costo Promedio -->
-      <ng-container matColumnDef="costo_promedio">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Costo Promedio</th>
-        <td mat-cell *matCellDef="let row">
-          <span class="costo">S/ {{ row.costo_promedio | number:'1.2-2' }}</span>
-        </td>
-      </ng-container>
-
-      <!-- Proveedor -->
-      <ng-container matColumnDef="proveedor">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Proveedor</th>
-        <td mat-cell *matCellDef="let row">
-          {{ row.proveedor_principal?.razon_social || '—' }}
-        </td>
-      </ng-container>
-
       <!-- Estado -->
       <ng-container matColumnDef="estado">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
@@ -109,11 +105,17 @@
         <th mat-header-cell *matHeaderCellDef>Acciones</th>
         <td mat-cell *matCellDef="let row">
           <div class="action-buttons">
+            <!-- Editar -->
             <button mat-icon-button color="primary" (click)="editInsumo(row)" matTooltip="Editar">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="deleteInsumo(row)" matTooltip="Eliminar">
-              <mat-icon>delete</mat-icon>
+            
+            <!-- ✅ DESACTIVAR / ACTIVAR -->
+            <button mat-icon-button 
+                    [color]="row.activo ? 'warn' : 'primary'" 
+                    (click)="toggleActivo(row)" 
+                    [matTooltip]="row.activo ? 'Desactivar insumo' : 'Activar insumo'">
+              <mat-icon>{{ row.activo ? 'block' : 'check_circle' }}</mat-icon>
             </button>
           </div>
         </td>
@@ -137,17 +139,21 @@
       </tr>
     </table>
 
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons></mat-paginator>
+    <!-- ✅ PAGINADOR CORREGIDO -->
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" 
+                   showFirstLastButtons
+                   [length]="dataSource.filteredData.length">
+    </mat-paginator>
   </div>
 
   <!-- Vista Móvil: Cards -->
   <div class="cards-container" *ngIf="!isLoading && isMobileView">
-    <mat-card *ngFor="let insumo of dataSource.filteredData" class="insumo-card">
+    <mat-card *ngFor="let insumo of dataSource.filteredData" class="insumo-card" [class.inactivo]="!insumo.activo">
       <mat-card-header>
         <mat-card-title>{{ insumo.nombre }}</mat-card-title>
         <mat-card-subtitle>ID: #{{ insumo.id_insumo }}</mat-card-subtitle>
-        <span class="card-badge" [class]="getStockStatus(insumo).class">
-          {{ getStockStatus(insumo).text }}
+        <span class="card-badge" [class.activo]="insumo.activo" [class.inactivo]="!insumo.activo">
+          {{ insumo.activo ? 'Activo' : 'Inactivo' }}
         </span>
       </mat-card-header>
 
@@ -161,13 +167,9 @@
             <mat-icon>inventory</mat-icon>
             <span>Stock: {{ insumo.stock_actual }} / Mín: {{ insumo.stock_minimo }}</span>
           </div>
-          <div class="detail-item">
-            <mat-icon>payments</mat-icon>
-            <span>Costo: S/ {{ insumo.costo_promedio | number:'1.2-2' }}</span>
-          </div>
-          <div class="detail-item" *ngIf="insumo.proveedor_principal">
-            <mat-icon>business</mat-icon>
-            <span>{{ insumo.proveedor_principal.razon_social }}</span>
+          <div class="detail-item" *ngIf="insumo.descripcion">
+            <mat-icon>description</mat-icon>
+            <span>{{ insumo.descripcion | slice:0:60 }}{{ insumo.descripcion.length > 60 ? '...' : '' }}</span>
           </div>
         </div>
       </mat-card-content>
@@ -176,8 +178,9 @@
         <button mat-button color="primary" (click)="editInsumo(insumo)">
           <mat-icon>edit</mat-icon> Editar
         </button>
-        <button mat-button color="warn" (click)="deleteInsumo(insumo)">
-          <mat-icon>delete</mat-icon> Eliminar
+        <button mat-button [color]="insumo.activo ? 'warn' : 'primary'" (click)="toggleActivo(insumo)">
+          <mat-icon>{{ insumo.activo ? 'block' : 'check_circle' }}</mat-icon>
+          {{ insumo.activo ? 'Desactivar' : 'Activar' }}
         </button>
       </mat-card-actions>
     </mat-card>

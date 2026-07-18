@@ -52,9 +52,7 @@
           </mat-error>
         </mat-form-field>
       </div>
-
-      <div class="row-fields">
-        <!-- Costo Promedio -->
+ <!-- Costo Promedio<div class="row-fields">
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Costo Promedio *</mat-label>
           <span matPrefix>S/ &nbsp;</span>
@@ -66,8 +64,6 @@
             No puede ser negativo
           </mat-error>
         </mat-form-field>
-
-        <!-- Proveedor Principal -->
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Proveedor Principal</mat-label>
           <mat-select formControlName="id_proveedor_principal">
@@ -78,7 +74,8 @@
           </mat-select>
         </mat-form-field>
       </div>
-
+ -->
+      
       <!-- Checkbox Activo (solo en edición) -->
       <div class="checkbox-section" *ngIf="isEditMode">
         <mat-checkbox formControlName="activo" color="primary">

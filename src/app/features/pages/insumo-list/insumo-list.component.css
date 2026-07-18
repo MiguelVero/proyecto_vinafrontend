@@ -249,3 +249,86 @@
     font-size: 1.6rem;
   }
 }
+/* Agregar al CSS existente */
+
+/* ===== FILTRO DE ESTADO ===== */
+.search-filters-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-field {
+  width: 180px;
+  min-width: 140px;
+}
+
+/* ===== CARDS INACTIVAS ===== */
+.insumo-card.inactivo {
+  opacity: 0.7;
+  border-left-color: #e74c3c;
+}
+
+.insumo-card.inactivo .mat-card-title {
+  text-decoration: line-through;
+  color: #95a5a6;
+}
+
+/* ===== BADGE DE ESTADO EN CARDS ===== */
+.card-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.card-badge.activo {
+  background: #e8f5e9;
+  color: #27ae60;
+}
+
+.card-badge.inactivo {
+  background: #ffebee;
+  color: #e74c3c;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .search-filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-field {
+    width: 100%;
+  }
+}
+
+/* ===== ESTADO BADGE EN TABLA ===== */
+.estado-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.estado-badge.activo {
+  background: #e8f5e9;
+  color: #27ae60;
+}
+
+.estado-badge.inactivo {
+  background: #ffebee;
+  color: #e74c3c;
+}

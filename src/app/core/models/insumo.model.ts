@@ -6,16 +6,16 @@ export interface Insumo {
   unidad_medida: string;
   stock_actual: number;
   stock_minimo: number;
-  costo_promedio: number;
-  id_proveedor_principal?: number;
+  //costo_promedio: number;
+  //id_proveedor_principal?: number;
   activo: boolean;
   fecha_creacion?: string;
   fecha_actualizacion?: string;
   
   // Datos de relaciones (populados por el backend)
-  proveedor_principal?: {
-    razon_social: string;
-  };
+  //proveedor_principal?: {
+    //razon_social: string;
+  //};
 }
 
 export interface InsumoCreate {
@@ -23,8 +23,8 @@ export interface InsumoCreate {
   descripcion?: string;
   unidad_medida: string;
   stock_minimo: number;
-  costo_promedio: number;
-  id_proveedor_principal?: number;
+  //costo_promedio: number;
+  //id_proveedor_principal?: number;
 }
 
 export interface InsumoUpdate {
@@ -32,7 +32,7 @@ export interface InsumoUpdate {
   descripcion?: string;
   unidad_medida?: string;
   stock_minimo?: number;
-  costo_promedio?: number;
-  id_proveedor_principal?: number;
+  //costo_promedio?: number;
+  //id_proveedor_principal?: number;
   activo?: boolean;
 }

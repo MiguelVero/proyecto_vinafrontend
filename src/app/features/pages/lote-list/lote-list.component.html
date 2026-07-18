@@ -150,41 +150,54 @@
           </td>
         </ng-container>
 
-        <!-- Columna Estado -->
-        <ng-container matColumnDef="estado">
-          <th mat-header-cell *matHeaderCellDef class="column-estado">Estado</th>
-          <td mat-cell *matCellDef="let row" class="column-estado">
-            <div class="estado-completo">
-              <span class="estado-badge caducidad" [class]="getDiasClass(row.fecha_caducidad)"
-                    matTooltip="Días para caducar: {{ calcularDiasParaCaducar(row.fecha_caducidad) }}">
-                <mat-icon class="estado-icon">{{ getCaducidadIcon(row.fecha_caducidad) }}</mat-icon>
-                {{ getCaducidadText(row.fecha_caducidad) }}
+          <!-- Columna Estado - Mejorado con indicador de caducado -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef class="column-estado">Estado</th>
+        <td mat-cell *matCellDef="let row" class="column-estado">
+          <div class="estado-completo">
+            <!-- Estado de Caducidad (PRINCIPAL) -->
+            <span class="estado-badge caducidad" 
+                  [class]="getDiasClass(row.fecha_caducidad)"
+                  [style.background]="isLoteCaducado(row.fecha_caducidad) ? '#d32f2f' : ''"
+                  [style.color]="isLoteCaducado(row.fecha_caducidad) ? 'white' : ''"
+                  matTooltip="Días para caducar: {{ calcularDiasParaCaducar(row.fecha_caducidad) }}">
+              <mat-icon class="estado-icon">{{ getCaducidadIcon(row.fecha_caducidad) }}</mat-icon>
+              {{ getCaducidadText(row.fecha_caducidad) }}
+              <span *ngIf="isLoteCaducado(row.fecha_caducidad)" style="font-size: 0.6rem; margin-left: 4px;">
+                ⚠️
               </span>
-              <span class="stock-badge" [class]="getStockClass(row)"
-                    matTooltip="Estado de stock: {{ getStockText(row) }}">
-                {{ getStockText(row) }}
-              </span>
-            </div>
-          </td>
-        </ng-container>
+            </span>
 
-        <!-- Columna Acciones -->
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef class="column-acciones">Acciones</th>
-          <td mat-cell *matCellDef="let row" class="column-acciones">
-            <div class="action-buttons">
-              <button mat-icon-button color="accent" (click)="verDetallesLote(row)" 
-                      matTooltip="Ver detalles" class="btn-details">
-                <mat-icon>visibility</mat-icon>
-              </button>
-              <button *ngIf="authService.isAdmin() && row.cantidad_actual === 0" 
-                      mat-icon-button color="warn" (click)="desactivarLote(row)" 
-                      matTooltip="Desactivar lote" class="btn-deactivate">
-                <mat-icon>delete_outline</mat-icon>
-              </button>
-            </div>
-          </td>
-        </ng-container>
+            <!-- Estado de Stock (SECUNDARIO) -->
+            <span class="stock-badge" [class]="getStockClass(row)"
+                  matTooltip="Estado de stock: {{ getStockText(row) }}">
+              {{ getStockText(row) }}
+            </span>
+          </div>
+        </td>
+      </ng-container>
+
+        <!-- Columna Acciones - MODIFICAR -->
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef class="column-acciones">Acciones</th>
+      <td mat-cell *matCellDef="let row" class="column-acciones">
+        <div class="action-buttons">
+          <!-- VER DETALLES (siempre visible) -->
+          <button mat-icon-button color="accent" (click)="verDetallesLote(row)" 
+                  matTooltip="Ver detalles" class="btn-details">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          
+          <!-- DESACTIVAR LOTE: Visible si es admin Y (stock=0 O lote caducado) -->
+          <button *ngIf="authService.isAdmin() && (row.cantidad_actual === 0 || isLoteCaducado(row.fecha_caducidad))" 
+                  mat-icon-button color="warn" (click)="desactivarLote(row)" 
+                  matTooltip="{{ isLoteCaducado(row.fecha_caducidad) ? 'Desactivar lote caducado' : 'Desactivar lote agotado' }}" 
+                  class="btn-deactivate">
+            <mat-icon>block</mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumnsProfessional" class="header-row"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumnsProfessional" 

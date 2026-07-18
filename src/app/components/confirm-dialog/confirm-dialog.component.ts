@@ -1,3 +1,4 @@
+// confirm-dialog.component.ts - CORREGIDO
 import { CommonModule } from '@angular/common';
 import { Component, Inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,7 +32,6 @@ export class ConfirmDialogComponent {
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogData
   ) {
-    // Establecer valores por defecto
     this.data = {
       title: 'Confirmar acción',
       confirmText: 'Confirmar',
@@ -39,7 +39,7 @@ export class ConfirmDialogComponent {
       confirmColor: 'warn',
       icon: 'warning',
       showIcon: true,
-      ...data // El 'message' viene de aquí
+      ...data
     };
   }
 
@@ -60,18 +60,37 @@ export class ConfirmDialogComponent {
     }
   }
 
- getConfirmIcon(): string {
-  // Si se proporcionó un ícono específico, usarlo
-  if (this.data.icon && this.data.icon !== 'warning') {
-    return this.data.icon;
+  // ✅ CORREGIDO: Iconos según el contexto
+  getConfirmIcon(): string {
+    // Si se proporcionó un ícono específico, usarlo
+    if (this.data.icon && this.data.icon !== 'warning') {
+      return this.data.icon;
+    }
+    
+    // Si no, usar íconos según el título/color
+    const titulo = this.data.title || '';
+    
+    // Para Desactivar
+    if (titulo.includes('Desactivar')) {
+      return 'block';
+    }
+    
+    // Para Activar
+    if (titulo.includes('Activar')) {
+      return 'check_circle';
+    }
+    
+    // Para Eliminar
+    if (titulo.includes('Eliminar')) {
+      return 'delete';
+    }
+    
+    // Por defecto según color
+    switch (this.data.confirmColor) {
+      case 'warn': return 'warning';
+      case 'primary': return 'check_circle';
+      case 'accent': return 'done';
+      default: return 'check';
+    }
   }
-  
-  // Si no, usar íconos por defecto según el color
-  switch (this.data.confirmColor) {
-    case 'warn': return 'delete';
-    case 'primary': return 'check_circle';
-    case 'accent': return 'done';
-    default: return 'check';
-  }
-}
 }

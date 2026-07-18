@@ -1,5 +1,6 @@
-// En producto-list.component.ts - MODIFICAR completamente
+// producto-list.component.ts - VERSIÓN FINAL CON FECHA PERÚ
 import { Component, OnInit, ViewChild, inject, ElementRef } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -16,9 +17,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Product } from '../../../core/models/producto.model';
 import { ProductService } from '../../../core/services/producto.service';
+import { LoteService } from '../../../core/services/lote.service';
+import { Lote } from '../../../core/models/lote.model';
 import { ProductoFormComponent } from '../../../components/producto-form/producto-form.component';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
-import { AuthService } from '../../../core/services/auth.service'; // ✅ AGREGAR
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-producto-list',
@@ -48,7 +51,7 @@ export class ProductoListComponent implements OnInit {
     'descripcion',
     'precio',
     'stock',
-    'stockMinimo', // 👈 NUEVA COLUMNA
+    'stockMinimo',
     'categoria',
     'marca',
     'paisOrigen',
@@ -58,15 +61,17 @@ export class ProductoListComponent implements OnInit {
   dataSource: MatTableDataSource<any>;
   isLoading = true;
   isVendedor = false;
+  lotesCache: Lote[] = [];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
- @ViewChild('tableWrapper') tableWrapper!: ElementRef;
-  // ✅ INYECTAR AuthService
+  @ViewChild('tableWrapper') tableWrapper!: ElementRef;
+
   private authService = inject(AuthService);
 
   constructor(
     private productService: ProductService,
+    private loteService: LoteService,
     public dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
@@ -74,11 +79,9 @@ export class ProductoListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // ✅ DETERMINAR SI ES VENDEDOR
     const currentUser = this.authService.getCurrentUser();
     this.isVendedor = currentUser?.id_rol === 2;
     
-    // ✅ OCULTAR COLUMNAS DE ACCIONES SI ES VENDEDOR
     if (this.isVendedor) {
       this.displayedColumns = this.displayedColumns.filter(col => col !== 'acciones');
     }
@@ -91,12 +94,104 @@ export class ProductoListComponent implements OnInit {
     this.dataSource.sort = this.sort;
   }
 
+  // ============================================
+  // 🔧 NORMALIZAR FECHA A FORMATO YYYY-MM-DD
+  // ============================================
+  private normalizarFecha(fecha: string): string {
+    if (!fecha) return '';
+    
+    // Si ya está en formato YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+      return fecha;
+    }
+    
+    // Si tiene formato ISO (YYYY-MM-DDTHH:mm:ss)
+    if (fecha.includes('T')) {
+      return fecha.split('T')[0];
+    }
+    
+    // Si tiene formato DD/MM/YYYY
+    if (fecha.includes('/')) {
+      const partes = fecha.split('/');
+      if (partes.length === 3) {
+        const dia = partes[0].padStart(2, '0');
+        const mes = partes[1].padStart(2, '0');
+        const anio = partes[2];
+        const anioCompleto = anio.length === 2 ? `20${anio}` : anio;
+        return `${anioCompleto}-${mes}-${dia}`;
+      }
+    }
+    
+    // Si tiene formato DD-MM-YYYY
+    if (fecha.includes('-')) {
+      const partes = fecha.split('-');
+      if (partes.length === 3 && partes[2].length === 4) {
+        const dia = partes[0].padStart(2, '0');
+        const mes = partes[1].padStart(2, '0');
+        const anio = partes[2];
+        return `${anio}-${mes}-${dia}`;
+      }
+    }
+    
+    // Si tiene otro formato, intentar crear un Date
+    try {
+      const date = new Date(fecha);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+    } catch (e) {
+      console.warn('Error normalizando fecha:', fecha, e);
+    }
+    
+    return fecha;
+  }
+
+// ============================================
+// 🔍 VERIFICAR CONSISTENCIA DE STOCK (FECHA PERÚ CORREGIDA)
+// ============================================
+private verificarConsistenciaStock(producto: any, lotes: Lote[]): boolean {
+    const lotesProducto = lotes.filter(l => l.id_producto === producto.id_producto);
+    
+    // Si no hay lotes, el stock debería ser 0
+    if (lotesProducto.length === 0) {
+        return producto.stock !== 0;
+    }
+    
+    // ✅ Obtener fecha actual en zona horaria Perú (formato YYYY-MM-DD)
+    const hoy = new Date();
+    const hoyStr = hoy.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+    
+    let stockLotesValidos = 0;
+    
+    lotesProducto.forEach(l => {
+        if (!l.activo) return;
+        
+        const fechaStr = this.normalizarFecha(l.fecha_caducidad);
+        const esValido = fechaStr >= hoyStr;
+        
+        if (esValido) {
+            stockLotesValidos += l.cantidad_actual;
+        }
+    });
+    
+    // Debug
+    console.log(`📊 Producto "${producto.nombre}":`, {
+        stockProducto: producto.stock,
+        stockLotesValidos: stockLotesValidos,
+        hoy: hoyStr,
+        esInconsistente: producto.stock !== stockLotesValidos
+    });
+    
+    return producto.stock !== stockLotesValidos;
+}
+
+  // ============================================
+  // 📥 CARGAR PRODUCTOS CON DETALLES
+  // ============================================
   loadProductsWithDetails(): void {
     this.isLoading = true;
 
-    
     if (this.isVendedor) {
-      // ✅ USAR MÉTODO SIMPLIFICADO PARA VENDEDORES
       this.productService.getProductsForSales().subscribe({
         next: (products) => {
           console.log('📦 Productos para vendedor:', products);
@@ -112,11 +207,23 @@ export class ProductoListComponent implements OnInit {
         }
       });
     } else {
-      // ✅ USAR MÉTODO COMPLETO PARA ADMIN/ALMACENERO
-      this.productService.getProductsWithDetails().subscribe({
-        next: (productsWithDetails) => {
-          console.log('📦 Productos con detalles:', productsWithDetails);
-          this.dataSource = new MatTableDataSource(productsWithDetails);
+      forkJoin({
+        productos: this.productService.getProductsWithDetails(),
+        lotes: this.loteService.getLotes()
+      }).subscribe({
+        next: ({ productos, lotes }) => {
+          this.lotesCache = lotes;
+          
+          const productosConStock = productos.map((producto: any) => {
+            const stockInconsistente = this.verificarConsistenciaStock(producto, lotes);
+            return {
+              ...producto,
+              stockInconsistente
+            };
+          });
+          
+          console.log('📦 Productos con verificación de stock:', productosConStock);
+          this.dataSource = new MatTableDataSource(productosConStock);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
           this.isLoading = false;
@@ -130,16 +237,20 @@ export class ProductoListComponent implements OnInit {
     }
   }
 
+  // ============================================
+  // 📥 CARGAR PRODUCTOS BÁSICOS (FALLBACK)
+  // ============================================
   loadBasicProducts(): void {
     this.productService.getProducts().subscribe({
       next: (products) => {
         const productsWithPlaceholders = products.map(p => ({
           ...p,
-          stockMinimo: p.stock_minimo || 0, // 👈 AÑADIR
+          stockMinimo: p.stock_minimo || 0,
           categoriaNombre: 'No disponible',
           marcaNombre: 'No disponible',
           proveedorNombre: 'No disponible',
-          paisOrigenNombre: 'No disponible'
+          paisOrigenNombre: 'No disponible',
+          stockInconsistente: false
         }));
         
         this.dataSource = new MatTableDataSource(productsWithPlaceholders);
@@ -154,6 +265,16 @@ export class ProductoListComponent implements OnInit {
     });
   }
 
+  // ============================================
+  // 🔄 RECARGAR DATOS
+  // ============================================
+  recargarDatos(): void {
+    this.loadProductsWithDetails();
+  }
+
+  // ============================================
+  // 🔍 FILTRO DE BÚSQUEDA
+  // ============================================
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -163,8 +284,10 @@ export class ProductoListComponent implements OnInit {
     }
   }
 
+  // ============================================
+  // ➕ AGREGAR PRODUCTO
+  // ============================================
   openAddDialog(): void {
-    // ✅ SOLO PERMITIR SI NO ES VENDEDOR
     if (this.isVendedor) {
       this.showErrorMessage('No tienes permisos para agregar productos');
       return;
@@ -186,8 +309,10 @@ export class ProductoListComponent implements OnInit {
     });
   }
 
+  // ============================================
+  // ✏️ EDITAR PRODUCTO
+  // ============================================
   openEditDialog(product: Product): void {
-    // ✅ SOLO PERMITIR SI NO ES VENDEDOR
     if (this.isVendedor) {
       this.showErrorMessage('No tienes permisos para editar productos');
       return;
@@ -210,8 +335,10 @@ export class ProductoListComponent implements OnInit {
     });
   }
 
+  // ============================================
+  // 🗑️ ELIMINAR PRODUCTO
+  // ============================================
   deleteProduct(product: Product): void {
-    // ✅ SOLO PERMITIR SI NO ES VENDEDOR
     if (this.isVendedor) {
       this.showErrorMessage('No tienes permisos para eliminar productos');
       return;
@@ -240,6 +367,9 @@ export class ProductoListComponent implements OnInit {
     });
   }
 
+  // ============================================
+  // 📢 NOTIFICACIONES
+  // ============================================
   private showSuccessMessage(message: string): void {
     this.snackBar.open(message, 'Cerrar', {
       duration: 3000,
@@ -258,8 +388,17 @@ export class ProductoListComponent implements OnInit {
     });
   }
 
-  // ✅ NUEVO MÉTODO PARA VERIFICAR PERMISOS
+  // ============================================
+  // 🔐 VERIFICAR PERMISOS
+  // ============================================
   canEdit(): boolean {
     return !this.isVendedor;
+  }
+
+  // ============================================
+  // 📊 OBTENER CONTEO DE PRODUCTOS INCONSISTENTES
+  // ============================================
+  getProductosInconsistentes(): number {
+    return this.dataSource.data.filter((p: any) => p.stockInconsistente).length;
   }
 }

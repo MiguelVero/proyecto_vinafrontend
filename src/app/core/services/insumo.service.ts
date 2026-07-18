@@ -5,6 +5,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Insumo, InsumoCreate, InsumoUpdate } from '../models/insumo.model';
 import { environment } from '../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class InsumoService {
   private apiUrl = `${environment.apiUrl}/insumos`;
@@ -19,11 +20,18 @@ export class InsumoService {
     return throwError(() => new Error(message));
   }
 
-  getInsumos(): Observable<Insumo[]> {// ✅ Tipado explícito
+  // ✅ Obtener TODOS los insumos (para gestión)
+  getInsumos(): Observable<Insumo[]> {
     return this.http.get<Insumo[]>(this.apiUrl).pipe(catchError(this.handleError));
   }
 
-  getInsumoById(id: number): Observable<Insumo> {// ✅ Tipado explícito
+  // ✅ NUEVO: Obtener SOLO insumos activos (para pedidos y producción)
+  getInsumosActivos(): Observable<Insumo[]> {
+    return this.http.get<Insumo[]>(`${this.apiUrl}?soloActivos=true`)
+      .pipe(catchError(this.handleError));
+  }
+
+  getInsumoById(id: number): Observable<Insumo> {
     return this.http.get<Insumo>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
   }
 
@@ -32,7 +40,16 @@ export class InsumoService {
   }
 
   updateInsumo(id: number, payload: InsumoUpdate): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, payload).pipe(catchError(this.handleError));
+    const dataToSend = {
+      nombre: payload.nombre || '',
+      descripcion: payload.descripcion || '',
+      unidad_medida: payload.unidad_medida || 'unidades',
+      stock_minimo: payload.stock_minimo !== undefined ? payload.stock_minimo : 0,
+      activo: payload.activo !== undefined ? payload.activo : true
+    };
+    
+    return this.http.put<any>(`${this.apiUrl}/${id}`, dataToSend)
+      .pipe(catchError(this.handleError));
   }
 
   deleteInsumo(id: number): Observable<any> {

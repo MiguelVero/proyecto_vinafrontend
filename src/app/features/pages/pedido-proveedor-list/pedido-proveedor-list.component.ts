@@ -118,53 +118,59 @@ export class PedidoProveedorListComponent implements OnInit, AfterViewInit {
     this.applyFilterToDataSource();
   }
 
-   // ✅ CORREGIDO: Filtro simplificado
-  private createFilterPredicate() {
-    return (data: PedidoProveedor, filter: string): boolean => {
-      const searchTerms = JSON.parse(filter);
-      const { searchTerm, estado, fechaInicio, fechaFin } = searchTerms;
 
-      console.log('🔍 Aplicando filtro a pedido:', {
-        id: data.id_pedido,
-        estadoPedido: data.id_estado_pedido,
-        filtroEstado: estado,
-        coincide: estado === 0 || data.id_estado_pedido === estado
-      });
+ // ✅ CORREGIDO: Filtro de fechas en createFilterPredicate
+// ✅ CORREGIDO: Filtro de fechas 
+private createFilterPredicate() {
+  return (data: PedidoProveedor, filter: string): boolean => {
+    const searchTerms = JSON.parse(filter);
+    const { searchTerm, estado, fechaInicio, fechaFin } = searchTerms;
 
-      // Filtro por búsqueda textual
-      if (searchTerm) {
-        const matchesSearch = 
-          data.id_pedido.toString().includes(searchTerm) ||
-          data.proveedor?.razon_social?.toLowerCase().includes(searchTerm) ||
-          data.estado?.estado?.toLowerCase().includes(searchTerm);
-        if (!matchesSearch) return false;
+    // Filtro por búsqueda textual
+    if (searchTerm) {
+      const matchesSearch = 
+        data.id_pedido.toString().includes(searchTerm) ||
+        data.proveedor?.razon_social?.toLowerCase().includes(searchTerm) ||
+        data.estado?.estado?.toLowerCase().includes(searchTerm);
+      if (!matchesSearch) return false;
+    }
+
+    // Filtro por estado único (0 = Todos)
+    if (estado !== 0) {
+      if (data.id_estado_pedido !== estado) return false;
+    }
+
+    // ✅ CORREGIDO: Filtro por fecha
+    if (fechaInicio || fechaFin) {
+      // La fecha viene del backend como 'YYYY-MM-DD' (sin hora)
+      let fechaPedidoStr = data.fecha;
+      
+      // Si tiene formato ISO con T, extraer solo la fecha
+      if (fechaPedidoStr.includes('T')) {
+        fechaPedidoStr = fechaPedidoStr.split('T')[0];
+      }
+      
+      const fechaPedido = new Date(fechaPedidoStr + 'T00:00:00-05:00');
+      fechaPedido.setHours(0, 0, 0, 0);
+      
+      if (fechaInicio) {
+        const inicio = new Date(fechaInicio);
+        inicio.setHours(0, 0, 0, 0);
+        // Incluir la fecha de inicio (>=)
+        if (fechaPedido < inicio) return false;
       }
 
-      // ✅ CORREGIDO: Filtro por estado único (0 = Todos)
-      if (estado !== 0) {
-        if (data.id_estado_pedido !== estado) return false;
+      if (fechaFin) {
+        const fin = new Date(fechaFin);
+        fin.setHours(23, 59, 59, 999);
+        // Incluir la fecha de fin (<=)
+        if (fechaPedido > fin) return false;
       }
+    }
 
-      // Filtro por fecha
-      if (fechaInicio || fechaFin) {
-        const fechaPedido = new Date(data.fecha);
-        
-        if (fechaInicio) {
-          const inicio = new Date(fechaInicio);
-          inicio.setHours(0, 0, 0, 0);
-          if (fechaPedido < inicio) return false;
-        }
-
-        if (fechaFin) {
-          const fin = new Date(fechaFin);
-          fin.setHours(23, 59, 59, 999);
-          if (fechaPedido > fin) return false;
-        }
-      }
-
-      return true;
-    };
-  }
+    return true;
+  };
+}
 
 
    // ✅ CORREGIDO: Aplicar filtros simplificado
@@ -204,8 +210,6 @@ export class PedidoProveedorListComponent implements OnInit, AfterViewInit {
     
     // Resetear datasource
     this.dataSource.filter = '';
-    
-    this.showSuccess('Filtros limpiados correctamente');
   }
 
  // ✅ NUEVO: Método para debug

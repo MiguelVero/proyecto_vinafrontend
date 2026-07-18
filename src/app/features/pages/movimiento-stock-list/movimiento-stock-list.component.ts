@@ -203,22 +203,6 @@ private filtrarMovimientos() {
   };
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 toggleFiltrosAvanzados(): void {
   this.mostrarFiltrosAvanzados = !this.mostrarFiltrosAvanzados;
 }
@@ -272,18 +256,18 @@ getTotalEgresos(): number {
     .reduce((sum, mov) => sum + mov.cantidad, 0);
 }
 
-getPromedioDiario(): number {
-  const movimientosUltimaSemana = this.dataSource.data.filter(mov => {
-    const fechaMov = new Date(mov.fecha);
-    const unaSemanaAtras = new Date();
-    unaSemanaAtras.setDate(unaSemanaAtras.getDate() - 7);
-    return fechaMov >= unaSemanaAtras;
-  });
-  
-  return movimientosUltimaSemana.length > 0 
-    ? Math.round(movimientosUltimaSemana.length / 7) 
-    : 0;
-}
+
+ //getPromedioDiario(): number {
+   //const movimientosUltimaSemana = this.dataSource.data.filter(mov => {
+  //   const fechaMov = new Date(mov.fecha);
+ //const unaSemanaAtras = new Date();
+     //unaSemanaAtras.setDate(unaSemanaAtras.getDate() - 7);
+  //   return fechaMov >= unaSemanaAtras;
+  // });
+  // return movimientosUltimaSemana.length > 0 
+   //  ? Math.round(movimientosUltimaSemana.length / 7) 
+  //   : 0;
+ //}
 
 getBalanceTotal(): number {
   return this.dataSource.filteredData.reduce((balance, mov) => {
