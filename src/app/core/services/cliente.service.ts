@@ -54,7 +54,7 @@ export class ClienteService {
 getClientesParaVentas(): Observable<ClienteVenta[]> {
   return this.http.get<any[]>(`${this.apiUrl}/clientes`).pipe(
     map(clientes => clientes.map(cliente => {
-      console.log('🔍 Cliente recibido del backend:', cliente); // Para debug
+      //console.log('🔍 Cliente recibido del backend:', cliente); // Para debug
       
       return {
         id_cliente: cliente.id_cliente || cliente.id,

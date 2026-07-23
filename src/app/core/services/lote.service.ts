@@ -5,6 +5,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Lote, LoteCreate, LoteUpdate } from '../models/lote.model';
 import { environment } from '../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class LoteService {
   private apiUrl = `${environment.apiUrl}/lotes`;
@@ -37,5 +38,17 @@ export class LoteService {
 
   deleteLote(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(catchError(this.handleError));
+  }
+
+  // ✅ REACTIVAR LOTE
+  reactivarLote(id: number): Observable<Lote> {
+    return this.http.post<Lote>(`${this.apiUrl}/${id}/reactivar`, {})
+      .pipe(catchError(this.handleError));
+  }
+
+  // ✅ VACIAR STOCK DEL LOTE (NUEVO MÉTODO)
+  vaciarStockLote(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/vaciar-stock`, {})
+      .pipe(catchError(this.handleError));
   }
 }

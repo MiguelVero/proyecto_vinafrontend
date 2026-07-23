@@ -48,6 +48,7 @@ export class LoteListComponent implements OnInit, AfterViewInit {
   isLoading = true;
   mostrarFiltrosAvanzados = false;
   searchTerm: string = '';
+  filtroEstado: string = 'todos'; // 'todos' | 'activos' | 'inactivos'
 
   filtrosLotes: {
     stock: string[];
@@ -76,18 +77,36 @@ export class LoteListComponent implements OnInit, AfterViewInit {
       this.loadLotes();
     });
 
-    // ✅ Configurar el filterPredicate UNA SOLA VEZ
     this.dataSource.filterPredicate = this.filtrarLotes();
   }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    // ❌ NO sobrescribir filterPredicate aquí
   }
 
   // ============================================
-  // 🔍 FILTRO PRINCIPAL (combina todos los filtros)
+  // 📥 CARGAR LOTES
+  // ============================================
+  loadLotes(): void {
+    this.isLoading = true;
+    this.loteService.getLotes().subscribe({
+      next: (rows: Lote[]) => {
+        this.dataSource.data = rows;
+        this.isLoading = false;
+        console.log('✅ Lotes cargados:', rows);
+        this.aplicarFiltrosLotes();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.showError('Error al cargar lotes');
+        console.error('❌ Error cargando lotes:', error);
+      }
+    });
+  }
+
+  // ============================================
+  // 🔍 FILTRO PRINCIPAL
   // ============================================
   private filtrarLotes() {
     return (data: Lote, filter: string): boolean => {
@@ -96,7 +115,13 @@ export class LoteListComponent implements OnInit, AfterViewInit {
       try {
         const filtros = JSON.parse(filter);
 
-        // 1. Filtro por término de búsqueda
+        // 1. Filtro por estado (activo/inactivo/todos)
+        if (filtros.estado && filtros.estado !== 'todos') {
+          if (filtros.estado === 'activos' && !data.activo) return false;
+          if (filtros.estado === 'inactivos' && data.activo) return false;
+        }
+
+        // 2. Filtro por término de búsqueda
         if (filtros.searchTerm) {
           const term = filtros.searchTerm.toLowerCase();
           const productoNombre = data.producto?.nombre?.toLowerCase() || '';
@@ -107,7 +132,7 @@ export class LoteListComponent implements OnInit, AfterViewInit {
           }
         }
 
-        // 2. Filtro por estado de stock
+        // 3. Filtro por estado de stock
         if (filtros.stock && filtros.stock.length > 0) {
           const stockClass = this.getStockClass(data);
           let coincideStock = false;
@@ -121,7 +146,7 @@ export class LoteListComponent implements OnInit, AfterViewInit {
           if (!coincideStock) return false;
         }
 
-        // 3. Filtro por estado de caducidad
+        // 4. Filtro por estado de caducidad
         if (filtros.caducidad && filtros.caducidad.length > 0) {
           const dias = this.calcularDiasParaCaducar(data.fecha_caducidad);
           let coincideCaducidad = false;
@@ -145,27 +170,6 @@ export class LoteListComponent implements OnInit, AfterViewInit {
   }
 
   // ============================================
-  // 📥 CARGAR LOTES
-  // ============================================
-  loadLotes(): void {
-    this.isLoading = true;
-    this.loteService.getLotes().subscribe({
-      next: (rows: Lote[]) => {
-        this.dataSource.data = rows;
-        this.isLoading = false;
-        console.log('✅ Lotes cargados:', rows);
-        // Aplicar filtros después de cargar
-        this.aplicarFiltrosLotes();
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.showError('Error al cargar lotes');
-        console.error('❌ Error cargando lotes:', error);
-      }
-    });
-  }
-
-  // ============================================
   // 🔄 MÉTODOS DE FILTRO
   // ============================================
   applyFilter(event: Event): void {
@@ -183,8 +187,14 @@ export class LoteListComponent implements OnInit, AfterViewInit {
     this.aplicarFiltrosLotes();
   }
 
+  filtrarPorEstado(estado: string): void {
+    this.filtroEstado = estado;
+    this.aplicarFiltrosLotes();
+  }
+
   aplicarFiltrosLotes(): void {
     const filtroCombinado = {
+      estado: this.filtroEstado,
       stock: this.filtrosLotes.stock,
       caducidad: this.filtrosLotes.caducidad,
       searchTerm: this.filtrosLotes.searchTerm
@@ -202,11 +212,11 @@ export class LoteListComponent implements OnInit, AfterViewInit {
       caducidad: [],
       searchTerm: ''
     };
+    this.filtroEstado = 'todos';
 
     const searchInput = document.querySelector('.search-field input') as HTMLInputElement;
     if (searchInput) searchInput.value = '';
 
-    // Cerrar paneles de selects abiertos
     document.querySelectorAll('.cdk-overlay-container .mat-select-panel').forEach(panel => {
       panel.remove();
     });
@@ -283,11 +293,43 @@ export class LoteListComponent implements OnInit, AfterViewInit {
     return 'event_available';
   }
 
+  isLoteCaducado(fechaCaducidad: string): boolean {
+    const dias = this.calcularDiasParaCaducar(fechaCaducidad);
+    return dias < 0;
+  }
+
+  getLotesActivos(): Lote[] {
+    return this.dataSource.data.filter(lote => lote.activo);
+  }
+
+  getLotesInactivos(): Lote[] {
+    return this.dataSource.data.filter(lote => !lote.activo);
+  }
+
   getLotesProximosCaducar(): any[] {
     return this.dataSource.data.filter(lote =>
       this.getDiasClass(lote.fecha_caducidad) === 'caducidad-critica' ||
       this.getDiasClass(lote.fecha_caducidad) === 'caducidad-proxima'
     );
+  }
+
+  // ============================================
+  // 🔍 VERIFICAR SI SE PUEDE ELIMINAR
+  // ============================================
+  puedeEliminarLote(lote: Lote): boolean {
+    if (lote.activo) return false;
+    if (lote.cantidad_actual !== 0) return false;
+    return true;
+  }
+
+  getMotivoNoEliminar(lote: Lote): string {
+    if (lote.activo) {
+      return 'El lote está activo. Primero debe desactivarlo.';
+    }
+    if (lote.cantidad_actual > 0) {
+      return `El lote tiene ${lote.cantidad_actual} unidades en stock. Primero debe vaciar el stock.`;
+    }
+    return 'No se puede eliminar este lote.';
   }
 
   // ============================================
@@ -302,43 +344,96 @@ export class LoteListComponent implements OnInit, AfterViewInit {
     });
   }
 
-// Modificar el método desactivarLote
-desactivarLote(lote: Lote): void {
-  const esCaducado = this.isLoteCaducado(lote.fecha_caducidad);
-  const esAgotado = lote.cantidad_actual === 0;
-  
-  let mensaje = '';
-  let titulo = '⚠️ Desactivar Lote';
-  
-  if (esCaducado) {
-    titulo = '⚠️ Desactivar Lote Caducado';
-    mensaje = `
-      <p>El lote <strong>${lote.numero_lote}</strong> está <strong style="color: #d32f2f;">CADUCADO</strong>.</p>
-      <p>Stock actual: <strong>${lote.cantidad_actual}</strong> unidades</p>
-      <br>
-      <p><strong>¿Estás seguro de desactivar este lote?</strong></p>
-      <p style="color: #d32f2f; font-size: 0.9rem;">
-        ⚠️ El stock de este lote se eliminará del inventario y no podrá ser utilizado.
-      </p>
-    `;
-  } else if (esAgotado) {
-    titulo = '⚠️ Desactivar Lote Agotado';
-    mensaje = `
-      <p>El lote <strong>${lote.numero_lote}</strong> está <strong style="color: #f57c00;">AGOTADO</strong>.</p>
-      <br>
-      <p><strong>¿Estás seguro de desactivar este lote?</strong></p>
-      <p style="color: #f57c00; font-size: 0.9rem;">
-        ⚠️ El lote no tiene stock disponible y será ocultado del sistema.
-      </p>
-    `;
+  desactivarLote(lote: Lote): void {
+    const esCaducado = this.isLoteCaducado(lote.fecha_caducidad);
+    const esAgotado = lote.cantidad_actual === 0;
+    
+    let mensaje = '';
+    let titulo = '⚠️ Desactivar Lote';
+    
+    if (esCaducado) {
+      titulo = '⚠️ Desactivar Lote Caducado';
+      mensaje = `
+        <p>El lote <strong>${lote.numero_lote}</strong> está <strong style="color: #d32f2f;">CADUCADO</strong>.</p>
+        <p>Stock actual: <strong>${lote.cantidad_actual}</strong> unidades</p>
+        <br>
+        <p><strong>¿Estás seguro de desactivar este lote?</strong></p>
+        <p style="color: #d32f2f; font-size: 0.9rem;">
+          ⚠️ El stock de este lote se eliminará del inventario y no podrá ser utilizado.
+        </p>
+      `;
+    } else if (esAgotado) {
+      titulo = '⚠️ Desactivar Lote Agotado';
+      mensaje = `
+        <p>El lote <strong>${lote.numero_lote}</strong> está <strong style="color: #f57c00;">AGOTADO</strong>.</p>
+        <br>
+        <p><strong>¿Estás seguro de desactivar este lote?</strong></p>
+        <p style="color: #f57c00; font-size: 0.9rem;">
+          ⚠️ El lote no tiene stock disponible y será ocultado del sistema.
+        </p>
+      `;
+    }
+    
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: titulo,
+        message: mensaje,
+        confirmText: 'Sí, Desactivar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn',
+        icon: 'warning',
+        showIcon: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loteService.updateLote(lote.id_lote, { activo: false }).subscribe({
+          next: () => {
+            this.showSuccess(esCaducado 
+              ? '✅ Lote caducado desactivado correctamente' 
+              : '✅ Lote desactivado correctamente'
+            );
+            this.loadLotes();
+            window.dispatchEvent(new CustomEvent('inventario-actualizado'));
+          },
+          error: (err) => {
+            console.error('Error al desactivar lote:', err);
+            this.showError('Error al desactivar lote');
+          }
+        });
+      }
+    });
   }
+
+// ============================================
+// 🔄 REACTIVAR LOTE
+// ============================================
+reactivarLote(lote: Lote): void {
+  const esCaducado = this.isLoteCaducado(lote.fecha_caducidad);
+  const dias = this.calcularDiasParaCaducar(lote.fecha_caducidad);
+  
+  let mensaje = `
+    <p>El lote <strong>${lote.numero_lote}</strong> está <strong style="color: #d32f2f;">CADUCADO</strong>.</p>
+    <p><strong>Producto:</strong> ${lote.producto?.nombre}</p>
+    <p><strong>Stock actual:</strong> <span style="color: #d32f2f; font-weight: bold;">${lote.cantidad_actual}</span> unidades</p>
+    <p>Caducó hace <strong>${Math.abs(dias)}</strong> días.</p>
+    <br>
+    <p style="color: #f57c00; font-size: 0.9rem;">
+      ⚠️ Este lote está caducado. Reactivarlo permitiría vender producto vencido.
+    </p>
+    <p style="color: #2e7d32; font-size: 0.9rem;">
+      💡 Alternativa: Puedes <strong>vaciar el stock</strong> (crea un egreso) y luego eliminar el lote.
+    </p>
+  `;
   
   const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-    width: '450px',
+    width: '500px',
     data: {
-      title: titulo,
+      title: '⚠️ Lote Caducado',
       message: mensaje,
-      confirmText: 'Sí, Desactivar',
+      confirmText: 'Reactivar (No recomendado)',
       cancelText: 'Cancelar',
       confirmColor: 'warn',
       icon: 'warning',
@@ -348,29 +443,101 @@ desactivarLote(lote: Lote): void {
 
   dialogRef.afterClosed().subscribe(result => {
     if (result) {
-      this.loteService.updateLote(lote.id_lote, { activo: false }).subscribe({
+      this.confirmarReactivacion(lote);
+    }
+  });
+}
+
+confirmarReactivacion(lote: Lote): void {
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '450px',
+    data: {
+      title: '⚠️ Confirmar Reactivación',
+      message: `
+        <p>¿Estás seguro de REACTIVAR el lote caducado <strong>${lote.numero_lote}</strong>?</p>
+        <p style="color: #d32f2f; font-size: 0.9rem;">
+          ⚠️ Estás a punto de poner en venta producto caducado.
+        </p>
+        <p style="color: #d32f2f; font-size: 0.9rem;">
+          Esto puede afectar la calidad y la reputación de la empresa.
+        </p>
+      `,
+      confirmText: 'Sí, Reactivar (bajo mi responsabilidad)',
+      cancelText: 'Cancelar',
+      confirmColor: 'warn',
+      icon: 'warning',
+      showIcon: true
+    }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.loteService.reactivarLote(lote.id_lote).subscribe({
         next: () => {
-          this.showSuccess(esCaducado 
-            ? '✅ Lote caducado desactivado correctamente' 
-            : '✅ Lote desactivado correctamente'
-          );
+          this.showSuccess('✅ Lote reactivado (producto caducado)');
           this.loadLotes();
+          window.dispatchEvent(new CustomEvent('inventario-actualizado'));
         },
         error: (err) => {
-          console.error('Error al desactivar lote:', err);
-          this.showError('Error al desactivar lote');
+          console.error('Error al reactivar lote:', err);
+          this.showError('Error al reactivar lote');
         }
       });
     }
   });
 }
 
+ // ============================================
+// 📥 ELIMINAR LOTE (solo si está inactivo y sin stock)
+// ============================================
+eliminarLote(lote: Lote): void {
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '450px',
+    data: {
+      title: '🗑️ Eliminar Lote',
+      message: `
+        <p>¿Estás seguro de ELIMINAR el lote <strong>${lote.numero_lote}</strong>?</p>
+        <p><strong>Producto:</strong> ${lote.producto?.nombre}</p>
+        <p><strong>Stock:</strong> ${lote.cantidad_actual} unidades</p>
+        <br>
+        <p style="color: #d32f2f; font-size: 0.9rem;">
+          ⚠️ Esta acción no se puede deshacer. El lote será eliminado permanentemente.
+        </p>
+        <p style="color: #f57c00; font-size: 0.9rem;">
+          ℹ️ Solo se pueden eliminar lotes inactivos y sin stock.
+        </p>
+      `,
+      confirmText: 'Sí, Eliminar',
+      cancelText: 'Cancelar',
+      confirmColor: 'warn',
+      icon: 'delete',
+      showIcon: true
+    }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.loteService.deleteLote(lote.id_lote).subscribe({
+        next: () => {
+          this.showSuccess('✅ Lote eliminado correctamente');
+          this.loadLotes();
+          window.dispatchEvent(new CustomEvent('inventario-actualizado'));
+        },
+        error: (err) => {
+          console.error('Error al eliminar lote:', err);
+          this.showError('Error al eliminar lote: ' + (err.error?.message || err.message));
+        }
+      });
+    }
+  });
+}
+
+
   recargarDatos(): void {
     this.loadLotes();
   }
 
   exportarExcel(): void {
-    // TODO: Implementar exportación a Excel
     console.log('📊 Exportando a Excel...');
   }
 
@@ -390,36 +557,56 @@ desactivarLote(lote: Lote): void {
       panelClass: ['error-snackbar']
     });
   }
-// lote-list.component.ts - AGREGAR ESTE MÉTODO
+
+// lote-list.component.ts - SOLO LA PARTE DE ACCIONES (mantener el resto igual)
 
 // ============================================
-// 🔴 VERIFICAR SI UN LOTE ESTÁ CADUCADO
+// 🗑️ VACIAR STOCK DEL LOTE (CORREGIDO)
 // ============================================
-isLoteCaducado(fechaCaducidad: string): boolean {
-  const dias = this.calcularDiasParaCaducar(fechaCaducidad);
-  return dias < 0;
-}
+vaciarStockLote(lote: Lote): void {
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '450px',
+    data: {
+      title: '🗑️ Vaciar Stock del Lote',
+      message: `
+        <p>¿Estás seguro de VACIAR el stock del lote <strong>${lote.numero_lote}</strong>?</p>
+        <p><strong>Producto:</strong> ${lote.producto?.nombre}</p>
+        <p><strong>Stock a vaciar:</strong> <span style="color: #d32f2f; font-weight: bold;">${lote.cantidad_actual}</span> unidades</p>
+        <br>
+        <p style="color: #d32f2f; font-size: 0.9rem;">
+          ⚠️ El stock se eliminará del inventario y del lote.
+        </p>
+        <p style="color: #f57c00; font-size: 0.9rem;">
+          💡 Esto creará un movimiento de egreso en el historial.
+        </p>
+        <p style="color: #2e7d32; font-size: 0.9rem; background: #e8f5e9; padding: 8px; border-radius: 4px;">
+          ℹ️ El stock del producto NO se verá afectado porque el lote está inactivo.
+        </p>
+      `,
+      confirmText: 'Sí, Vaciar Stock',
+      cancelText: 'Cancelar',
+      confirmColor: 'warn',
+      icon: 'warning',
+      showIcon: true
+    }
+  });
 
-// ============================================
-// 🟡 OBTENER EL COLOR DEL ESTADO DEL LOTE
-// ============================================
-getLoteStatusColor(fechaCaducidad: string): string {
-  const dias = this.calcularDiasParaCaducar(fechaCaducidad);
-  if (dias < 0) return '#d32f2f'; // Rojo - Caducado
-  if (dias <= 7) return '#f57c00'; // Naranja - Crítico
-  if (dias <= 30) return '#f9a825'; // Amarillo - Próximo
-  return '#2e7d32'; // Verde - Normal
-}
-
-// ============================================
-// 🟢 TEXTO DEL ESTADO DEL LOTE
-// ============================================
-getLoteStatusText(fechaCaducidad: string): string {
-  const dias = this.calcularDiasParaCaducar(fechaCaducidad);
-  if (dias < 0) return 'CADUCADO';
-  if (dias <= 7) return 'CRÍTICO';
-  if (dias <= 30) return 'PRÓXIMO';
-  return 'NORMAL';
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      // ✅ USAR EL MÉTODO ESPECÍFICO vaciarStockLote en lugar de updateLote
+      this.loteService.vaciarStockLote(lote.id_lote).subscribe({
+        next: (response) => {
+          this.showSuccess(`✅ Stock del lote ${lote.numero_lote} vaciado correctamente (${response.cantidad_eliminada} unidades)`);
+          this.loadLotes();
+          window.dispatchEvent(new CustomEvent('inventario-actualizado'));
+        },
+        error: (err) => {
+          console.error('Error al vaciar stock:', err);
+          this.showError('Error al vaciar stock del lote');
+        }
+      });
+    }
+  });
 }
 
 }

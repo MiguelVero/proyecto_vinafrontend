@@ -1,4 +1,4 @@
-// producto-list.component.ts - VERSIÓN FINAL CON FECHA PERÚ
+// producto-list.component.ts - VERSIÓN COMPLETA CORREGIDA
 import { Component, OnInit, ViewChild, inject, ElementRef } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { MatSelectModule } from '@angular/material/select';
@@ -100,17 +100,14 @@ export class ProductoListComponent implements OnInit {
   private normalizarFecha(fecha: string): string {
     if (!fecha) return '';
     
-    // Si ya está en formato YYYY-MM-DD
     if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
       return fecha;
     }
     
-    // Si tiene formato ISO (YYYY-MM-DDTHH:mm:ss)
     if (fecha.includes('T')) {
       return fecha.split('T')[0];
     }
     
-    // Si tiene formato DD/MM/YYYY
     if (fecha.includes('/')) {
       const partes = fecha.split('/');
       if (partes.length === 3) {
@@ -122,7 +119,6 @@ export class ProductoListComponent implements OnInit {
       }
     }
     
-    // Si tiene formato DD-MM-YYYY
     if (fecha.includes('-')) {
       const partes = fecha.split('-');
       if (partes.length === 3 && partes[2].length === 4) {
@@ -133,7 +129,6 @@ export class ProductoListComponent implements OnInit {
       }
     }
     
-    // Si tiene otro formato, intentar crear un Date
     try {
       const date = new Date(fecha);
       if (!isNaN(date.getTime())) {
@@ -146,44 +141,53 @@ export class ProductoListComponent implements OnInit {
     return fecha;
   }
 
-// ============================================
-// 🔍 VERIFICAR CONSISTENCIA DE STOCK (FECHA PERÚ CORREGIDA)
-// ============================================
-private verificarConsistenciaStock(producto: any, lotes: Lote[]): boolean {
+  // ============================================
+  // 🔍 VERIFICAR CONSISTENCIA DE STOCK
+  // ============================================
+  private verificarConsistenciaStock(producto: any, lotes: Lote[]): boolean {
     const lotesProducto = lotes.filter(l => l.id_producto === producto.id_producto);
     
-    // Si no hay lotes, el stock debería ser 0
     if (lotesProducto.length === 0) {
-        return producto.stock !== 0;
+      return producto.stock !== 0;
     }
     
-    // ✅ Obtener fecha actual en zona horaria Perú (formato YYYY-MM-DD)
     const hoy = new Date();
     const hoyStr = hoy.toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
     
     let stockLotesValidos = 0;
     
     lotesProducto.forEach(l => {
-        if (!l.activo) return;
-        
-        const fechaStr = this.normalizarFecha(l.fecha_caducidad);
-        const esValido = fechaStr >= hoyStr;
-        
-        if (esValido) {
-            stockLotesValidos += l.cantidad_actual;
-        }
+      // ✅ SOLO considerar lotes ACTIVOS
+      if (!l.activo) return;
+      
+      const fechaStr = this.normalizarFecha(l.fecha_caducidad);
+      const esValido = fechaStr >= hoyStr;
+      
+      if (esValido) {
+        stockLotesValidos += l.cantidad_actual;
+      }
     });
     
-    // Debug
-    console.log(`📊 Producto "${producto.nombre}":`, {
+    // Debug para identificar inconsistencias
+    const esInconsistente = producto.stock !== stockLotesValidos;
+    
+    if (esInconsistente) {
+      console.log(`⚠️ Producto "${producto.nombre}" - INCONSISTENTE:`, {
         stockProducto: producto.stock,
         stockLotesValidos: stockLotesValidos,
         hoy: hoyStr,
-        esInconsistente: producto.stock !== stockLotesValidos
-    });
+        diferencia: producto.stock - stockLotesValidos
+      });
+    } else {
+      console.log(`✅ Producto "${producto.nombre}" - CONSISTENTE:`, {
+        stockProducto: producto.stock,
+        stockLotesValidos: stockLotesValidos,
+        hoy: hoyStr
+      });
+    }
     
-    return producto.stock !== stockLotesValidos;
-}
+    return esInconsistente;
+  }
 
   // ============================================
   // 📥 CARGAR PRODUCTOS CON DETALLES

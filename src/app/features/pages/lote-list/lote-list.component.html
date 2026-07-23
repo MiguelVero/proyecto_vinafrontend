@@ -1,4 +1,4 @@
-<!-- lote-list.component.html - VERSIÓN PROFESIONAL -->
+<!-- lote-list.component.html - VERSIÓN COMPLETA CON FILTROS POR ESTADO -->
 <div class="professional-container">
   <!-- Header Mejorado -->
   <div class="professional-header">
@@ -14,6 +14,14 @@
         <div class="stat-item">
           <span class="stat-number">{{ dataSource.data.length }}</span>
           <span class="stat-label">Lotes Totales</span>
+        </div>
+        <div class="stat-item primary" *ngIf="getLotesActivos().length > 0">
+          <span class="stat-number">{{ getLotesActivos().length }}</span>
+          <span class="stat-label">Activos</span>
+        </div>
+        <div class="stat-item inactivo" *ngIf="getLotesInactivos().length > 0">
+          <span class="stat-number">{{ getLotesInactivos().length }}</span>
+          <span class="stat-label">Inactivos</span>
         </div>
         <div class="stat-item warning" *ngIf="getLotesProximosCaducar().length > 0">
           <span class="stat-number">{{ getLotesProximosCaducar().length }}</span>
@@ -35,6 +43,31 @@
     </div>
 
     <div class="filters-section">
+      <!-- ✅ Botones de filtro por estado -->
+      <div class="estado-filtros">
+        <button mat-button 
+                [class.active]="filtroEstado === 'todos'"
+                (click)="filtrarPorEstado('todos')"
+                class="estado-btn todos">
+          <mat-icon>list_alt</mat-icon>
+          Todos ({{ dataSource.data.length }})
+        </button>
+        <button mat-button 
+                [class.active]="filtroEstado === 'activos'"
+                (click)="filtrarPorEstado('activos')"
+                class="estado-btn activos">
+          <mat-icon>check_circle</mat-icon>
+          Activos ({{ getLotesActivos().length }})
+        </button>
+        <button mat-button 
+                [class.active]="filtroEstado === 'inactivos'"
+                (click)="filtrarPorEstado('inactivos')"
+                class="estado-btn inactivos">
+          <mat-icon>block</mat-icon>
+          Inactivos ({{ getLotesInactivos().length }})
+        </button>
+      </div>
+
       <button mat-stroked-button (click)="toggleFiltrosAvanzados()" class="filter-btn">
         <mat-icon>filter_list</mat-icon>
         Filtros Avanzados
@@ -74,6 +107,9 @@
         <span class="results-count">
           Mostrando {{ dataSource.filteredData.length }} de {{ dataSource.data.length }} lotes
         </span>
+        <span class="resultado-estado" *ngIf="filtroEstado !== 'todos'">
+          • {{ filtroEstado === 'activos' ? '✅ Mostrando solo activos' : '🚫 Mostrando solo inactivos' }}
+        </span>
       </div>
     </div>
 
@@ -111,7 +147,7 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-lote">N° Lote</th>
           <td mat-cell *matCellDef="let row" class="column-lote">
             <div class="lote-info">
-              <span class="numero-lote">{{ row.numero_lote }}</span>
+              <span class="numero-lote" [class.inactivo]="!row.activo">{{ row.numero_lote }}</span>
               <span class="lote-estado" [class]="getStockClass(row)">
                 {{ getStockText(row) }}
               </span>
@@ -142,7 +178,9 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header class="column-caducidad">Caducidad</th>
           <td mat-cell *matCellDef="let row" class="column-caducidad">
             <div class="caducidad-info">
-              <span class="fecha-caducidad">{{ row.fecha_caducidad | date:'dd/MM/yyyy' }}</span>
+              <span class="fecha-caducidad" [class.caducado]="isLoteCaducado(row.fecha_caducidad)">
+                {{ row.fecha_caducidad | date:'dd/MM/yyyy' }}
+              </span>
               <span class="dias-restantes" [class]="getDiasClass(row.fecha_caducidad)">
                 {{ calcularDiasParaCaducar(row.fecha_caducidad) }} días
               </span>
@@ -150,60 +188,98 @@
           </td>
         </ng-container>
 
-          <!-- Columna Estado - Mejorado con indicador de caducado -->
-      <ng-container matColumnDef="estado">
-        <th mat-header-cell *matHeaderCellDef class="column-estado">Estado</th>
-        <td mat-cell *matCellDef="let row" class="column-estado">
-          <div class="estado-completo">
-            <!-- Estado de Caducidad (PRINCIPAL) -->
-            <span class="estado-badge caducidad" 
-                  [class]="getDiasClass(row.fecha_caducidad)"
-                  [style.background]="isLoteCaducado(row.fecha_caducidad) ? '#d32f2f' : ''"
-                  [style.color]="isLoteCaducado(row.fecha_caducidad) ? 'white' : ''"
-                  matTooltip="Días para caducar: {{ calcularDiasParaCaducar(row.fecha_caducidad) }}">
-              <mat-icon class="estado-icon">{{ getCaducidadIcon(row.fecha_caducidad) }}</mat-icon>
-              {{ getCaducidadText(row.fecha_caducidad) }}
-              <span *ngIf="isLoteCaducado(row.fecha_caducidad)" style="font-size: 0.6rem; margin-left: 4px;">
-                ⚠️
+        <!-- Columna Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef class="column-estado">Estado</th>
+          <td mat-cell *matCellDef="let row" class="column-estado">
+            <div class="estado-completo">
+              <!-- Estado de activo/inactivo -->
+              <span *ngIf="!row.activo" class="estado-badge inactivo">
+                <mat-icon>block</mat-icon>
+                INACTIVO
               </span>
-            </span>
+              
+              <!-- Estado de Caducidad -->
+              <span *ngIf="row.activo" class="estado-badge caducidad" 
+                    [class]="getDiasClass(row.fecha_caducidad)"
+                    [style.background]="isLoteCaducado(row.fecha_caducidad) ? '#d32f2f' : ''"
+                    [style.color]="isLoteCaducado(row.fecha_caducidad) ? 'white' : ''"
+                    matTooltip="Días para caducar: {{ calcularDiasParaCaducar(row.fecha_caducidad) }}">
+                <mat-icon class="estado-icon">{{ getCaducidadIcon(row.fecha_caducidad) }}</mat-icon>
+                {{ getCaducidadText(row.fecha_caducidad) }}
+                <span *ngIf="isLoteCaducado(row.fecha_caducidad)" style="font-size: 0.6rem; margin-left: 4px;">
+                  ⚠️
+                </span>
+              </span>
 
-            <!-- Estado de Stock (SECUNDARIO) -->
-            <span class="stock-badge" [class]="getStockClass(row)"
-                  matTooltip="Estado de stock: {{ getStockText(row) }}">
-              {{ getStockText(row) }}
-            </span>
-          </div>
-        </td>
-      </ng-container>
+              <!-- Estado de Stock -->
+              <span *ngIf="row.activo" class="stock-badge" [class]="getStockClass(row)"
+                    matTooltip="Estado de stock: {{ getStockText(row) }}">
+                {{ getStockText(row) }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
 
-        <!-- Columna Acciones - MODIFICAR -->
-    <ng-container matColumnDef="acciones">
-      <th mat-header-cell *matHeaderCellDef class="column-acciones">Acciones</th>
-      <td mat-cell *matCellDef="let row" class="column-acciones">
-        <div class="action-buttons">
-          <!-- VER DETALLES (siempre visible) -->
-          <button mat-icon-button color="accent" (click)="verDetallesLote(row)" 
-                  matTooltip="Ver detalles" class="btn-details">
-            <mat-icon>visibility</mat-icon>
-          </button>
-          
-          <!-- DESACTIVAR LOTE: Visible si es admin Y (stock=0 O lote caducado) -->
-          <button *ngIf="authService.isAdmin() && (row.cantidad_actual === 0 || isLoteCaducado(row.fecha_caducidad))" 
-                  mat-icon-button color="warn" (click)="desactivarLote(row)" 
-                  matTooltip="{{ isLoteCaducado(row.fecha_caducidad) ? 'Desactivar lote caducado' : 'Desactivar lote agotado' }}" 
-                  class="btn-deactivate">
-            <mat-icon>block</mat-icon>
-          </button>
-        </div>
-      </td>
-    </ng-container>
+        <!-- Columna Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="column-acciones">Acciones</th>
+          <td mat-cell *matCellDef="let row" class="column-acciones">
+            <div class="action-buttons">
+              <!-- VER DETALLES (siempre visible) -->
+              <button mat-icon-button color="accent" (click)="verDetallesLote(row)" 
+                      matTooltip="Ver detalles" class="btn-details">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              
+              <!-- DESACTIVAR: Solo si está activo -->
+              <button *ngIf="row.activo && authService.isAdmin()" 
+                      mat-icon-button color="warn" (click)="desactivarLote(row)" 
+                      matTooltip="{{ isLoteCaducado(row.fecha_caducidad) ? '⚠️ Desactivar lote caducado' : 'Desactivar lote' }}" 
+                      class="btn-deactivate">
+                <mat-icon>block</mat-icon>
+              </button>
+              
+              <!-- REACTIVAR: Solo si está inactivo y tiene stock -->
+              <button *ngIf="!row.activo && row.cantidad_actual > 0 && authService.isAdmin()" 
+                      mat-icon-button color="primary" (click)="reactivarLote(row)" 
+                      matTooltip="Reactivar lote" 
+                      class="btn-reactivate">
+                <mat-icon>restore</mat-icon>
+              </button>
+
+              <!-- lote-list.component.html - Agregar en acciones -->
+              <!-- VACIAR STOCK: Solo si está inactivo y tiene stock -->
+              <button *ngIf="!row.activo && row.cantidad_actual > 0 && authService.isAdmin()" 
+                      mat-icon-button color="warn" (click)="vaciarStockLote(row)" 
+                      matTooltip="Vaciar stock del lote (egreso)" 
+                      class="btn-vaciar">
+                <mat-icon>remove_shopping_cart</mat-icon>
+              </button>
+              <!-- ELIMINAR: Solo si está inactivo y sin stock -->
+              <button *ngIf="!row.activo && row.cantidad_actual === 0 && authService.isAdmin()" 
+                      mat-icon-button color="warn" (click)="eliminarLote(row)" 
+                      matTooltip="🗑️ Eliminar lote (sin stock)" 
+                      class="btn-delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+              
+              <!-- INDICADOR DE BLOQUEO -->
+              <span *ngIf="!puedeEliminarLote(row) && authService.isAdmin() && !row.activo && row.cantidad_actual > 0" 
+                    class="no-delete-indicator" 
+                    [matTooltip]="getMotivoNoEliminar(row)">
+                <mat-icon class="no-delete-icon">info</mat-icon>
+              </span>
+            </div>
+          </td>
+        </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumnsProfessional" class="header-row"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumnsProfessional" 
-            [class.row-warning]="getDiasClass(row.fecha_caducidad) === 'caducidad-critica'"
-            [class.row-danger]="getDiasClass(row.fecha_caducidad) === 'caducado'"
-            [class.row-low-stock]="getStockClass(row) === 'stock-bajo'"
+            [class.row-inactivo]="!row.activo"
+            [class.row-warning]="row.activo && getDiasClass(row.fecha_caducidad) === 'caducidad-critica'"
+            [class.row-danger]="row.activo && getDiasClass(row.fecha_caducidad) === 'caducado'"
+            [class.row-low-stock]="row.activo && getStockClass(row) === 'stock-bajo'"
             class="data-row"></tr>
       </table>
 
@@ -211,7 +287,9 @@
       <div class="no-results" *ngIf="dataSource.filteredData.length === 0 && !isLoading">
         <mat-icon>inventory_2</mat-icon>
         <h3>No se encontraron lotes</h3>
-        <p>No hay lotes que coincidan con los criterios de búsqueda actuales.</p>
+        <p *ngIf="filtroEstado === 'activos'">No hay lotes activos que coincidan con los criterios.</p>
+        <p *ngIf="filtroEstado === 'inactivos'">No hay lotes inactivos que coincidan con los criterios.</p>
+        <p *ngIf="filtroEstado === 'todos'">No hay lotes que coincidan con los criterios de búsqueda actuales.</p>
       </div>
     </div>
 
