@@ -1,0 +1,28 @@
+<div class="catalogos-container">
+  <!-- Encabezado unificado -->
+  <div class="header">
+    <div class="title-section">
+      <h1><mat-icon>category</mat-icon> Gestión de Catálogos</h1>
+      <p class="subtitle">Administra las categorías y marcas de productos del sistema</p>
+    </div>
+  </div>
+
+  <!-- Pestañas (Tabs) para cambiar entre Categorías y Marcas -->
+  <mat-tab-group animationDuration="0ms" class="catalogos-tabs">
+    
+    <!-- Pestaña de Categorías -->
+    <mat-tab label="📂 Categorías">
+      <div class="tab-content">
+        <app-categoria-list></app-categoria-list>
+      </div>
+    </mat-tab>
+
+    <!-- Pestaña de Marcas -->
+    <mat-tab label="🏷️ Marcas">
+      <div class="tab-content">
+        <app-marca-list></app-marca-list>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>

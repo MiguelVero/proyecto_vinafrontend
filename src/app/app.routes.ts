@@ -33,6 +33,13 @@ import { roleGuard } from './guards/role.guard';
 import { PersonalizacionComponent } from './features/pages/configuracion/personalizacion/personalizacion.component';
 import { InsumoListComponent } from './features/pages/insumo-list/insumo-list.component';
 import { RecargaRapidaComponent } from './components/recarga-rapida/recarga-rapida.component';
+import { CatalogosUnificadosComponent } from './features/pages/inventario/catalogos-unificados/catalogos-unificados.component';
+
+
+
+
+
+
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -209,18 +216,28 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { requiredModule: 'pedido_proveedor', expectedRoles: [4] }
   },
-  {
-    path: 'categorias',
-    component: CategoriaListComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { requiredModule: 'categorias', expectedRoles: [4] }
-  },
-  {
-    path: 'marcas',
-    component: MarcaListComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { requiredModule: 'marcas', expectedRoles: [4] }
-  },
+ // ✅ ELIMINAR O COMENTAR ESTAS DOS RUTAS:
+// {
+//   path: 'categorias',
+//   component: CategoriaListComponent,
+//   canActivate: [authGuard, roleGuard],
+//   data: { requiredModule: 'categorias', expectedRoles: [4] }
+// },
+// {
+//   path: 'marcas',
+//   component: MarcaListComponent,
+//   canActivate: [authGuard, roleGuard],
+//   data: { requiredModule: 'marcas', expectedRoles: [4] }
+// },
+
+
+// ✅ AGREGAR LA NUEVA RUTA UNIFICADA DE CATÁLOGOS:
+{
+  path: 'inventario/catalogos',
+  component: CatalogosUnificadosComponent, // Importa este componente al inicio del archivo
+  canActivate: [authGuard, roleGuard],
+  data: { requiredModule: 'inventario', expectedRoles: [4] } // Usa el módulo padre
+},
 
   // =============================================
   // ✅ NUEVA SECCIÓN: RUTAS SUNAT

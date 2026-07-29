@@ -1,24 +1,33 @@
 <!-- src/app/features/pages/ventas/detalle-venta/detalle-venta.component.html -->
 <div class="detalle-venta-container">
-  <!-- Contenedor principal con márgenes -->
   <div class="contenedor-principal">
     
-    <!-- Header Mejorado -->
+    <!-- Header Mejorado con botones de acción -->
     <div class="header">
-     <button (click)="volverAPanel()" class="btn-back">
-  <i class="fas fa-arrow-left"></i>
-  Volver
-</button>
+      <button (click)="volverAPanel()" class="btn-back">
+        <i class="fas fa-arrow-left"></i>
+        Volver
+      </button>
       
       <h1>
         <i class="fas fa-file-invoice-dollar"></i>
         Detalle de Venta #{{venta?.id_venta}}
       </h1>
       
-      <button (click)="imprimirComprobante()" class="btn-print">
-        <i class="fas fa-print"></i>
-        Imprimir Comprobante
-      </button>
+      <!-- CONTENEDOR DE BOTONES DE COMPROBANTE -->
+      <div class="acciones-comprobante">
+        <!-- Botón IMPRIMIR -->
+        <button (click)="imprimirComprobante()" class="btn-print" [disabled]="descargando">
+          <i class="fas fa-print"></i>
+          Imprimir Comprobante
+        </button>
+        
+        <!-- Botón DESCARGAR COMO IMAGEN -->
+        <button (click)="descargarComprobanteComoImagen()" class="btn-download" [disabled]="descargando">
+          <i class="fas" [ngClass]="descargando ? 'fa-spinner fa-spin' : 'fa-image'"></i>
+          {{ descargando ? 'Descargando...' : 'Descargar Imagen' }}
+        </button>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -41,9 +50,9 @@
       </h2>
       <p>La venta que buscas no existe o fue eliminada.</p>
       <button (click)="volverAPanel()" class="btn-back">
-      <i class="fas fa-arrow-left"></i>
-      Volver
-    </button>
+        <i class="fas fa-arrow-left"></i>
+        Volver
+      </button>
     </div>
 
     <!-- Detalle de la venta -->
@@ -51,7 +60,6 @@
       
       <!-- Fila 1: Información del cliente y productos -->
       <div class="fila-principal">
-        <!-- Información del cliente -->
         <div class="seccion info-cliente-compacto">
           <h2>
             <i class="fas fa-user-tie"></i>
@@ -72,7 +80,6 @@
           </div>
         </div>
 
-        <!-- Detalles de productos -->
         <div class="seccion productos-compacto">
           <h2>
             <i class="fas fa-boxes"></i>
@@ -94,24 +101,20 @@
 
       <!-- Fila 2: Información general y adicional -->
       <div class="fila-secundaria">
-        <!-- Información general -->
         <div class="seccion info-general-compacto">
           <h2>
             <i class="fas fa-info-circle"></i>
             Información General
           </h2>
           <div class="info-grid-compacto">
-            <!-- En info-general-compacto - CAMBIAR -->
-          <div class="info-item-compacto">
-            <label><i class="fas fa-calendar"></i> Fecha</label>
-            <!-- REEMPLAZAR: {{ formatearFecha(venta.fecha) }} -->
-            <span class="info-valor">{{ fechaService.formatFechaCompleta(venta.fecha) }}</span>
-          </div>
-          <div class="info-item-compacto">
-            <label><i class="fas fa-clock"></i> Hora</label>
-            <!-- REEMPLAZAR: {{ formatearHora(venta.hora) }} -->
-            <span class="info-valor">{{ fechaService.formatHora(venta.hora) }}</span>
-          </div>
+            <div class="info-item-compacto">
+              <label><i class="fas fa-calendar"></i> Fecha</label>
+              <span class="info-valor">{{ fechaService.formatFechaCompleta(venta.fecha) }}</span>
+            </div>
+            <div class="info-item-compacto">
+              <label><i class="fas fa-clock"></i> Hora</label>
+              <span class="info-valor">{{ fechaService.formatHora(venta.hora) }}</span>
+            </div>
             <div class="info-item-compacto">
               <label><i class="fas fa-tag"></i> Estado</label>
               <span [class]="'estado-badge ' + getEstadoClass(venta.estado || '')">
@@ -131,7 +134,6 @@
           </div>
         </div>
 
-        <!-- Información adicional -->
         <div class="seccion info-adicional-compacto">
           <h2>
             <i class="fas fa-clipboard-list"></i>

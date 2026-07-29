@@ -244,3 +244,80 @@ h2 {
     width: 100%;
   }
 }
+
+/* ✅ NUEVO: Estilos para la información del lote seleccionado */
+.lote-seleccionado-info {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.lote-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lote-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.lote-info-row:last-child {
+  border-bottom: none;
+}
+
+.lote-info-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.lote-info-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.lote-info-value.caducado {
+  color: #d32f2f;
+}
+
+.estado-caducado {
+  font-size: 0.7rem;
+  background: #d32f2f;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.estado-ok {
+  font-size: 0.7rem;
+  background: #4caf50;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+/* ✅ Estilo para cuando no hay lotes disponibles */
+.lote-subsection.existente .mat-select-empty {
+  color: #94a3b8;
+}
+
+/* ✅ Responsive */
+@media (max-width: 480px) {
+  .lote-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

@@ -118,13 +118,13 @@
 
 .table-container {
   position: relative;
-  min-height: 400px;
+ height: auto;
 }
 
 .table-content {
   display: flex;
   flex-direction: column;
-  min-height: 400px;
+height: auto;
 }
 
 .table-wrapper {

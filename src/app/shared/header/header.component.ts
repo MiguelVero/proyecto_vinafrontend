@@ -356,19 +356,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  goCategorias(): void {
-    if (this.tieneAcceso('categorias')) {
-      this.router.navigate(['/categorias']);
-      this.closeMenu();
-    }
+// Reemplaza los métodos goCategorias y goMarcas por este único método:
+goCatalogos(): void {
+  // Verificamos si tiene acceso a categorías o marcas
+  if (this.tieneAcceso('categorias') || this.tieneAcceso('marcas')) {
+    this.router.navigate(['/inventario/catalogos']);
+    this.closeMenu();
   }
-
-  goMarcas(): void {
-    if (this.tieneAcceso('marcas')) {
-      this.router.navigate(['/marcas']);
-      this.closeMenu();
-    }
-  }
+}
   /**goToConfiguracionEmpresa(): void {
   if (this.tieneAcceso('empresa')) {
     this.router.navigate(['/configuracion/empresa']);

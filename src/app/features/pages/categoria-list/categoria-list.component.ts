@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
+import Swal from 'sweetalert2'; // ✅ IMPORTADO
 
 import { CategoriaService } from '../../../core/services/categoria.service';
 import { CategoriaFormComponent } from '../../../components/categoria-form/categoria-form.component';
@@ -26,8 +25,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   imports: [
     CommonModule,
     MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -39,11 +36,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   ]
 })
 export class CategoriaListComponent implements OnInit {
-  pageSize = 5; // 5 por defecto
+  pageSize = 5;
   currentPage = 0;
+  
+  // ✅ SOLO NOMBRE Y ACCIONES (ELIMINADOS # E ID)
   displayedColumns: string[] = [
-    'numero',
-    'id',
     'nombre',
     'acciones'
   ];
@@ -68,13 +65,9 @@ export class CategoriaListComponent implements OnInit {
     this.isLoading = true;
     this.categoriaService.getCategorias().subscribe({
       next: (categorias) => {
-        console.log('Categorías cargadas:', categorias);
-        
         this.allCategorias = [...categorias];
         this.filteredCategorias = [...categorias];
-        
         this.applyPagination();
-        
         this.isLoading = false;
       },
       error: (error) => {
@@ -85,40 +78,32 @@ export class CategoriaListComponent implements OnInit {
     });
   }
 
-  // Aplicar paginación
   applyPagination(): void {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    
     this.paginatedCategorias = this.filteredCategorias.slice(startIndex, endIndex);
     this.dataSource.data = this.paginatedCategorias;
   }
 
-  // Cambiar tamaño de página
   changePageSize(size: number): void {
     this.pageSize = size;
     this.currentPage = 0;
     this.applyPagination();
   }
 
-  // Aplicar filtro
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    
     if (!filterValue) {
       this.filteredCategorias = [...this.allCategorias];
     } else {
       this.filteredCategorias = this.allCategorias.filter(categoria => 
-        (categoria.nombre && categoria.nombre.toLowerCase().includes(filterValue)) ||
-        (categoria.id_categoria && categoria.id_categoria.toString().includes(filterValue))
+        (categoria.nombre && categoria.nombre.toLowerCase().includes(filterValue))
       );
     }
-    
     this.currentPage = 0;
     this.applyPagination();
   }
 
-  // Navegación de páginas
   nextPage(): void {
     if (this.hasNextPage()) {
       this.currentPage++;
@@ -155,7 +140,6 @@ export class CategoriaListComponent implements OnInit {
     return Math.ceil(this.filteredCategorias.length / this.pageSize);
   }
 
-  // Métodos para información de paginación
   getCurrentPageStart(): number {
     if (this.filteredCategorias.length === 0) return 0;
     return (this.currentPage * this.pageSize) + 1;
@@ -175,11 +159,6 @@ export class CategoriaListComponent implements OnInit {
     return this.allCategorias.length;
   }
 
-  getPageNumber(index: number): number {
-    return (this.currentPage * this.pageSize) + index + 1;
-  }
-
-  // Métodos de acciones
   addCategoria(): void {
     const dialogRef = this.dialog.open(CategoriaFormComponent, {
       width: '600px',
@@ -228,27 +207,37 @@ export class CategoriaListComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error eliminando categoría:', error);
-            this.showErrorMessage('Error al eliminar la categoría');
+            // ✅ MANEJO DE ERROR 409 (LLAVE FORÁNEA)
+            if (error.status === 409) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'No se puede eliminar',
+                text: 'Esta categoría tiene productos asociados. Primero debes eliminar o reasignar esos productos.',
+                confirmButtonColor: '#3498db',
+                confirmButtonText: 'Entendido'
+              });
+            } else {
+              this.showErrorMessage('Error al eliminar la categoría');
+            }
           }
         });
       }
     });
   }
 
+  // ✅ MEJORADO CON SWEETALERT2
   viewDetails(categoria: Categoria): void {
-    // Método para ver detalles de la categoría
-    console.log('Ver detalles de categoría:', categoria);
-    this.showInfoMessage(`Detalles de: ${categoria.nombre}`);
-  }
-
-  // Métodos de utilidad
-  getEstadoColor(estado: string): string {
-    if (!estado) return 'basic';
-    const est = estado.toLowerCase();
-    if (est.includes('activo')) return 'primary';
-    if (est.includes('inactivo')) return 'warn';
-    if (est.includes('pendiente')) return 'accent';
-    return 'basic';
+    Swal.fire({
+      title: `Detalles de: ${categoria.nombre}`,
+      html: `<div style="text-align: left; padding: 10px;">
+               <p>Información detallada de la categoría <b>${categoria.nombre}</b>.</p>
+               <p><i>(Puedes cargar más detalles del backend aquí)</i></p>
+             </div>`,
+      icon: 'info',
+      confirmButtonText: 'Cerrar',
+      confirmButtonColor: '#3498db',
+      showCloseButton: true,
+    });
   }
 
   private showSuccessMessage(message: string): void {
@@ -264,15 +253,6 @@ export class CategoriaListComponent implements OnInit {
     this.snackBar.open(message, 'Cerrar', {
       duration: 5000,
       panelClass: ['error-snackbar'],
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
-  }
-
-  private showInfoMessage(message: string): void {
-    this.snackBar.open(message, 'Cerrar', {
-      duration: 3000,
-      panelClass: ['info-snackbar'],
       horizontalPosition: 'right',
       verticalPosition: 'top'
     });

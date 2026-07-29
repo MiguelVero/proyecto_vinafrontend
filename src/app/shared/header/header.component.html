@@ -159,14 +159,10 @@
         <mat-icon>category</mat-icon>
         Insumos
       </button>
-        <button mat-menu-item *ngIf="tieneAcceso('categorias')" (click)="goCategorias(); closeMenu()">
-          <mat-icon>category</mat-icon>
-          Categorías
-        </button>
-        <button mat-menu-item *ngIf="tieneAcceso('marcas')" (click)="goMarcas(); closeMenu()">
-          <mat-icon>branding_watermark</mat-icon>
-          Marcas
-        </button>
+       <button mat-menu-item *ngIf="tieneAcceso('categorias') || tieneAcceso('marcas')" (click)="goCatalogos(); closeMenu()">
+        <mat-icon>category</mat-icon>
+        Catálogos
+      </button>
       </mat-menu>
     </div>
 

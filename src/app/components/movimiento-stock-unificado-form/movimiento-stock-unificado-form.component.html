@@ -43,7 +43,7 @@
       <div class="lote-section" *ngIf="form.get('id_producto')?.value">
         <h4>🏷️ Gestión de Lote</h4>
         
-        <!-- Selector de modo de gestión -->
+        <!-- Selector de modo de gestión (SOLO PARA INGRESOS) -->
         <mat-radio-group formControlName="gestion_lote" class="radio-group" *ngIf="esIngreso">
           <mat-radio-button value="automatico" class="radio-option">
             <div class="radio-content">
@@ -51,8 +51,6 @@
               <span class="radio-description">Generar lote automáticamente</span>
             </div>
           </mat-radio-button>
-
-          
           <mat-radio-button value="existente" class="radio-option">
             <div class="radio-content">
               <span class="radio-title">📋 Existente</span>
@@ -61,62 +59,43 @@
           </mat-radio-button>
         </mat-radio-group>
 
-       <!-- En movimiento-stock-unificado-form.component.html - dentro de la sección de lote automático -->
-<div *ngIf="esIngreso && modoLoteActual === 'automatico'" class="lote-subsection automatico">
-  <div class="auto-lote-info">
-    <div class="info-item">
-      <strong>Número de Lote:</strong> 
-      <span class="lote-number">{{ numeroLoteDisplay || 'Generando...' }}</span>
-    </div>
-    
-    <!-- NUEVO: Selector de período de caducidad -->
-    <div class="info-item periodo-selector">
-      <strong>Período de Caducidad:</strong>
-      <mat-radio-group [(ngModel)]="periodoCaducidadSeleccionado" 
-                       (change)="actualizarFechaCaducidad()"
-                       [ngModelOptions]="{standalone: true}">
-        <mat-radio-button *ngFor="let opcion of opcionesCaducidadProductoActual" 
-                          [value]="opcion">
-          {{ opcion }} {{ opcion === 1 ? 'mes' : 'meses' }}
-        </mat-radio-button>
-      </mat-radio-group>
-    </div>
-    
-    <div class="info-item">
-      <strong>Fecha de Caducidad:</strong> 
-      <span class="fecha-caducidad">
-        {{ fechaCaducidadCalculada | date:'dd/MM/yyyy' }}
-      </span>
-    </div>
-  </div>
-  <div class="info-note">
-    ✅ Este lote se generará automáticamente al guardar
-  </div>
-</div>
-
-        <!-- Lote Manual -->
-        <div *ngIf="esIngreso && modoLoteActual === 'manual'" class="lote-subsection manual">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Número de Lote *</mat-label>
-            <input matInput formControlName="numero_lote_manual" placeholder="Ej: LOTE-001-2024">
-            <mat-error *ngIf="form.get('numero_lote_manual')?.hasError('required')">
-              El número de lote es requerido
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Fecha de Caducidad *</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="fecha_caducidad_manual">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <mat-error *ngIf="form.get('fecha_caducidad_manual')?.hasError('required')">
-              La fecha de caducidad es requerida
-            </mat-error>
-          </mat-form-field>
+        <!-- Lote Automático (SOLO PARA INGRESOS) -->
+        <div *ngIf="esIngreso && modoLoteActual === 'automatico'" class="lote-subsection automatico">
+          <div class="auto-lote-info">
+            <div class="info-item">
+              <strong>Número de Lote:</strong> 
+              <span class="lote-number">{{ numeroLoteDisplay || 'Generando...' }}</span>
+            </div>
+            
+            <div class="info-item periodo-selector">
+              <strong>Período de Caducidad:</strong>
+              <mat-radio-group [(ngModel)]="periodoCaducidadSeleccionado" 
+                               (change)="actualizarFechaCaducidad()"
+                               [ngModelOptions]="{standalone: true}">
+                <mat-radio-button *ngFor="let opcion of opcionesCaducidadProductoActual" 
+                                  [value]="opcion">
+                  {{ opcion }} {{ opcion === 1 ? 'mes' : 'meses' }}
+                </mat-radio-button>
+              </mat-radio-group>
+            </div>
+            
+            <div class="info-item">
+              <strong>Fecha de Caducidad:</strong> 
+              <span class="fecha-caducidad">
+                {{ fechaCaducidadCalculada | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+          <div class="info-note">
+            ✅ Este lote se generará automáticamente al guardar
+          </div>
         </div>
 
-        <!-- Lote Existente (para ingresos) -->
-        <div *ngIf="esIngreso && modoLoteActual === 'existente'" class="lote-subsection existente">
+        <!-- 🔥 Lote Existente (UNIFICADO para todos los tipos de movimiento) -->
+        <div *ngIf="(esIngreso && modoLoteActual === 'existente') || !esIngreso" 
+             class="lote-subsection existente">
+          
+          <!-- Usar mat-select para todos los casos (consistente y fácil de cambiar) -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Seleccionar Lote Existente *</mat-label>
             <mat-select formControlName="id_lote_existente">
@@ -128,28 +107,32 @@
               Seleccione un lote existente
             </mat-error>
           </mat-form-field>
-        </div>
-
-        <!-- Lote para Egresos/Ajustes/Devoluciones -->
-        <div *ngIf="!esIngreso" class="lote-subsection no-ingreso">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Seleccionar Lote *</mat-label>
-            <input type="text" matInput formControlName="lote_search" [matAutocomplete]="auto" placeholder="Buscar lote...">
-            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onLoteSelected($event)">
-              <mat-option *ngFor="let lote of filteredLotes | async" [value]="lote">
-                <div class="lote-option">
-                  <strong>{{ lote.numero_lote }}</strong>
-                  <div class="lote-details">
-                    <span>Stock: {{ lote.cantidad_actual }}</span>
-                    <span>Caduca: {{ lote.fecha_caducidad | date:'dd/MM/yyyy' }}</span>
-                  </div>
-                </div>
-              </mat-option>
-            </mat-autocomplete>
-            <mat-error *ngIf="form.get('id_lote_existente')?.hasError('required')">
-              Seleccione un lote
-            </mat-error>
-          </mat-form-field>
+          
+          <!-- Mostrar información detallada del lote seleccionado -->
+          <div *ngIf="loteSeleccionado" class="lote-seleccionado-info">
+            <div class="lote-info-card">
+              <div class="lote-info-row">
+                <span class="lote-info-label">📦 Lote:</span>
+                <span class="lote-info-value">{{ loteSeleccionado.numero_lote }}</span>
+              </div>
+              <div class="lote-info-row">
+                <span class="lote-info-label">📊 Stock disponible:</span>
+                <span class="lote-info-value">{{ loteSeleccionado.cantidad_actual }} unidades</span>
+              </div>
+              <div class="lote-info-row">
+                <span class="lote-info-label">📅 Fecha de caducidad:</span>
+                <span class="lote-info-value" [class.caducado]="estaCaducado(loteSeleccionado.fecha_caducidad)">
+                  {{ loteSeleccionado.fecha_caducidad | date:'dd/MM/yyyy' }}
+                  <span *ngIf="estaCaducado(loteSeleccionado.fecha_caducidad)" class="estado-caducado">
+                    ⚠️ CADUCADO
+                  </span>
+                  <span *ngIf="!estaCaducado(loteSeleccionado.fecha_caducidad)" class="estado-ok">
+                    ✅ Válido
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

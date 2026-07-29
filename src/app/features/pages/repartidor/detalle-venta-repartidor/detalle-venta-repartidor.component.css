@@ -1,20 +1,6 @@
 /* src/app/features/pages/repartidor/detalle-venta-repartidor/detalle-venta-repartidor.component.css */
 
-/* === VARIABLES === */
-:root {
-  --primary-color: #057cbe;
-  --primary-dark: #0469a0;
-  --success-color: #28a745;
-  --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  --info-color: #17a2b8;
-  --light-bg: #f8f9fa;
-  --border-color: #e2e8f0;
-  --text-dark: #2c3e50;
-  --text-light: #6c757d;
-}
-
-/* === HEADER MEJORADO === */
+/* ===== HEADER MEJORADO ===== */
 .header-mejorado {
   display: flex;
   justify-content: space-between;
@@ -25,6 +11,20 @@
   border-radius: 10px;
   margin-bottom: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.header-mejorado h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+  min-width: 200px;
 }
 
 .btn-back {
@@ -39,11 +39,20 @@
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
+  min-height: 44px;
 }
 
 .btn-back:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: translateX(-3px);
+}
+
+/* ===== ACCIONES DE COMPROBANTE ===== */
+.acciones-comprobante {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .btn-print {
@@ -58,27 +67,44 @@
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
+  min-height: 44px;
 }
 
-.btn-print:hover {
+.btn-print:hover:not(:disabled) {
   background: #f8f9fa;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.header-mejorado h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 0;
-  text-align: center;
-  flex: 1;
+.btn-download {
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: white;
+  border: 2px solid #28a745;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: 8px;
+  transition: all 0.3s ease;
+  min-height: 44px;
 }
 
-/* === CONTENEDOR PRINCIPAL === */
+.btn-download:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-print:disabled,
+.btn-download:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
 .detalle-entrega-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -87,7 +113,7 @@
   box-sizing: border-box;
 }
 
-/* === ESTRUCTURA DE FILAS === */
+/* ===== FILAS ===== */
 .fila-principal {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -102,12 +128,11 @@
   margin-bottom: 20px;
 }
 
-/* === SECCIONES COMPACTAS === */
+/* ===== SECCIONES ===== */
 .info-cliente-compacto,
 .productos-compacto,
 .info-general-compacto,
-.cronologia-compacto,
-.info-adicional-compacto {
+.cronologia-compacto {
   background: white;
   border-radius: 10px;
   padding: 20px;
@@ -119,8 +144,7 @@
 .info-cliente-compacto h2,
 .productos-compacto h2,
 .info-general-compacto h2,
-.cronologia-compacto h2,
-.info-adicional-compacto h2 {
+.cronologia-compacto h2 {
   font-size: 1.2rem;
   font-weight: 600;
   color: #2c3e50;
@@ -135,12 +159,11 @@
 .info-cliente-compacto h2 i,
 .productos-compacto h2 i,
 .info-general-compacto h2 i,
-.cronologia-compacto h2 i,
-.info-adicional-compacto h2 i {
+.cronologia-compacto h2 i {
   color: #057cbe;
 }
 
-/* === INFORMACIÓN DEL CLIENTE === */
+/* ===== CLIENTE ===== */
 .cliente-datos-compacto {
   display: flex;
   flex-direction: column;
@@ -183,7 +206,7 @@
   border-left: 3px solid #ffc107;
 }
 
-/* === PRODUCTOS === */
+/* ===== PRODUCTOS ===== */
 .productos-lista {
   max-height: 300px;
   overflow-y: auto;
@@ -249,7 +272,7 @@
   color: #28a745;
 }
 
-/* === INFORMACIÓN GENERAL === */
+/* ===== INFO GENERAL ===== */
 .info-grid-compacto {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -305,7 +328,7 @@
 .estado-badge.badge-info { background: #17a2b8; }
 .estado-badge.badge-secondary { background: #6c757d; }
 
-/* === TIMELINE === */
+/* ===== TIMELINE ===== */
 .timeline {
   display: flex;
   flex-direction: column;
@@ -426,7 +449,6 @@
   margin-right: 4px;
 }
 
-/* === MEJORAS PARA TIEMPO TOTAL === */
 .tiempo-container {
   display: flex;
   flex-direction: column;
@@ -457,10 +479,10 @@
   color: #6c757d;
 }
 
-/* === ESTADO DE ENTREGA COMPLETADA === */
+/* ===== ESTADO COMPLETADA ===== */
 .entrega-completada {
   background: linear-gradient(135deg, #d4edda, #c3e6cb);
-  border-left: 5px solid var(--success-color);
+  border-left: 5px solid #28a745;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -475,7 +497,7 @@
 
 .completada-header i {
   font-size: 2rem;
-  color: var(--success-color);
+  color: #28a745;
 }
 
 .completada-header h3 {
@@ -500,10 +522,10 @@
   color: #155724;
 }
 
-/* === ESTADO DE ENTREGA CANCELADA === */
+/* ===== ESTADO CANCELADA ===== */
 .entrega-cancelada {
   background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-  border-left: 5px solid var(--danger-color);
+  border-left: 5px solid #dc3545;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -518,7 +540,7 @@
 
 .cancelada-header i {
   font-size: 2rem;
-  color: var(--danger-color);
+  color: #dc3545;
 }
 
 .cancelada-header h3 {
@@ -527,7 +549,7 @@
   font-size: 1.3rem;
 }
 
-/* === BOTONES DE ACCIÓN === */
+/* ===== ACCIONES ===== */
 .acciones-container {
   display: flex;
   gap: 15px;
@@ -570,7 +592,7 @@
   box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
 }
 
-/* === RESPONSIVE === */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 992px) {
   .fila-principal,
   .fila-secundaria {
@@ -586,12 +608,12 @@
 @media (max-width: 768px) {
   .header-mejorado {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     padding: 15px;
   }
 
   .header-mejorado h1 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     order: 1;
   }
 
@@ -601,8 +623,14 @@
     justify-content: center;
   }
 
-  .btn-print {
+  .acciones-comprobante {
     order: 3;
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .btn-print,
+  .btn-download {
     width: 100%;
     justify-content: center;
   }
@@ -668,12 +696,24 @@
   .info-valor {
     font-size: 0.9rem;
   }
+
+  .header-mejorado h1 {
+    font-size: 1rem;
+  }
+
+  .btn-back,
+  .btn-print,
+  .btn-download {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    min-height: 38px;
+  }
 }
 
-/* === IMPRESIÓN === */
 @media print {
   .btn-back,
   .btn-print,
+  .btn-download,
   .btn-action {
     display: none !important;
   }
@@ -689,5 +729,15 @@
     box-shadow: none;
     border: 1px solid #ddd;
     page-break-inside: avoid;
+  }
+
+  .header-mejorado {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #ddd;
+  }
+
+  .header-mejorado h1 {
+    color: black !important;
   }
 }

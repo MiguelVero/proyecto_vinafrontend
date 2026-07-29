@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
+import Swal from 'sweetalert2'; // ✅ IMPORTADO
 
 import { MarcaService } from '../../../core/services/marca.service';
 import { MarcaFormComponent } from '../../../components/marca-form/marca-form.component';
@@ -26,8 +25,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   imports: [
     CommonModule,
     MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -39,11 +36,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   ]
 })
 export class MarcaListComponent implements OnInit {
-  pageSize = 5; // 5 por defecto
+  pageSize = 5;
   currentPage = 0;
+  
+  // ✅ SOLO NOMBRE Y ACCIONES (ELIMINADOS # E ID)
   displayedColumns: string[] = [
-    'numero',
-    'id',
     'nombre',
     'acciones'
   ];
@@ -68,13 +65,9 @@ export class MarcaListComponent implements OnInit {
     this.isLoading = true;
     this.marcaService.getMarcas().subscribe({
       next: (marcas) => {
-        console.log('Marcas cargadas:', marcas);
-        
         this.allMarcas = [...marcas];
         this.filteredMarcas = [...marcas];
-        
         this.applyPagination();
-        
         this.isLoading = false;
       },
       error: (error) => {
@@ -89,31 +82,25 @@ export class MarcaListComponent implements OnInit {
   applyPagination(): void {
     const startIndex = this.currentPage * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    
     this.paginatedMarcas = this.filteredMarcas.slice(startIndex, endIndex);
     this.dataSource.data = this.paginatedMarcas;
   }
 
-  // Cambiar tamaño de página
   changePageSize(size: number): void {
     this.pageSize = size;
     this.currentPage = 0;
     this.applyPagination();
   }
 
-  // Aplicar filtro
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    
     if (!filterValue) {
       this.filteredMarcas = [...this.allMarcas];
     } else {
       this.filteredMarcas = this.allMarcas.filter(marca => 
-        (marca.nombre && marca.nombre.toLowerCase().includes(filterValue)) ||
-        (marca.id_marca && marca.id_marca.toString().includes(filterValue)) 
+        (marca.nombre && marca.nombre.toLowerCase().includes(filterValue))
       );
     }
-    
     this.currentPage = 0;
     this.applyPagination();
   }
@@ -155,7 +142,6 @@ export class MarcaListComponent implements OnInit {
     return Math.ceil(this.filteredMarcas.length / this.pageSize);
   }
 
-  // Métodos para información de paginación
   getCurrentPageStart(): number {
     if (this.filteredMarcas.length === 0) return 0;
     return (this.currentPage * this.pageSize) + 1;
@@ -175,11 +161,6 @@ export class MarcaListComponent implements OnInit {
     return this.allMarcas.length;
   }
 
-  getPageNumber(index: number): number {
-    return (this.currentPage * this.pageSize) + index + 1;
-  }
-
-  // Métodos de acciones
   addMarca(): void {
     const dialogRef = this.dialog.open(MarcaFormComponent, {
       width: '600px',
@@ -228,37 +209,37 @@ export class MarcaListComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error eliminando marca:', error);
-            this.showErrorMessage('Error al eliminar la marca');
+            // ✅ MANEJO DE ERROR 409 (LLAVE FORÁNEA)
+            if (error.status === 409) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'No se puede eliminar',
+                text: 'Esta marca tiene productos asociados. Primero debes eliminar o reasignar esos productos.',
+                confirmButtonColor: '#ff9800',
+                confirmButtonText: 'Entendido'
+              });
+            } else {
+              this.showErrorMessage('Error al eliminar la marca');
+            }
           }
         });
       }
     });
   }
 
+  // ✅ MEJORADO CON SWEETALERT2
   viewProducts(marca: Marca): void {
-    // Método para ver productos de la marca
-    console.log('Ver productos de marca:', marca);
-    this.showInfoMessage(`Productos de: ${marca.nombre}`);
-  }
-
-  // Métodos de utilidad
-  getEstadoColor(estado: string): string {
-    if (!estado) return 'basic';
-    const est = estado.toLowerCase();
-    if (est.includes('activo')) return 'primary';
-    if (est.includes('inactivo')) return 'warn';
-    if (est.includes('pendiente')) return 'accent';
-    return 'basic';
-  }
-
-  getPaisOrigenColor(pais: string): string {
-    if (!pais) return 'basic';
-    const paisLower = pais.toLowerCase();
-    if (paisLower.includes('peru')) return 'primary';
-    if (paisLower.includes('usa') || paisLower.includes('estados unidos')) return 'accent';
-    if (paisLower.includes('china')) return 'warn';
-    if (paisLower.includes('alemania')) return 'basic';
-    return 'basic';
+    Swal.fire({
+      title: `Productos de: ${marca.nombre}`,
+      html: `<div style="text-align: left; padding: 10px;">
+               <p>Aquí se mostrará la lista de productos pertenecientes a <b>${marca.nombre}</b>.</p>
+               <p><i>(Puedes cargar un listado dinámico con una petición al backend aquí)</i></p>
+             </div>`,
+      icon: 'info',
+      confirmButtonText: 'Cerrar',
+      confirmButtonColor: '#ff9800',
+      showCloseButton: true,
+    });
   }
 
   private showSuccessMessage(message: string): void {
@@ -274,15 +255,6 @@ export class MarcaListComponent implements OnInit {
     this.snackBar.open(message, 'Cerrar', {
       duration: 5000,
       panelClass: ['error-snackbar'],
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
-  }
-
-  private showInfoMessage(message: string): void {
-    this.snackBar.open(message, 'Cerrar', {
-      duration: 3000,
-      panelClass: ['info-snackbar'],
       horizontalPosition: 'right',
       verticalPosition: 'top'
     });
