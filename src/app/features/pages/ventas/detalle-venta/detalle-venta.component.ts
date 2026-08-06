@@ -185,112 +185,170 @@ async descargarComprobanteComoImagen() {
   }
 }
 
-/**
- * Genera el HTML del comprobante para la imagen
- */
-private generarHTMLComprobante(): string {
-  if (!this.venta) return '';
-  
-  const empresa = this.comprobanteService.getDatosEmpresa();
-  const logoUrl = this.comprobanteService.getLogoUrlParaHTML();
-  
-  const tipoComprobante = this.comprobanteService.getTipoComprobanteTexto(this.venta.tipo_comprobante_solicitado);
-  
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { padding: 20px; background: white; }
-        .comprobante { max-width: 600px; margin: 0 auto; }
-        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 2px solid #057cbe; padding-bottom: 15px; }
-        .logo-container { width: 60px; height: 60px; flex-shrink: 0; }
-        .logo-container img { width: 100%; height: 100%; object-fit: contain; }
-        .header-text { flex: 1; }
-        .header-text h1 { color: #057cbe; font-size: 22px; }
-        .header-text p { color: #666; font-size: 12px; }
-        .titulo { text-align: center; font-size: 18px; font-weight: bold; color: #333; margin: 15px 0; }
-        .info-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12px; }
-        .cliente-section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0; }
-        .cliente-section h3 { color: #057cbe; font-size: 14px; margin-bottom: 10px; }
-        .cliente-row { padding: 3px 0; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
-        th { background: #057cbe; color: white; padding: 8px; text-align: left; }
-        td { padding: 8px; border-bottom: 1px solid #ddd; }
-        .total { font-size: 16px; font-weight: bold; color: #28a745; text-align: right; }
-        .footer { margin-top: 20px; padding-top: 15px; border-top: 2px solid #057cbe; text-align: center; font-size: 11px; color: #666; }
-        .gracias { font-size: 14px; font-weight: bold; color: #057cbe; margin: 10px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="comprobante">
-        <div class="header">
-          <div class="logo-container">
-            ${logoUrl ? `<img src="${logoUrl}" alt="${empresa.nombre}" crossorigin="anonymous">` : ''}
+  /**
+   * Genera el HTML del comprobante para la imagen - CON DISEÑO ORIGINAL
+   */
+  private generarHTMLComprobante(): string {
+    if (!this.venta) return '';
+    
+    const empresa = this.comprobanteService.getDatosEmpresa();
+    const logoUrl = this.comprobanteService.getLogoUrlParaHTML();
+    const tipoComprobante = this.comprobanteService.getTipoComprobanteTexto(this.venta.tipo_comprobante_solicitado);
+    
+    let serieNumero = '---';
+    if (this.venta.serie_comprobante && this.venta.numero_correlativo) {
+      serieNumero = `${this.venta.serie_comprobante}-${this.venta.numero_correlativo.toString().padStart(5, '0')}`;
+    } else {
+      serieNumero = tipoComprobante.includes('Factura') ? 'F001-00001' : 'B001-00001';
+    }
+    
+    const fechaEmision = this.fechaService.formatFechaCompleta(this.venta.fecha) + ' ' + this.fechaService.formatHora(this.venta.hora);
+    
+    let tipoDocumento = 'DNI';
+    let documento = '---';
+    if (this.venta.tipo_documento === 'RUC' && this.venta.numero_documento) {
+      tipoDocumento = 'RUC';
+      documento = this.venta.numero_documento;
+    } else if (this.venta.tipo_documento === 'DNI' && this.venta.numero_documento) {
+      tipoDocumento = 'DNI';
+      documento = this.venta.numero_documento;
+    }
+    
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
+          body { background: #f0f0f0; display: flex; justify-content: center; padding: 20px; }
+          .comprobante-container { max-width: 600px; width: 100%; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); border: 1px solid #ccc; }
+          
+          .empresa-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #057cbe; }
+          .logo { width: 70px; height: 70px; flex-shrink: 0; }
+          .logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+          .logo-placeholder { width: 70px; height: 70px; background: #057cbe; color: white; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+          .empresa-info h1 { font-size: 1.8rem; color: #057cbe; margin-bottom: 2px; }
+          .ruc { font-size: 0.85rem; color: #333; font-weight: bold; }
+          .eslogan { font-size: 0.8rem; color: #555; font-style: italic; }
+          
+          .titulo-comprobante { text-align: center; font-size: 1.4rem; font-weight: bold; color: #2c3e50; margin: 15px 0; text-transform: uppercase; letter-spacing: 2px; }
+          
+          .documento-info { display: flex; justify-content: space-between; background: #f8f9fa; padding: 12px; border-radius: 5px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid #dee2e6; }
+          .label { font-weight: 600; color: #495057; }
+          .valor { font-weight: 500; color: #2c3e50; }
+          
+          .cliente-section { margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-radius: 5px; border: 1px solid #dee2e6; }
+          .cliente-section h3 { font-size: 1rem; color: #057cbe; margin-bottom: 8px; border-bottom: 1px dashed #057cbe; padding-bottom: 4px; }
+          .cliente-tabla { width: 100%; font-size: 0.9rem; }
+          .cliente-tabla td { padding: 4px 0; }
+          .cliente-tabla .label { width: 100px; font-weight: bold; }
+          
+          .productos-section { margin-bottom: 20px; }
+          .productos-section h3 { font-size: 1rem; color: #057cbe; margin-bottom: 8px; }
+          .productos-tabla { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+          .productos-tabla th { background: #057cbe; color: white; padding: 8px; text-align: left; }
+          .productos-tabla td { padding: 8px; border-bottom: 1px solid #dee2e6; }
+          .productos-tabla tfoot tr td { border-top: 2px solid #057cbe; border-bottom: none; font-weight: bold; padding-top: 10px; }
+          .center { text-align: center; }
+          .right { text-align: right; }
+          .total { font-size: 1.1rem; color: #28a745; }
+          
+          .monto-letras { text-align: center; font-size: 0.95rem; font-weight: bold; color: #2c3e50; margin: 20px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; border: 1px dashed #28a745; }
+          
+          .info-adicional { margin: 20px 0; padding: 12px; background: #f8f9fa; border-radius: 5px; border: 1px solid #dee2e6; font-size: 0.9rem; }
+          .info-row { display: flex; justify-content: space-between; padding: 4px 0; }
+          
+          .footer { margin-top: 25px; padding-top: 15px; border-top: 2px solid #057cbe; text-align: center; font-size: 0.8rem; color: #6c757d; }
+          .direccion-empresa { font-weight: 500; margin-bottom: 5px; }
+          .contacto-empresa { font-size: 0.75rem; margin-bottom: 5px; }
+          .gracias { font-size: 1rem; font-weight: bold; color: #057cbe; margin: 5px 0; }
+          .sistema { font-size: 0.7rem; }
+        </style>
+      </head>
+      <body>
+        <div class="comprobante-container">
+          <!-- HEADER -->
+          <div class="empresa-header">
+            <div class="logo">
+              ${logoUrl ? `<img src="${logoUrl}" alt="${empresa.nombre}" crossorigin="anonymous">` : `<div class="logo-placeholder">${empresa.logoTexto}</div>`}
+            </div>
+            <div class="empresa-info">
+              <h1>${empresa.nombre}</h1>
+              <p class="ruc">RUC: ${empresa.ruc}</p>
+              <p class="eslogan">${empresa.eslogan}</p>
+            </div>
           </div>
-          <div class="header-text">
-            <h1>${empresa.nombre}</h1>
-            <p>RUC: ${empresa.ruc}</p>
-            <p>${empresa.eslogan}</p>
+
+          <!-- TÍTULO -->
+          <h2 class="titulo-comprobante">${tipoComprobante}</h2>
+
+          <!-- SERIE Y FECHA -->
+          <div class="documento-info">
+            <div><span class="label">Serie - Número:</span> <span class="valor">${serieNumero}</span></div>
+            <div><span class="label">Fecha de Emisión:</span> <span class="valor">${fechaEmision}</span></div>
+          </div>
+
+          <!-- DATOS DEL CLIENTE -->
+          <div class="cliente-section">
+            <h3>Datos del Cliente</h3>
+            <table class="cliente-tabla">
+              <tr><td class="label">${tipoDocumento}:</td><td>${documento}</td></tr>
+              <tr><td class="label">Cliente:</td><td>${this.venta.nombre_completo || 'Cliente General'}</td></tr>
+              <tr><td class="label">Dirección:</td><td>${this.venta.direccion || 'No especificada'}</td></tr>
+              <tr><td class="label">Teléfono:</td><td>${this.venta.telefono || '---'}</td></tr>
+            </table>
+          </div>
+
+          <!-- TABLA DE PRODUCTOS -->
+          <div class="productos-section">
+            <h3>Detalle de Productos</h3>
+            <table class="productos-tabla">
+              <thead>
+                <tr><th>Cant.</th><th>Producto</th><th>P. Unit.</th><th>Total</th></tr>
+              </thead>
+              <tbody>
+                ${this.venta.detalles?.map((d: any) => `
+                  <tr>
+                    <td class="center">${d.cantidad}</td>
+                    <td>${d.producto_nombre}</td>
+                    <td class="right">S/ ${Number(d.precio_unitario).toFixed(2)}</td>
+                    <td class="right">S/ ${(Number(d.cantidad) * Number(d.precio_unitario)).toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="right"><strong>Total a Pagar:</strong></td>
+                  <td class="right total"><strong>S/ ${Number(this.venta.total).toFixed(2)}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- MONTO EN LETRAS -->
+          <div class="monto-letras">
+            <p>SON: ${this.comprobanteService.numeroALetras(Number(this.venta.total))} SOLES</p>
+          </div>
+
+          <!-- INFORMACIÓN ADICIONAL -->
+          <div class="info-adicional">
+            <div class="info-row"><span class="label">Vendedor:</span> <span>${this.venta.vendedor || 'admin'}</span></div>
+            <div class="info-row"><span class="label">Forma de Pago:</span> <span>${this.venta.metodo_pago || 'Contado'}</span></div>
+            ${this.venta.repartidor ? `<div class="info-row"><span class="label">Repartidor:</span> <span>${this.venta.repartidor}</span></div>` : ''}
+          </div>
+
+          <!-- PIE DE PÁGINA -->
+          <div class="footer">
+            <p class="direccion-empresa">${empresa.direccion}</p>
+            <p class="contacto-empresa">Tel: ${empresa.telefono} ${empresa.email ? `| Email: ${empresa.email}` : ''}</p>
+            <p class="gracias">¡Gracias por su compra! 💧</p>
+            <p class="sistema">Sistema de Ventas</p>
           </div>
         </div>
-        
-        <div class="titulo">${tipoComprobante}</div>
-        
-        <div class="info-row">
-          <span><strong>Serie - Número:</strong> B001-00001</span>
-          <span><strong>Fecha:</strong> ${this.fechaService.formatFechaCompleta(this.venta.fecha)} ${this.fechaService.formatHora(this.venta.hora)}</span>
-        </div>
-        
-        <div class="cliente-section">
-          <h3>Datos del Cliente</h3>
-          <div class="cliente-row"><strong>DNI:</strong> ${this.venta.numero_documento || '---'}</div>
-          <div class="cliente-row"><strong>Cliente:</strong> ${this.venta.nombre_completo}</div>
-          <div class="cliente-row"><strong>Dirección:</strong> ${this.venta.direccion || 'No especificada'}</div>
-          <div class="cliente-row"><strong>Teléfono:</strong> ${this.venta.telefono || '---'}</div>
-        </div>
-        
-        <h3 style="color: #057cbe; font-size: 14px; margin: 10px 0;">Detalle de Productos</h3>
-        <table>
-          <thead>
-            <tr><th>Cant.</th><th>Producto</th><th>P. Unit.</th><th>Total</th></tr>
-          </thead>
-          <tbody>
-            ${this.venta.detalles?.map((d: any) => `
-              <tr>
-                <td>${d.cantidad}</td>
-                <td>${d.producto_nombre}</td>
-                <td>S/ ${Number(d.precio_unitario).toFixed(2)}</td>
-                <td>S/ ${(Number(d.cantidad) * Number(d.precio_unitario)).toFixed(2)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        
-        <div class="total">Total a Pagar: S/ ${Number(this.venta.total).toFixed(2)}</div>
-        
-        <div style="margin: 15px 0; font-size: 12px;">
-          <p><strong>SON:</strong> ${this.comprobanteService.numeroALetras(Number(this.venta.total))} SOLES</p>
-        </div>
-        
-        <div style="margin: 10px 0; font-size: 12px;">
-          <p><strong>Vendedor:</strong> ${this.venta.vendedor || 'admin'}</p>
-          <p><strong>Forma de Pago:</strong> ${this.venta.metodo_pago || 'Contado'}</p>
-          ${this.venta.repartidor ? `<p><strong>Repartidor:</strong> ${this.venta.repartidor}</p>` : ''}
-        </div>
-        
-        <div class="footer">
-          <p>${empresa.direccion}</p>
-          <p>Tel: ${empresa.telefono} | Email: ${empresa.email}</p>
-          <p class="gracias">¡Gracias por su compra!</p>
-          <p style="font-size: 10px; color: #999;">Sistema de Ventas</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-}
+      </body>
+      </html>
+    `;
+  }
 
 
   getTipoComprobanteTexto(tipo: string | undefined): string {
