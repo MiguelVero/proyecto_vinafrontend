@@ -537,21 +537,27 @@ export class MovimientoStockUnificadoFormComponent implements OnInit, OnDestroy 
     this.dialogRef.close();
   }
 
-  cargarProductos(): void {
-    this.isLoading = true;
-    this.productService.getProducts().subscribe({
-      next: (productos) => {
-        this.productos = productos;
-        this.isLoading = false;
-        this.form.get('id_producto')?.enable();
-      },
-      error: (err) => {
-        this.mostrarError('Error cargando productos');
-        this.isLoading = false;
-        this.form.get('id_producto')?.enable();
-      }
-    });
-  }
+// src/app/components/movimiento-stock-unificado-form/movimiento-stock-unificado-form.component.ts
+
+cargarProductos(): void {
+  this.isLoading = true;
+  this.productService.getProducts().subscribe({
+    next: (productos) => {
+      // ✅ FILTRAR: Excluir el producto de recarga
+      this.productos = productos.filter(p => 
+        !p.nombre.toLowerCase().includes('recarga') &&
+        p.id_producto !== 5
+      );
+      this.isLoading = false;
+      this.form.get('id_producto')?.enable();
+    },
+    error: (err) => {
+      this.mostrarError('Error cargando productos');
+      this.isLoading = false;
+      this.form.get('id_producto')?.enable();
+    }
+  });
+}
 
   get esIngreso(): boolean {
     return this.form.get('tipo_movimiento')?.value === 'ingreso';

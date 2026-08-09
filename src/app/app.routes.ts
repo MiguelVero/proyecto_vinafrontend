@@ -34,7 +34,7 @@ import { PersonalizacionComponent } from './features/pages/configuracion/persona
 import { InsumoListComponent } from './features/pages/insumo-list/insumo-list.component';
 import { RecargaRapidaComponent } from './components/recarga-rapida/recarga-rapida.component';
 import { CatalogosUnificadosComponent } from './features/pages/inventario/catalogos-unificados/catalogos-unificados.component';
-
+import { ServicioListComponent } from './features/pages/servicios/servicio-list.component';
 
 
 
@@ -63,7 +63,20 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { requiredModule: 'productos', expectedRoles: [1, 2, 4] }
   },
-  
+  // src/app/app.routes.ts (dentro del array routes)
+
+{
+  path: 'servicios',
+  component: ServicioListComponent,
+  canActivate: [authGuard, roleGuard],//vendedores es el 2
+  data: { requiredModule: 'productos', expectedRoles: [1,2,4] } // Admins y Almaceneros
+},
+
+
+
+
+
+
   // Módulo de Ventas
   {
     path: 'ventas/nueva',

@@ -535,17 +535,32 @@ export class NuevaVentaComponent implements OnInit {
         error: (error) => console.error('Error cargando clientes:', error)
       });
 
-      this.productosService.getProducts().subscribe({
-        next: (productos) => {
-          this.productos = productos;
-          this.filteredProductos = productos;
-        },
-        error: (error) => console.error('Error cargando productos:', error)
-      });
-
-    } catch (error) {
-      console.error('Error inicializando venta:', error);
-    }
+this.productosService.getProductsWithDetails().subscribe({
+      next: (productos) => {
+        // ✅ FILTRAR: Excluir el producto de recarga
+        this.productos = productos.filter(p => 
+          !p.nombre.toLowerCase().includes('recarga') &&
+          p.id_producto !== 5 // Ajusta según el ID real
+        );
+        this.filteredProductos = this.productos;
+      },
+      error: (error) => {
+        console.error('Error cargando productos:', error);
+        // Fallback
+        this.productosService.getProducts().subscribe({
+          next: (productos) => {
+            this.productos = productos.filter(p => 
+              !p.nombre.toLowerCase().includes('recarga') &&
+              p.id_producto !== 5
+            );
+            this.filteredProductos = this.productos;
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error inicializando venta:', error);
+  }
   }
 
   cargarRepartidores() {

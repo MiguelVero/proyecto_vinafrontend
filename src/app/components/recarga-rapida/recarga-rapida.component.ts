@@ -1,13 +1,10 @@
-// frontend_dsi6/src/app/components/recarga-rapida/recarga-rapida.component.ts
+// src/app/components/recarga-rapida/recarga-rapida.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -20,6 +17,7 @@ import { Product } from '../../core/models/producto.model';
 import { ClienteRapidoFormComponent } from '../cliente-rapido-form/cliente-rapido-form.component';
 import Swal from 'sweetalert2';
 import { PersonalizacionService } from '../../core/services/personalizacion.service';
+
 @Component({
   selector: 'app-recarga-rapida',
   standalone: true,
@@ -28,9 +26,6 @@ import { PersonalizacionService } from '../../core/services/personalizacion.serv
     FormsModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule
@@ -47,45 +42,55 @@ export class RecargaRapidaComponent implements OnInit {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   public personalizacionService = inject(PersonalizacionService);
-  // Datos del formulario
+
+  // ===== DATOS DEL FORMULARIO =====
   clientes: ClienteVenta[] = [];
-  productos: Product[] = [];
+  productos: Product[] = []; // ✅ Solo tendrá 1 producto (Servicio de Recarga)
   clienteSeleccionado: ClienteVenta | null = null;
   productoSeleccionado: Product | null = null;
   cantidad: number = 1;
-  metodoPago: number = 1; // 1: Efectivo, 2: Yape
+  metodoPago: number = 1;
   notas: string = '';
-  // Agregar esta propiedad computada
-get telefonoYape(): string {
-  const telefono = this.personalizacionService.config()?.telefono;
-  if (telefono && telefono.trim() !== '') {
-    // Formatear el teléfono para mostrar (ej: 959 203 847)
-    const numeros = telefono.replace(/\D/g, '');
-    if (numeros.length === 9) {
-      return `${numeros.slice(0, 3)} ${numeros.slice(3, 6)} ${numeros.slice(6, 9)}`;
-    }
-    return telefono;
-  }
-  return '999 999 999'; // fallback por si no hay teléfono configurado
-}
-  // Estados
+
+  // ===== ESTADOS =====
   loading = false;
   searchCliente = '';
   filteredClientes: ClienteVenta[] = [];
   mostrarListaClientes = false;
+  currentYear: number = new Date().getFullYear();
+  totalRecargasHoy: number = 0;
   
-  // Métodos de pago
+  // ===== MÉTODOS DE PAGO =====
   metodosPago = [
-    { id: 1, nombre: 'Efectivo', icono: 'money', requiereConfirmacion: false },
-    { id: 2, nombre: 'Yape', icono: 'qr_code', requiereConfirmacion: true }
+    { id: 1, nombre: 'Efectivo', icono: 'money', descripcion: 'Pago inmediato en caja' },
+    { id: 2, nombre: 'Yape', icono: 'qr_code', descripcion: 'El cliente paga con Yape y confirmas' }
   ];
 
-  ngOnInit(): void {
-    this.cargarClientes();
-    this.cargarProductosBidones();
+  // ===== TELEFONO YAPE =====
+  get telefonoYape(): string {
+    const telefono = this.personalizacionService.config()?.telefono;
+    if (telefono && telefono.trim() !== '') {
+      const numeros = telefono.replace(/\D/g, '');
+      if (numeros.length === 9) {
+        return `${numeros.slice(0, 3)} ${numeros.slice(3, 6)} ${numeros.slice(6, 9)}`;
+      }
+      return telefono;
+    }
+    return '999 999 999';
   }
 
-  // ========== MÉTODOS PARA CANTIDAD ==========
+  // ==============================================
+  // 🔄 LIFECYCLE
+  // ==============================================
+  ngOnInit(): void {
+    this.cargarClientes();
+    this.cargarProductoRecarga(); // ✅ Cambiado: solo 1 producto
+    this.cargarTotalRecargasHoy();
+  }
+
+  // ==============================================
+  // ➕ CONTROLES DE CANTIDAD
+  // ==============================================
   decrementarCantidad(): void {
     if (this.cantidad > 1) {
       this.cantidad--;
@@ -93,26 +98,26 @@ get telefonoYape(): string {
   }
 
   incrementarCantidad(): void {
-    // Limitar por stock si es necesario
-    if (this.productoSeleccionado && this.cantidad >= this.productoSeleccionado.stock) {
-      this.snackBar.open(`Stock máximo: ${this.productoSeleccionado.stock} unidades`, 'Cerrar', { duration: 2000 });
-      return;
+    if (this.cantidad < 100) {
+      this.cantidad++;
+    } else {
+      this.snackBar.open('Máximo 100 bidones por recarga', 'Cerrar', { duration: 2000 });
     }
-    this.cantidad++;
   }
 
   onCantidadChange(): void {
     if (this.cantidad < 1) {
       this.cantidad = 1;
     }
-    // Limitar por stock si es necesario
-    if (this.productoSeleccionado && this.cantidad > this.productoSeleccionado.stock) {
-      this.cantidad = this.productoSeleccionado.stock;
-      this.snackBar.open(`Stock máximo: ${this.productoSeleccionado.stock} unidades`, 'Cerrar', { duration: 2000 });
+    if (this.cantidad > 100) {
+      this.cantidad = 100;
+      this.snackBar.open('Máximo 100 bidones por recarga', 'Cerrar', { duration: 2000 });
     }
   }
 
-  // ========== MÉTODOS DE CARGA DE DATOS ==========
+  // ==============================================
+  // 📥 CARGA DE DATOS
+  // ==============================================
   cargarClientes(): void {
     this.clienteService.getClientesParaVentas().subscribe({
       next: (clientes) => {
@@ -126,23 +131,54 @@ get telefonoYape(): string {
     });
   }
 
-  cargarProductosBidones(): void {
+  // ✅ CORREGIDO: Cargar SOLO el producto de recarga (único)
+  cargarProductoRecarga(): void {
     this.productService.getProducts().subscribe({
       next: (productos) => {
-        // Filtrar solo productos que son bidones
-        this.productos = productos.filter(p => 
-          p.nombre.toLowerCase().includes('bidón') ||
-          p.nombre.toLowerCase().includes('bidon')
+        // ✅ Buscar el producto de recarga por nombre o ID fijo
+        const productoRecarga = productos.find(p => 
+          p.nombre.toLowerCase().includes('servicio de recarga') ||
+          p.nombre.toLowerCase().includes('recarga de bidón') ||
+          p.nombre.toLowerCase().includes('recarga bidón') ||
+          p.id_producto === 5 // ID que tendrá en la base de datos
         );
+        
+        this.productos = productoRecarga ? [productoRecarga] : [];
+        
+        // ✅ Si solo hay uno, seleccionarlo automáticamente
+        if (this.productos.length === 1) {
+          this.productoSeleccionado = this.productos[0];
+          console.log('✅ Producto de recarga seleccionado automáticamente:', this.productoSeleccionado.nombre);
+        } else {
+          this.snackBar.open(
+            '⚠️ No hay producto de recarga configurado. Contacte al administrador.',
+            'Cerrar',
+            { duration: 5000 }
+          );
+        }
       },
       error: (err) => {
-        console.error('Error cargando productos:', err);
-        this.snackBar.open('Error al cargar productos', 'Cerrar', { duration: 3000 });
+        console.error('Error cargando producto de recarga:', err);
+        this.snackBar.open('Error al cargar producto de recarga', 'Cerrar', { duration: 3000 });
       }
     });
   }
 
-  // ========== MÉTODOS DE CLIENTES ==========
+  cargarTotalRecargasHoy(): void {
+    this.recargaService.getRecargasHoy().subscribe({
+      next: (recargas) => {
+        this.totalRecargasHoy = recargas.length;
+      },
+      error: (err) => {
+        console.error('Error cargando total recargas hoy:', err);
+        this.totalRecargasHoy = 0;
+      }
+    });
+  }
+
+  // ==============================================
+  // 👤 CLIENTES
+  // ==============================================
   filtrarClientes(): void {
     if (!this.searchCliente) {
       this.filteredClientes = this.clientes;
@@ -166,6 +202,17 @@ get telefonoYape(): string {
     this.clienteSeleccionado = cliente;
     this.searchCliente = cliente.nombre_completo || cliente.persona?.nombre_completo || '';
     this.mostrarListaClientes = false;
+    const nombreCliente = cliente.nombre_completo || cliente.persona?.nombre_completo || 'Cliente';
+    Swal.fire({
+      title: '✅ Cliente seleccionado',
+      text: `${nombreCliente} seleccionado correctamente.`,
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      toast: true,
+      position: 'top-end'
+    });
   }
 
   limpiarBusquedaCliente(): void {
@@ -194,9 +241,12 @@ get telefonoYape(): string {
     });
   }
 
-  // ========== MÉTODOS DE CÁLCULO Y VALIDACIÓN ==========
+  // ==============================================
+  // 💰 CÁLCULOS Y VALIDACIONES
+  // ==============================================
   getTotal(): number {
     if (!this.productoSeleccionado) return 0;
+    // ✅ Precio único de recarga (3.00)
     return this.productoSeleccionado.precio * this.cantidad;
   }
 
@@ -207,194 +257,59 @@ get telefonoYape(): string {
            !this.loading;
   }
 
-  // ========== MÉTODOS DE REGISTRO ==========
+  getVendedorNombre(): string {
+    const currentUser = this.authService.getCurrentUser();
+    return currentUser?.nombre || currentUser?.username || 'Vendedor';
+  }
+
+  getRecargasHoy(): number {
+    return this.totalRecargasHoy;
+  }
+
+  // ==============================================
+  // 📝 REGISTRAR RECARGA - CORREGIDO
+  // ==============================================
   registrarRecarga(): void {
     if (!this.puedeRegistrar()) return;
 
+    // ✅ OBTENER NOMBRE DEL CLIENTE
+    const nombreCliente = this.clienteSeleccionado?.nombre_completo || 
+                          this.clienteSeleccionado?.persona?.nombre_completo || 
+                          'Cliente';
+    const telefonoCliente = this.clienteSeleccionado?.persona?.telefono || '';
+
     const total = this.getTotal();
-    const concepto = `Recarga de ${this.cantidad} bidón(es) - ${this.productoSeleccionado!.nombre}`;
+    const concepto = `Recarga de ${this.cantidad} bidón(es)`;
 
-    if (this.metodoPago === 2) {
-      this.procesarYape(total, concepto);
-    } else {
-      this.procesarEfectivo(total);
-    }
-  }
-
-private procesarYape(total: number, concepto: string): void {
-  this.loading = true;
-  
-  const recargaData = {
-    id_cliente: this.clienteSeleccionado!.id_cliente,
-    id_producto: this.productoSeleccionado!.id_producto!,
-    cantidad: this.cantidad,
-    total: total,
-    id_metodo_pago: 2, // Yape
-    notas: `${concepto} - PENDIENTE DE CONFIRMACIÓN YAPE`
-  };
-  
-  this.recargaService.registrarRecarga(recargaData).subscribe({
-    next: (response) => {
-      const id_venta = response.recarga.id_venta;
-      
-      // ✅ YA NO SE SOLICITA CÓDIGO - se elimina esta parte
-      // this.recargaService.solicitarCodigoYape(id_venta, total).subscribe(...)
-      
-      this.loading = false;
-      
-      // Mostrar modal ESPERANDO PAGO (sin código)
-      Swal.fire({
-        title: '💛 Pago con Yape',
-        html: `
-          <div style="text-align: center;">
-            <div style="font-size: 2rem; margin: 1rem 0;">💛</div>
-            <p><strong>Monto a pagar: S/ ${total.toFixed(2)}</strong></p>
-            
-            <div style="background: #f0f0f0; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-              <p><strong>Número Yape de la empresa:</strong></p>
-              <p style="font-size: 1.2rem; font-weight: bold; color: #25D366;">${this.telefonoYape}</p>
-            </div>
-            
-            <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
-              <p><strong>📱 Instrucciones:</strong></p>
-              <p>El cliente debe realizar el pago por Yape al número de la empresa.</p>
-              <p>El sistema detectará automáticamente el pago cuando llegue la notificación.</p>
-              <p style="font-size: 0.8rem; color: #666;">No es necesario escribir ningún código en el mensaje.</p>
-            </div>
-            
-            <div id="yape-status" style="margin: 1rem 0; padding: 0.75rem; background: #e3f2fd; border-radius: 8px;">
-              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                <div class="spinner" style="width: 16px; height: 16px;"></div>
-                <span>Esperando confirmación de Yape...</span>
-              </div>
-              <small id="yape-timer" style="display: block; margin-top: 0.5rem; color: #666;">
-                Tiempo de espera: 2:00
-              </small>
-            </div>
-            
-            <div id="yape-success" style="display: none; margin: 1rem 0; padding: 0.75rem; background: #e8f5e9; border-radius: 8px; color: #2e7d32;">
-              ✅ ¡Pago confirmado! Redirigiendo...
-            </div>
-            
-            <div id="yape-error" style="display: none; margin: 1rem 0; padding: 0.75rem; background: #ffebee; border-radius: 8px; color: #c62828;">
-              ❌ Tiempo de espera agotado. El pago no fue confirmado.
-            </div>
-          </div>
-        `,
-        icon: 'info',
-        showConfirmButton: false,
-        showCancelButton: true,
-        cancelButtonText: 'Cancelar',
-        cancelButtonColor: '#d33',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => {
-          // Iniciar polling para verificar el pago
-          const subscription = this.recargaService.verificarPagoYape(id_venta, 120)
-            .subscribe({
-              next: (result: any) => {
-                if (result.pagado) {
-                  // Pago confirmado
-                  Swal.fire({
-                    title: '✅ Pago Confirmado',
-                    html: `
-                      <p>El pago con Yape ha sido confirmado</p>
-                      <p><strong>Código de seguridad:</strong> ${result.codigo_seguridad || 'N/A'}</p>
-                      <p><strong>Cliente:</strong> ${this.clienteSeleccionado?.nombre_completo}</p>
-                      <p><strong>Monto:</strong> S/ ${total.toFixed(2)}</p>
-                    `,
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar'
-                  }).then(() => {
-                    this.limpiarFormulario();
-                    window.dispatchEvent(new CustomEvent('recarga-realizada'));
-                  });
-                } else if (result.timeout) {
-                  subscription.unsubscribe();
-                  Swal.fire({
-                    title: '⏱️ Tiempo agotado',
-                    text: 'No se recibió confirmación de pago. Por favor, verifique si el cliente realizó el pago correctamente.',
-                    icon: 'warning',
-                    confirmButtonText: 'Entendido'
-                  }).then(() => {
-                    this.cancelarVentaPendiente(id_venta);
-                  });
-                }
-              },
-              error: (err) => {
-                console.error('Error verificando pago:', err);
-                subscription.unsubscribe();
-              }
-            });
-          
-          // Temporizador visual
-          let tiempoRestante = 120;
-          const timerElement = document.getElementById('yape-timer');
-          const intervalId = setInterval(() => {
-            tiempoRestante--;
-            const minutos = Math.floor(tiempoRestante / 60);
-            const segundos = tiempoRestante % 60;
-            if (timerElement) {
-              timerElement.innerHTML = `Tiempo de espera: ${minutos}:${segundos.toString().padStart(2, '0')}`;
-            }
-            if (tiempoRestante <= 0) {
-              clearInterval(intervalId);
-            }
-          }, 1000);
-          
-          (Swal as any).getPopup()?.setAttribute('data-subscription', subscription);
-          (Swal as any).getPopup()?.setAttribute('data-interval', intervalId);
-        },
-        willClose: () => {
-          const subscription = (Swal as any).getPopup()?.getAttribute('data-subscription');
-          const interval = (Swal as any).getPopup()?.getAttribute('data-interval');
-          if (subscription) subscription.unsubscribe();
-          if (interval) clearInterval(interval);
-        }
-      });
-    },
-    error: (error) => {
-      this.loading = false;
-      console.error('Error registrando recarga:', error);
-      Swal.fire({
-        title: '❌ Error',
-        text: error.error?.message || 'Error al registrar la recarga',
-        icon: 'error',
-        confirmButtonText: 'Entendido'
-      });
-    }
-  });
-}
-
-private cancelarVentaPendiente(id_venta: number): void {
-  this.recargaService.cancelarRecarga(id_venta, 'Tiempo de espera agotado - Pago no confirmado')
-    .subscribe({
-      next: () => console.log(`Venta ${id_venta} cancelada por timeout`),
-      error: (err) => console.error('Error cancelando venta:', err)
-    });
-}
-
-
-  private confirmarYapeYRegistrar(total: number, concepto: string): void {
+    // Confirmación
     Swal.fire({
-      title: '¿Confirmar pago Yape?',
-      text: '¿Ya verificaste que el cliente realizó el pago correctamente?',
+      title: '¿Confirmar recarga?',
+      html: `
+        <div style="text-align: left;">
+          <p><strong>Cliente:</strong> ${nombreCliente}</p>
+          <p><strong>Servicio:</strong> Recarga de bidón (agua purificada)</p>
+          <p><strong>Cantidad:</strong> ${this.cantidad} bidón(es)</p>
+          <p><strong>Total:</strong> S/ ${total.toFixed(2)}</p>
+          <p><strong>Método:</strong> ${this.metodoPago === 2 ? 'Yape' : 'Efectivo'}</p>
+          <p style="font-size: 0.8rem; color: #666; margin-top: 8px;">
+            <i class="fas fa-info-circle"></i> El cliente trae su propio bidón
+          </p>
+        </div>
+      `,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Sí, confirmar pago',
-      cancelButtonText: 'Cancelar'
+      confirmButtonText: '✅ Confirmar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#009949',
+      cancelButtonColor: '#d33'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.registrarEnSistema(total, concepto, true);
+        this.procesarRecarga(total, concepto, nombreCliente, telefonoCliente);
       }
     });
   }
 
-  private procesarEfectivo(total: number): void {
-    this.registrarEnSistema(total, 'Pago en efectivo', false);
-  }
-
-  private registrarEnSistema(total: number, descripcion: string, yapeConfirmado: boolean): void {
+  private procesarRecarga(total: number, concepto: string, nombreCliente: string, telefonoCliente: string): void {
     this.loading = true;
 
     const recargaData = {
@@ -403,27 +318,43 @@ private cancelarVentaPendiente(id_venta: number): void {
       cantidad: this.cantidad,
       total: total,
       id_metodo_pago: this.metodoPago,
-      notas: `${descripcion} - ${this.notas || 'Recarga en tienda'}`
+      notas: `${concepto} - ${this.notas || 'Recarga en planta'}`
     };
 
     this.recargaService.registrarRecarga(recargaData).subscribe({
       next: (response) => {
         this.loading = false;
         
+        // ✅ USAR DATOS LOCALES
+        const clienteFinal = response.recarga?.cliente || nombreCliente;
+        const telefonoFinal = response.recarga?.telefono || telefonoCliente;
+        
         Swal.fire({
           title: '✅ Recarga registrada',
           html: `
-            <p>${response.mensaje || 'Recarga completada exitosamente'}</p>
-            <p><strong>Cliente:</strong> ${this.clienteSeleccionado?.nombre_completo}</p>
-            <p><strong>Producto:</strong> ${this.productoSeleccionado?.nombre}</p>
-            <p><strong>Cantidad:</strong> ${this.cantidad} bidón(es)</p>
-            <p><strong>Total:</strong> S/ ${total.toFixed(2)}</p>
-            <p><strong>Método:</strong> ${this.metodoPago === 2 ? 'Yape' : 'Efectivo'}</p>
+            <div style="text-align: left; margin-top: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #f0f7ff; border-radius: 8px; margin-bottom: 10px;">
+                <i class="fas fa-user" style="color: #057cbe; font-size: 1.2rem;"></i>
+                <div>
+                  <strong>${clienteFinal}</strong>
+                  <div style="font-size: 0.8rem; color: #666;">${telefonoFinal}</div>
+                </div>
+              </div>
+              <p><strong>Servicio:</strong> Recarga de bidón (agua purificada)</p>
+              <p><strong>Cantidad:</strong> ${this.cantidad} bidón(es)</p>
+              <p><strong>Total:</strong> S/ ${(response.recarga?.total || total).toFixed(2)}</p>
+              <p><strong>Método:</strong> ${this.metodoPago === 2 ? 'Yape' : 'Efectivo'}</p>
+              <p style="font-size: 0.8rem; color: #666; margin-top: 8px;">
+                <i class="fas fa-hashtag"></i> Venta #${response.recarga?.id_venta || 'N/A'}
+              </p>
+            </div>
           `,
           icon: 'success',
-          confirmButtonText: 'Aceptar'
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#009949'
         }).then(() => {
           this.limpiarFormulario();
+          this.cargarTotalRecargasHoy();
           window.dispatchEvent(new CustomEvent('recarga-realizada'));
         });
       },
@@ -432,7 +363,7 @@ private cancelarVentaPendiente(id_venta: number): void {
         console.error('Error registrando recarga:', error);
         Swal.fire({
           title: '❌ Error',
-          text: error.error?.message || 'Error al registrar la recarga',
+          text: error.error?.error || error.error?.message || 'Error al registrar la recarga',
           icon: 'error',
           confirmButtonText: 'Entendido'
         });
@@ -440,9 +371,12 @@ private cancelarVentaPendiente(id_venta: number): void {
     });
   }
 
+  // ==============================================
+  // 🧹 LIMPIAR FORMULARIO
+  // ==============================================
   private limpiarFormulario(): void {
     this.clienteSeleccionado = null;
-    this.productoSeleccionado = null;
+    // ✅ NO limpiar productoSeleccionado porque es único y debe quedar seleccionado
     this.cantidad = 1;
     this.metodoPago = 1;
     this.notas = '';
@@ -450,7 +384,20 @@ private cancelarVentaPendiente(id_venta: number): void {
     this.mostrarListaClientes = false;
   }
 
+  // ==============================================
+  // 🔙 VOLVER
+  // ==============================================
   volver(): void {
     this.router.navigate(['/ventas']);
   }
+// Añadir una propiedad computada
+get nombreClienteSeleccionado(): string {
+  if (!this.clienteSeleccionado) return '';
+  return this.clienteSeleccionado.nombre_completo || 
+         this.clienteSeleccionado.persona?.nombre_completo || 
+         'Cliente';
+}
+
+
+
 }

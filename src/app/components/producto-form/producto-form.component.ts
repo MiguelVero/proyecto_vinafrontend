@@ -140,13 +140,18 @@ private loadFormData(product: Product): void {
     });
   }
 
-  onSubmit(): void {
-    if (this.productForm.valid) {
-      const formData = this.productForm.value;
+onSubmit(): void {
+  if (this.productForm.valid) {
+    let formData = this.productForm.value;
 
-      const request$ = this.isEditMode
-        ? this.productService.updateProduct(this.data.product.id_producto!, formData)
-        : this.productService.createProduct(formData);
+    // ✅ Si es edición, eliminar el campo 'stock' del payload
+    if (this.isEditMode) {
+      delete formData.stock;
+    }
+
+    const request$ = this.isEditMode
+      ? this.productService.updateProduct(this.data.product.id_producto!, formData)
+      : this.productService.createProduct(formData);
 
       this.isLoading = true;
 

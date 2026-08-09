@@ -1,0 +1,136 @@
+/* src/app/features/pages/servicios/servicio-list.component.css */
+.servicios-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Header */
+.header-container {
+  margin-bottom: 24px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.title-section h1 {
+  margin: 0 0 4px 0;
+  color: #1b5e20;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Tabla */
+.table-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  padding: 16px;
+}
+
+.servicios-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.servicios-table th {
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  padding: 12px 8px;
+  text-align: left;
+}
+
+.servicios-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+.servicios-table tr:hover td {
+  background-color: #f8fdf9;
+}
+
+/* Botones de acción */
+.servicios-table .mat-icon-button {
+  transition: transform 0.2s ease;
+}
+
+.servicios-table .mat-icon-button:hover {
+  transform: scale(1.1);
+}
+
+/* Loading y sin datos */
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.loading-spinner p {
+  margin-top: 16px;
+  font-size: 0.95rem;
+}
+
+.no-data {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+}
+
+.no-data-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  color: #ccc;
+}
+
+.no-data h3 {
+  margin: 0 0 8px 0;
+  color: #666;
+  font-weight: 500;
+}
+
+.no-data p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-title {
+    font-size: 1.4rem;
+  }
+
+  .servicios-table th,
+  .servicios-table td {
+    font-size: 0.8rem;
+    padding: 8px 4px;
+  }
+}

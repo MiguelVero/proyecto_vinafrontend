@@ -64,6 +64,14 @@
         <span class="nav-text">Productos</span>
       </button>
 
+  <!-- ✅ NUEVO: Servicios -->
+      <button mat-button *ngIf="tieneAcceso('productos')" (click)="goToServicios(); closeMenu()">
+        <mat-icon>build</mat-icon>
+        <span class="nav-text">Servicios</span>
+      </button>
+
+
+
       <!-- SUNAT -->
       <button mat-button *ngIf="tieneAcceso('sunat')" (click)="goToSunat(); closeMenu()">
         <mat-icon>receipt_long</mat-icon>
@@ -156,11 +164,11 @@
           Pedidos a Proveedor
         </button>
         <button mat-menu-item *ngIf="tieneAcceso('pedido_proveedor')" (click)="goInsumos(); closeMenu()">
-        <mat-icon>category</mat-icon>
+        <mat-icon>inventory</mat-icon>
         Insumos
       </button>
        <button mat-menu-item *ngIf="tieneAcceso('categorias') || tieneAcceso('marcas')" (click)="goCatalogos(); closeMenu()">
-        <mat-icon>category</mat-icon>
+        <mat-icon>collections_bookmark</mat-icon>
         Catálogos
       </button>
       </mat-menu>

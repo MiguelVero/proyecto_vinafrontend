@@ -265,6 +265,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
+// src/app/shared/header/header.component.ts
+
+// Agregar este método después de goToProductos() o donde prefieras
+goToServicios(): void {
+  if (this.tieneAcceso('productos')) { // Usamos el mismo permiso que productos
+    this.router.navigate(['/servicios']);
+    this.closeMenu();
+  }
+}
+
+
+
   nuevaVenta(): void {
     if (this.tieneAcceso('ventas_nueva')) {
       this.router.navigate(['/ventas/nueva']);

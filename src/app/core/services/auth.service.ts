@@ -57,16 +57,16 @@ private checkAccessByRole(modulo: string, user: Usuario): boolean {
   // Mapear módulos por rol (como lo haces en HomeComponent)
   switch (Number(role)) {
     case 1: // Admin
-      return ['usuarios', 'personas', 'clientes', 'productos', 
+      return ['usuarios', 'personas', 'clientes', 'productos','servicios',
               'ventas_nueva', 'ventas', 'ventas_asignacion_rutas','empresa','sunat','insumos','recargas'].includes(modulo);
     case 2: // Vendedor
     // 
-      return ['clientes','productos', 'ventas_nueva', 'ventas','ventas_asignacion_rutas','sunat','recargas'].includes(modulo);
+      return ['clientes','productos','servicios', 'ventas_nueva', 'ventas','ventas_asignacion_rutas','sunat','recargas'].includes(modulo);
     case 3: // Repartidor
       return ['rutas_asignadas', 'entregas_pendientes', 'historial_entregas'].includes(modulo);
    case 4: // Almacenero
       // Añadimos módulos específicos de almacén: lotes, proveedores, pedidos a proveedor, categorías y marcas
-      return ['inventario', 'productos', 'inventario_movimiento', 'inventario_reportes',
+      return ['inventario', 'productos','servicios', 'inventario_movimiento', 'inventario_reportes',
           'lotes', 'proveedores', 'pedido_proveedor', 'categorias', 'marcas'].includes(modulo);
     default:
       return false;

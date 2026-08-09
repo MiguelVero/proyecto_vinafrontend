@@ -1,4 +1,4 @@
-<!-- recarga-rapida.component.html -->
+<!-- src/app/components/recarga-rapida/recarga-rapida.component.html -->
 <div class="recarga-container">
   <!-- Header -->
   <div class="header">
@@ -9,18 +9,25 @@
       <i class="fas fa-tint"></i>
       Recarga de Bidones
     </h1>
+    <span class="header-badge">🔄 Servicio en Planta</span>
   </div>
 
   <div class="recarga-content">
-    <!-- Sección Cliente -->
+    <!-- ========================================== -->
+    <!-- SECCIÓN CLIENTE -->
+    <!-- ========================================== -->
     <div class="section cliente-section">
-      <h2>
-        <i class="fas fa-user"></i>
-        Cliente
-      </h2>
+      <div class="section-header">
+        <h2>
+          <i class="fas fa-user"></i>
+          Cliente
+        </h2>
+        <span class="badge" *ngIf="clienteSeleccionado">✅ Seleccionado</span>
+      </div>
       
       <div class="search-container">
         <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
           <input 
             type="text" 
             [(ngModel)]="searchCliente" 
@@ -45,7 +52,7 @@
              (click)="seleccionarCliente(cliente)">
           <div class="result-info">
             <strong>{{ cliente.nombre_completo || cliente.persona?.nombre_completo }}</strong>
-            <small>{{ cliente.persona?.telefono }}</small>
+            <small><i class="fas fa-phone"></i> {{ cliente.persona?.telefono }}</small>
           </div>
           <i class="fas fa-chevron-right"></i>
         </div>
@@ -55,54 +62,91 @@
       <div *ngIf="clienteSeleccionado" class="cliente-seleccionado">
         <div class="cliente-info">
           <i class="fas fa-check-circle"></i>
-          <span>{{ clienteSeleccionado.nombre_completo || clienteSeleccionado.persona?.nombre_completo }}</span>
-          <small>{{ clienteSeleccionado.persona?.telefono }}</small>
+          <span><strong>{{ clienteSeleccionado.nombre_completo || clienteSeleccionado.persona?.nombre_completo }}</strong></span>
+          <small><i class="fas fa-phone"></i> {{ clienteSeleccionado.persona?.telefono }}</small>
         </div>
       </div>
     </div>
 
-    <!-- Sección Producto -->
+    <!-- ========================================== -->
+    <!-- SECCIÓN SERVICIO DE RECARGA - SIMPLIFICADA -->
+    <!-- ========================================== -->
     <div class="section producto-section">
-      <h2>
-        <i class="fas fa-tint"></i>
-        Producto
-      </h2>
+      <div class="section-header">
+        <h2>
+          <i class="fas fa-box"></i>
+          Servicio de Recarga
+        </h2>
+        <span class="badge" *ngIf="productoSeleccionado">✅ Seleccionado</span>
+      </div>
       
-      <div class="productos-grid">
-        <div *ngFor="let producto of productos" 
-             class="producto-card"
-             [class.selected]="productoSeleccionado?.id_producto === producto.id_producto"
-             (click)="productoSeleccionado = producto">
-          <div class="producto-icon">
-            <i class="fas fa-water"></i>
+      <!-- Info del servicio -->
+      <div class="info-recarga-banner">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <strong>💡 ¿Cómo funciona?</strong>
+          <p>El cliente trae su bidón vacío (de cualquier marca) y lo llenamos con agua purificada. 
+             <strong>Costo: S/ 3.00 por bidón</strong></p>
+        </div>
+      </div>
+      
+      <!-- Producto único de recarga -->
+      <div *ngIf="productos.length === 1" class="producto-unico-card">
+        <div class="producto-unico-icon">
+          <i class="fas fa-water"></i>
+        </div>
+        <div class="producto-unico-info">
+          <h3>{{ productos[0].nombre }}</h3>
+          <div class="precio-recarga-unico">
+            <span class="precio">S/ {{ productos[0].precio }} por bidón</span>
           </div>
-          <div class="producto-info">
-            <h3>{{ producto.nombre }}</h3>
-            <p class="precio">S/ {{ producto.precio }} por unidad</p>
-            <p class="stock">Stock: {{ producto.stock }} unidades</p>
-          </div>
+          <p class="info-extra">
+            <i class="fas fa-undo-alt"></i> El cliente trae su envase (cualquier marca)
+          </p>
+          <p class="info-extra">
+            <i class="fas fa-check-circle" style="color: #009949;"></i> 
+            Stock ilimitado disponible
+          </p>
         </div>
       </div>
 
+      <!-- Si no hay producto configurado -->
+      <div *ngIf="productos.length === 0" class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        No hay producto de recarga configurado. Contacte al administrador.
+      </div>
+
+      <!-- Controles de cantidad -->
       <div class="cantidad-control" *ngIf="productoSeleccionado">
-        <label>Cantidad de bidones:</label>
-        <div class="quantity-selector">
-          <button (click)="decrementarCantidad()" class="qty-btn">-</button>
-          <input 
-            type="number" 
-            [(ngModel)]="cantidad" 
-            (change)="onCantidadChange()"
-            min="1" 
-            class="quantity-input">
-          <button (click)="incrementarCantidad()" class="qty-btn">+</button>
+        <div class="cantidad-row">
+          <label>Cantidad de bidones a recargar:</label>
+          <div class="quantity-selector">
+            <button (click)="decrementarCantidad()" class="qty-btn" [disabled]="cantidad <= 1">
+              <i class="fas fa-minus"></i>
+            </button>
+            <input 
+              type="number" 
+              [(ngModel)]="cantidad" 
+              (change)="onCantidadChange()"
+              min="1" 
+              max="100"
+              class="quantity-input">
+            <button (click)="incrementarCantidad()" class="qty-btn" [disabled]="cantidad >= 100">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <span class="cantidad-max">(máx. 100 por recarga)</span>
         </div>
-        <p class="total-recarga">
-          Total a pagar: <strong>S/ {{ getTotal() | number:'1.2-2' }}</strong>
-        </p>
+        <div class="total-recarga">
+          <span>Total a pagar:</span>
+          <strong>S/ {{ getTotal() | number:'1.2-2' }}</strong>
+        </div>
       </div>
     </div>
 
-    <!-- Sección Método de Pago -->
+    <!-- ========================================== -->
+    <!-- SECCIÓN MÉTODO DE PAGO -->
+    <!-- ========================================== -->
     <div class="section pago-section">
       <h2>
         <i class="fas fa-credit-card"></i>
@@ -119,18 +163,25 @@
           </div>
           <div class="metodo-info">
             <h3>{{ metodo.nombre }}</h3>
-            <p *ngIf="metodo.nombre === 'Yape'" class="metodo-desc">
-              El cliente paga con Yape y confirmas
-            </p>
-            <p *ngIf="metodo.nombre === 'Efectivo'" class="metodo-desc">
-              Pago inmediato en caja
-            </p>
+            <p class="metodo-desc">{{ metodo.descripcion }}</p>
+          </div>
+          <div class="metodo-check" *ngIf="metodoPago === metodo.id">
+            <i class="fas fa-check-circle"></i>
           </div>
         </div>
       </div>
+      
+      <!-- Mostrar teléfono Yape -->
+      <div *ngIf="metodoPago === 2" class="info-yape">
+        <i class="fab fa-yape" style="color: #f57c00;"></i>
+        <span>Yape al número: <strong>{{ telefonoYape }}</strong></span>
+        <small>El cliente debe pagar con Yape y confirmar</small>
+      </div>
     </div>
 
-    <!-- Sección Notas -->
+    <!-- ========================================== -->
+    <!-- SECCIÓN NOTAS -->
+    <!-- ========================================== -->
     <div class="section notas-section">
       <h2>
         <i class="fas fa-sticky-note"></i>
@@ -141,10 +192,48 @@
                 placeholder="Ej: Cliente frecuente, descuento especial..."></textarea>
     </div>
 
-    <!-- Botones de acción -->
+    <!-- ========================================== -->
+    <!-- RESUMEN DE RECARGA -->
+    <!-- ========================================== -->
+    <div class="section resumen-recarga" *ngIf="clienteSeleccionado">
+      <h2>
+        <i class="fas fa-file-invoice"></i>
+        Resumen de Recarga
+      </h2>
+      <div class="resumen-grid">
+        <div class="resumen-item">
+          <span class="label">Cliente:</span>
+         <span class="value">{{ nombreClienteSeleccionado }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Servicio:</span>
+          <span class="value">Recarga de bidón (agua purificada)</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Cantidad:</span>
+          <span class="value">{{ cantidad }} bidón(es)</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Precio unitario:</span>
+          <span class="value">S/ 3.00</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Total:</span>
+          <span class="value total">S/ {{ getTotal() | number:'1.2-2' }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Método de pago:</span>
+          <span class="value">{{ metodoPago === 2 ? 'Yape' : 'Efectivo' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- BOTONES DE ACCIÓN -->
+    <!-- ========================================== -->
     <div class="acciones">
       <button class="btn-cancelar" (click)="volver()">
-        Cancelar
+        <i class="fas fa-times"></i> Cancelar
       </button>
       <button class="btn-registrar" 
               (click)="registrarRecarga()" 
@@ -153,6 +242,17 @@
         <div *ngIf="loading" class="spinner"></div>
         {{ loading ? 'Procesando...' : 'Registrar Recarga' }}
       </button>
+    </div>
+    
+    <!-- ========================================== -->
+    <!-- FOOTER INFORMATIVO -->
+    <!-- ========================================== -->
+    <div class="footer-info">
+      <span>© {{ currentYear }} Sistema Agua Viña</span>
+      <span class="separator">|</span>
+      <span>Vendedor: {{ getVendedorNombre() }}</span>
+      <span class="separator">|</span>
+      <span>Total recargas hoy: {{ getRecargasHoy() }}</span>
     </div>
   </div>
 </div>

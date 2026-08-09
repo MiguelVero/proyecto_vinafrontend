@@ -145,6 +145,10 @@ export class ProductoListComponent implements OnInit {
   // 🔍 VERIFICAR CONSISTENCIA DE STOCK
   // ============================================
   private verificarConsistenciaStock(producto: any, lotes: Lote[]): boolean {
+  // ✅ EXCLUIR producto de recarga (nombre contiene 'recarga' o ID específico)
+  if (producto.nombre.toLowerCase().includes('recarga') || producto.id_producto === 5) {
+    return false;
+  }
     const lotesProducto = lotes.filter(l => l.id_producto === producto.id_producto);
     
     if (lotesProducto.length === 0) {
@@ -192,54 +196,54 @@ export class ProductoListComponent implements OnInit {
   // ============================================
   // 📥 CARGAR PRODUCTOS CON DETALLES
   // ============================================
-  loadProductsWithDetails(): void {
-    this.isLoading = true;
+// src/app/features/pages/producto-list/producto-list.component.ts
 
-    if (this.isVendedor) {
-      this.productService.getProductsForSales().subscribe({
-        next: (products) => {
-          console.log('📦 Productos para vendedor:', products);
-          this.dataSource = new MatTableDataSource(products);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error cargando productos para ventas:', error);
-          this.isLoading = false;
-          this.loadBasicProducts();
-        }
-      });
-    } else {
-      forkJoin({
-        productos: this.productService.getProductsWithDetails(),
-        lotes: this.loteService.getLotes()
-      }).subscribe({
-        next: ({ productos, lotes }) => {
-          this.lotesCache = lotes;
-          
-          const productosConStock = productos.map((producto: any) => {
-            const stockInconsistente = this.verificarConsistenciaStock(producto, lotes);
-            return {
-              ...producto,
-              stockInconsistente
-            };
-          });
-          
-          console.log('📦 Productos con verificación de stock:', productosConStock);
-          this.dataSource = new MatTableDataSource(productosConStock);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error cargando productos con detalles:', error);
-          this.isLoading = false;
-          this.loadBasicProducts();
-        }
-      });
-    }
+loadProductsWithDetails(): void {
+  this.isLoading = true;
+
+  if (this.isVendedor) {
+    this.productService.getProductsForSales().subscribe({
+      next: (products) => {
+        // ✅ Filtrar servicios para vendedores también
+        const productosFiltrados = products.filter(p => p.id_producto !== 5);
+        this.dataSource = new MatTableDataSource(productosFiltrados);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error cargando productos para ventas:', error);
+        this.isLoading = false;
+        this.loadBasicProducts();
+      }
+    });
+  } else {
+    forkJoin({
+      productos: this.productService.getProductsWithDetails(),
+      lotes: this.loteService.getLotes()
+    }).subscribe({
+      next: ({ productos, lotes }) => {
+        this.lotesCache = lotes;
+        const productosConStock = productos
+          .map((producto: any) => ({
+            ...producto,
+            stockInconsistente: this.verificarConsistenciaStock(producto, lotes)
+          }))
+          .filter(p => p.id_producto !== 5); // ✅ EXCLUIR SERVICIO DE RECARGA
+
+        this.dataSource = new MatTableDataSource(productosConStock);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error cargando productos con detalles:', error);
+        this.isLoading = false;
+        this.loadBasicProducts();
+      }
+    });
   }
+}
 
   // ============================================
   // 📥 CARGAR PRODUCTOS BÁSICOS (FALLBACK)
